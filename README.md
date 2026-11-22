@@ -9,8 +9,9 @@ End-to-end **PulseChain ↔ Trezor** program.
 
 ## Docs
 
+- [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
+- [ROADMAP.md](./ROADMAP.md) — master program todo
 - [END-TO-END.md](./END-TO-END.md) — full stack map
-- [ROADMAP.md](./ROADMAP.md) — master todo
 
 ## Sibling repos
 
