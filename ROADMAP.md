@@ -2,7 +2,7 @@
 
 Goal: **end-to-end PulseChain ↔ Trezor** — Desk users ship now; Suite + firmware tracks owned in parallel.
 
-See [END-TO-END.md](./END-TO-END.md) for layer map and dependencies.
+See [END-TO-END.md](./END-TO-END.md) for layer map · [ACCEPTANCE.md](./ACCEPTANCE.md) for journey audit / ship gates.
 
 Legend: `[ ]` todo · `[~]` partial · `[x]` done
 

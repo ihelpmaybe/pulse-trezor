@@ -10,6 +10,7 @@ End-to-end **PulseChain ↔ Trezor** program.
 ## Docs
 
 - [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
+- [ACCEPTANCE.md](./ACCEPTANCE.md) — E2E journey audit + ship gates
 - [ROADMAP.md](./ROADMAP.md) — master program todo
 - [END-TO-END.md](./END-TO-END.md) — full stack map
 
