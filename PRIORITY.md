@@ -121,7 +121,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 6. Stop (no “while I’m here” BONUS)
 ```
 
-**Spare / end-of-month tokens / blocked here:** open **[PULSE-HIVE.md](./PULSE-HIVE.md)** and claim an **H#**. Hive is the always-full PulseChain backlog.
+**Spare / end-of-month tokens / non-Trezor Pulse work / blocked here:** open **[PULSE-HIVE.md](./PULSE-HIVE.md)** and claim an **H#**. Hive = **all PulseChain**, not just Trezor.
 
 ## Suggested split (@ihelpmaybe vs @togosh)
 
