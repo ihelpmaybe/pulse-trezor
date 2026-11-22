@@ -30,6 +30,7 @@ import {
 } from "./trezor/connect";
 import { SCHEME_ID } from "./trezor/paths";
 import { previewFees, sendPlsWithTrezor } from "./trezor/signPulseTx";
+import { WcPanel } from "./wc/WcPanel";
 
 const apps = packFor(369).apps!;
 
@@ -563,6 +564,12 @@ export function App() {
             </>
           )}
         </section>
+
+        <WcPanel
+          address={session?.address ?? null}
+          derivationIndex={session?.derivationIndex ?? 0}
+          onError={setErr}
+        />
 
         <section className="card links">
           <h2>Open on Pulse</h2>

@@ -46,6 +46,14 @@ Opens on `http://127.0.0.1:5174`. Needs **Trezor Bridge** (:21325). Address path
 
 `setup` = install with scripts off (Windows: Connect’s Stellar `yarn setup || true` breaks cmd) then fetches the esbuild binary.
 
+## WalletConnect → Trezor
+
+dApps (PulseX, Phiat, ProveX, Bridge…) can pair a `wc:` URI into Desk; clear-sign warnings show before you sign on the device.
+
+1. Free [Reown Cloud](https://cloud.reown.com) project id → paste in **WalletConnect → Trezor** (or `VITE_REOWN_PROJECT_ID`)
+2. Connect Trezor → Pair URI → Approve session → Sign on Trezor  
+3. PulseChain **369** only · EIP-712 typed-data still next
+
 ## Status
 
-**A0–A2 + smoke CI:** Connect, PLS + ERC-20 balances, send, approve (369). Tip TIP1 blocked until Android source path. Device: `tests/smoke/README.md`.
+**A0–A2 + WC v0 + smoke CI:** Connect, balances, send, approve, WalletConnect host (send + personal_sign). Tip TIP1 blocked until Android source path. Device: `tests/smoke/README.md`.

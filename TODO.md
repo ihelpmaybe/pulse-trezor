@@ -99,7 +99,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Linux
 - [ ] macOS (Apple)
 - [ ] Web / PWA (Connect-web)
-- [ ] WalletConnect host (dapps → Trezor) — see platform TODO
+- [x] WalletConnect host (dapps → Trezor) — `src/wc/` v0 (eth_sendTransaction + personal_sign; EIP-712 next)
 
 ## AI — desk surface
 - [ ] Explain / simulate pane (AI0–AI1) — agent never signs

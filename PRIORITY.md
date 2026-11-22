@@ -56,7 +56,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 24 | Desk C HEX companion thin | `pulse-trezor` | C | After A2 |
 | 25 | Desk B **PulseX** swap (quote → Trezor sign) | `pulse-trezor` | B | After A2 |
 | 25b | ProveX deep link / USDC flow (guide + Desk entry) | guides + Desk | G6/ProveX | After A2 |
-| 26 | PLAT-WC WalletConnect → Desk | `pulse-trezor-platform` + Desk | PLAT-WC | After A1 |
+| 26 | ~~PLAT-WC WalletConnect → Desk~~ **DONE v0** (EIP-712 still open) | `pulse-trezor` | PLAT-WC | After A1 |
 | 27 | Rescue R1 deploy + R2 thin UI | `hexican-rescue` | R1–R2 | After R0 |
 | 28 | SYNC3 bunker deeplink | `pulse-trezor-platform` | SYNC3 | After R1 |
 | 29 | EIP-712 / Permit / bulk revoke | `pulse-trezor` | A2 extras | After A2 |
