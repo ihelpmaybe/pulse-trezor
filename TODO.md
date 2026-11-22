@@ -39,10 +39,10 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Re-run pen &lt; 30 days before each release tag
 
 ## A0 — Bootstrap
-- [ ] App shell (Vite + Connect patterns)
-- [ ] Warm Connect + Bridge; human-readable errors
-- [ ] Connect / disconnect; address matches device screen
-- [ ] Pulse RPC + explorer links (chain 369)
+- [x] App shell (Vite + Connect patterns)
+- [x] Warm Connect + Bridge; human-readable errors
+- [x] Connect / disconnect; address matches device screen
+- [x] Pulse RPC + explorer links (chain 369)
 
 ## A1 — Core custody
 - [ ] Receive + verify-on-device

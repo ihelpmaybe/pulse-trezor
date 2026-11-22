@@ -34,6 +34,17 @@ End-to-end **PulseChain ↔ Trezor** for core apps: **PulseChain · HEX · Pulse
 | [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides |
 | [pulse-trezor-platform](https://github.com/ihelpmaybe/pulse-trezor-platform) | Sync · multi-OS · MPC · AI |
 
+## Desk A0 (local)
+
+```bash
+npm run setup
+npm run dev
+```
+
+Opens on `http://127.0.0.1:5174`. Needs **Trezor Bridge** (:21325). Address path = SYNC0 `m/44'/60'/0'/0/0`.
+
+`setup` = install with scripts off (Windows: Connect’s Stellar `yarn setup || true` breaks cmd) then fetches the esbuild binary.
+
 ## Status
 
-Planning + scaffolds. Wave 1 = Desk A0/A1.
+**A0 done** — Connect warm + Bridge detect + connect/disconnect. Next: PRIORITY #4 smoke CI, then #5 A1 send.

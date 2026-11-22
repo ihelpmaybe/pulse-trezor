@@ -1,0 +1,40 @@
+{
+  "packId": "pulse-core",
+  "version": "1.0.0",
+  "coreApps": ["PulseChain", "HEX", "PulseX", "ProveX"],
+  "chains": [
+    {
+      "name": "PulseChain",
+      "chainId": 369,
+      "currency": { "name": "Pulse", "symbol": "PLS", "decimals": 18 },
+      "rpc": [
+        "https://rpc.pulsechain.com",
+        "https://pulsechain-rpc.publicnode.com"
+      ],
+      "explorers": [
+        {
+          "name": "PulseScan",
+          "url": "https://scan.pulsechain.com",
+          "apiUrl": "https://api.scan.pulsechain.com"
+        }
+      ],
+      "apps": {
+        "pulsex": "https://app.pulsex.com",
+        "provex": "https://app.provex.com",
+        "hex": "https://go.hex.com"
+      }
+    },
+    {
+      "name": "PulseChain Testnet V4",
+      "chainId": 943,
+      "currency": { "name": "Test Pulse", "symbol": "tPLS", "decimals": 18 },
+      "rpc": ["https://rpc.v4.testnet.pulsechain.com"],
+      "explorers": [
+        {
+          "name": "PulseScan Testnet",
+          "url": "https://scan.v4.testnet.pulsechain.com"
+        }
+      ]
+    }
+  ]
+}

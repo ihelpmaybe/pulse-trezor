@@ -16,7 +16,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 |---|------|------|---------|----------|
 | 1 | ~~SYNC0 address/BIP44 story spec~~ **DONE** | `pulse-trezor-platform` | [SYNC0-address-story.md](https://github.com/ihelpmaybe/pulse-trezor-platform/blob/main/SYNC0-address-story.md) | — |
 | 2 | ~~SYNC4 stub token+RPC pack~~ **DONE** | `pulse-trezor-platform` | [packs/pulse-core](https://github.com/ihelpmaybe/pulse-trezor-platform/tree/main/packs/pulse-core) | — |
-| 3 | Desk A0 shell + Connect warm + Bridge detect | `pulse-trezor` | A0 | After #2 started |
+| 3 | ~~Desk A0 shell + Connect warm + Bridge detect~~ **DONE** | `pulse-trezor` | A0 | Vite + Connect warm + Bridge probe + SYNC0 path |
 | 4 | Desk A0 smoke CI scaffold (Gate T start) | `pulse-trezor` | TEST smoke | Parallel w/ #3 |
 | 5 | Desk A1 receive + PLS balance + send (testnet) + fees | `pulse-trezor` | A1 | After #3 |
 | 6 | Indexer decision note (scan API vs self-host) | `pulse-trezor-platform` | SYNC7 | Parallel w/ #5 |
@@ -135,5 +135,5 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ## Current focus (update when claiming)
 
-**Active band: P0.** Next: **#3 Desk A0** (shell + Connect warm).  
-Say: `Taking PRIORITY #3 …`
+**Active band: P0.** Next: **#4 Desk smoke CI** (or #5 A1 if device ready).  
+Say: `Taking PRIORITY #4 …`
