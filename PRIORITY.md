@@ -19,7 +19,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 3 | ~~Desk A0 shell + Connect warm + Bridge detect~~ **DONE** | `pulse-trezor` | A0 | Vite + Connect warm + Bridge probe + SYNC0 path |
 | 4 | ~~Desk A0 smoke CI scaffold (Gate T start)~~ **DONE** | `pulse-trezor` | TEST smoke | workflow + path/error unit smoke |
 | 5 | ~~Desk A1 receive + PLS balance + send (testnet) + fees~~ **DONE** | `pulse-trezor` | A1 | 943 default · fee preview · Trezor sign |
-| 6 | Indexer decision note (scan API vs self-host) | `pulse-trezor-platform` | SYNC7 | Parallel w/ #5 |
+| 6 | ~~Indexer decision note (scan API vs self-host)~~ **DONE** | `pulse-trezor-platform` | SYNC7 | public PulseScan; self-host deferred |
 | 7 | TIP0 locate Tip source / face-vs-code decision | `Tip-wallet` | TIP0 | Parallel OK |
 | 8 | TIP1 consume SYNC4 pack + RPC align | `Tip-wallet` | TIP1 | After #2+#7 |
 | 9 | Desk A2 tokens HEX/PLSX + approve (use SYNC4) | `pulse-trezor` | A2 | After #5 |
@@ -135,5 +135,5 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ## Current focus (update when claiming)
 
-**Active band: P0.** Next: **#6 indexer note** (platform) or **#7 TIP0** / **#9 A2 tokens** if staying on Desk.  
-Say: `Taking PRIORITY #6 …`
+**Active band: P0.** Next: **#7 TIP0** (Tip source locate) or **#9 Desk A2 tokens**.  
+Say: `Taking PRIORITY #7 …`

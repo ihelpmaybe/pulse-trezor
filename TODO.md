@@ -50,7 +50,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Send PLS (prepare → Trezor sign → broadcast)
 - [x] **Fee / gas UI** (estimate preview; bump / stuck speed-up later)
 - [ ] Tx status + basic history
-- [ ] **Indexer decision** (scan API vs self-host) — document in platform
+- [x] **Indexer decision** (scan API vs self-host) — platform SYNC7 (PulseScan public API)
 - [x] **Testnet V4 (943)** toggle for safe e2e
 - [ ] **First-run: detect/install Bridge**
 - [ ] **Firmware outdated warning** (Connect device features)
