@@ -183,13 +183,16 @@ See [ADOPTION.md](./ADOPTION.md). After Gate 1 smoke — don’t ads-before-prod
 - [ ] Locales after English
 - [ ] Obtainium / F-Droid install docs
 
-### P2+
-- [ ] Fiat on-ramp pointers · CEX withdraw guides
-- [ ] iOS · PWA try-Desk · Ledger if verified
-- [ ] AI explain-before-sign as confidence feature
+### P2+ / BONUS (filed on owning repos — after Gate 1–2)
+- [ ] Fiat pointers · CEX guides → **guides BONUS**
+- [ ] iOS · PWA · locales → **Tip / Desk BONUS**
+- [ ] Ledger / Safe / AA research → **platform BONUS** (go/no-go)
+- [ ] 681 Chrome/Android funnel → **platform BONUS**
+- [ ] AI explain-before-sign → Tip/Desk when AI0–AI3 ready
+- [ ] Extra FW tokens / PQ → **firmware BONUS**
 
 ### Avoid
-- Fake “official Suite” · custodial easy mode · points farms before product
+- Fake “official Suite” · custodial easy mode · points farms before product · MetaMask/Rabby clones · Keystone sprawl
 
 ---
 

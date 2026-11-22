@@ -114,5 +114,18 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Deep link / badge target for “Open in Desk”
 - [ ] Watch-only mode pitched for Tip users (SYNC)
 
+## BONUS — after Gate 1–2 (do not start early)
+
+See [ADOPTION.md](./ADOPTION.md) P1–P2 · [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) other-wallets.
+
+- [ ] Locales after English (UI strings)
+- [ ] Public Desk **PWA** polish (zero-install try) — beyond bare Web
+- [ ] Opt-in light metrics (first-send) — no seed telemetry
+- [ ] Safe{Wallet} / multisig connect path (optional power users)
+- [ ] Account-abstraction / smart-EOA spike (only if Pulse ecosystem needs it)
+- [ ] Ledger signing path **only if** platform PLAT-Ledger research says yes
+- [ ] Points/airdrop experiments — **default no** (owner override)
+
 ## Ship order (this repo)
-1. A0 → A1 (Win, Bridge, fees, history) → A2 → SYNC hooks → A3 → Lin/Mac/Web → C → B → WC → AI → E
+1. A0 → A1 (Win, Bridge, fees, history) → A2 → SYNC hooks → A3 → Lin/Mac/Web → C → B → WC → AI → E  
+2. BONUS only after Gate 1–2 green

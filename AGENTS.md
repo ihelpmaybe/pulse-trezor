@@ -21,7 +21,8 @@ You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/to
 - Connect → Bridge → device/emu only — **no fake “Trezor” HD**.  
 - Suite = study/upstream; **no redistribute**. Tip ≠ Desk; SYNC = watch-only.  
 - AI never holds keys / auto-signs.  
-- Do **not** replan E2E, re-explain T-RSL, or expand GROWTH before Gate 1 smoke.  
+- Do **not** replan E2E, re-explain T-RSL, or expand GROWTH/BONUS before Gate 1 smoke.  
+- **BONUS** sections = after Gate 1–2 only (Ledger/Safe/AA/iOS/locales/etc.).  
 - Parallel agents (@togosh): **different TODO rows**, never the same feature twice.
 
 ## Sibling repos
