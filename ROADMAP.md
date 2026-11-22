@@ -16,7 +16,7 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 - [x] `pulse-trezor-guides` — normie docs
 - [x] `pulse-trezor-suite` — Suite reference / upstream (T-RSL, private)
 - [x] `pulse-trezor-firmware` — firmware fork / tokens / emu (GPL)
-- [ ] `pulse-trezor-platform` — sync · multi-OS · MPC · AI
+- [x] `pulse-trezor-platform` — sync · multi-OS · MPC · AI
 
 ---
 
