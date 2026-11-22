@@ -2,25 +2,27 @@
 
 You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/togosh)** on the PulseChain ↔ Trezor program.
 
-## Load order (do this first)
+## Efficiency (read once)
 
-1. [TODO.md](./TODO.md) — **this repo’s work list** (start at top unchecked items / ship order)
-2. [TESTING.md](./TESTING.md) — smoke / fuzz / pen / full; **Gate T blocks ship**
-3. [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) — gotchas, licenses, reuse paths
-4. [ACCEPTANCE.md](./ACCEPTANCE.md) — journey gates
-5. [END-TO-END.md](./END-TO-END.md) / [ROADMAP.md](./ROADMAP.md) — only if you need program context
-6. [ADOPTION.md](./ADOPTION.md) — if working growth / funnel / “why Pulse” features
+**[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)** — no redo, shared packs first, context diet, ship-order only.
+
+## Load order (minimum tokens)
+
+1. [TODO.md](./TODO.md) — **this repo only**; first unchecked ship-order item  
+2. Repo `NOTES.md` **if blocked**  
+3. [TESTING.md](./TESTING.md) **only when adding tests / claiming done**  
+4. [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) **section search**, not full reread  
+5. END-TO-END / ROADMAP / ACCEPTANCE / ADOPTION — **planning tasks only**, not every feature PR  
 
 ## How to work
 
-- Pick the **highest unchecked item** in this repo’s TODO ship order (don’t invent a parallel project).
-- Prefer existing Connect → Bridge → device/emu path — **no fake “Trezor” HD**.
-- Suite is T-RSL: study/upstream only — **do not redistribute** Suite.
-- Tip = mobile soft; Desk = HWW. SYNC never moves seeds.
-- AI assists may prepare/explain txs — **never hold keys or auto-sign**.
-- Every feature needs test evidence per TESTING.md before calling done.
-- Update TODO checkboxes in the PR when you finish something.
-- Keep changes in **this repo’s scope**; cross-repo work → note sibling TODO + link.
+- One TODO row → smallest slice → smoke evidence → **tick the box** → stop.  
+- Shared stuff → `pulse-trezor-platform` (don’t copy token lists / registry formats).  
+- Connect → Bridge → device/emu only — **no fake “Trezor” HD**.  
+- Suite = study/upstream; **no redistribute**. Tip ≠ Desk; SYNC = watch-only.  
+- AI never holds keys / auto-signs.  
+- Do **not** replan E2E, re-explain T-RSL, or expand GROWTH before Gate 1 smoke.  
+- Parallel agents (@togosh): **different TODO rows**, never the same feature twice.
 
 ## Sibling repos
 

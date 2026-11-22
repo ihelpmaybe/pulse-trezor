@@ -2,7 +2,7 @@
 
 Goal: **end-to-end PulseChain ↔ Trezor** — Desk users ship now; Suite + firmware tracks owned in parallel.
 
-See [END-TO-END.md](./END-TO-END.md) · [ACCEPTANCE.md](./ACCEPTANCE.md) · **[TESTING.md](./TESTING.md)** (smoke / fuzz / pen / full).
+See [END-TO-END.md](./END-TO-END.md) · [ACCEPTANCE.md](./ACCEPTANCE.md) · **[TESTING.md](./TESTING.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)** (no redo / shared-first / token diet).
 
 ---
 
@@ -196,10 +196,12 @@ See [ADOPTION.md](./ADOPTION.md). After Gate 1 smoke — don’t ads-before-prod
 ## Ship order (full program)
 
 **Wave 1 — leave MetaMask + Tip soft + sync foundation**  
+0. **SYNC0 + SYNC4 stubs first** (shared schema/token pack — stops Tip/Desk divergence)  
 1. Desk A0 + A1 (Windows first)  
-2. Desk A2 + TIP0–TIP1  
-3. SYNC0–SYNC4 (shared registry/tokens/bunker)  
+2. Desk A2 + TIP0–TIP1 (consume shared pack)  
+3. SYNC1–SYNC3 (registry/QR/bunker)  
 4. Guides: Tip · Desk · Graphene sideload  
+*(Efficiency: shared pack before per-app lists — see BUILD-EFFICIENCY.md)*  
 
 **Wave 2 — multi-OS + stack ownership**  
 5. Desk Linux + macOS + Web/PWA  

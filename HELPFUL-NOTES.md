@@ -177,7 +177,11 @@ Copy/adapt into private repos; don’t bind Desk forever to vault paths.
 | First swap | **One** venue |
 | Tests | Smoke + fuzz + pen + full before ship |
 
+## Efficiency
+
+See [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md). Shared packs in platform; don’t replan E2E; AI loads TODO not the whole wiki.
+
 ## Contributors
 
 - Owner: [@ihelpmaybe](https://github.com/ihelpmaybe)
-- Contributor: [@togosh](https://github.com/togosh) — may point AI at any repo; start at that repo`AGENTS.md` → `TODO.md`.
+- Contributor: [@togosh](https://github.com/togosh) — may point AI at any repo; start at that repo `AGENTS.md` → `TODO.md` (different rows if parallel).
