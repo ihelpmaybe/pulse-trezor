@@ -4,12 +4,12 @@ You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/to
 
 ## Efficiency (read once)
 
-**[PRIORITY.md](./PRIORITY.md)** = Gate-critical queue · **[PULSE-HIVE.md](./PULSE-HIVE.md)** = always-on PulseChain backlog (spare tokens) · **[CORE-APPS.md](./CORE-APPS.md)** · **[OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)**
+**[PRIORITY.md](./PRIORITY.md)** = Tip↔Desk/Trezor Gate only · **[PULSE-HIVE.md](./PULSE-HIVE.md)** = **all PulseChain** (infra, DeFi, HEX, fiat, creators, security — spare tokens) · **[CORE-APPS.md](./CORE-APPS.md)** · **[OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)**
 
 ## Load order (minimum tokens)
 
 1. **[PRIORITY.md](./PRIORITY.md)** — if you can own the lowest unchecked **#**, take it  
-2. Else / **end-of-month spare tokens** / blocked → **[PULSE-HIVE.md](./PULSE-HIVE.md)** lowest free **H#** (or Band SPARE)  
+2. Else / **any non-Trezor Pulse work** / **end-of-month spare tokens** / blocked → **[PULSE-HIVE.md](./PULSE-HIVE.md)** lowest free **H#** (or SPARE)  
 3. Open the **repo named in that row** → that repo’s `TODO.md`  
 4. Repo `NOTES.md` **if blocked**  
 5. [TESTING.md](./TESTING.md) when testing / claiming done  
