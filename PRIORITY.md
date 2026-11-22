@@ -14,7 +14,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 | # | Task | Repo | TODO id | Parallel |
 |---|------|------|---------|----------|
-| 1 | SYNC0 address/BIP44 story spec (1 page) | `pulse-trezor-platform` | SYNC0 | Solo |
+| 1 | ~~SYNC0 address/BIP44 story spec~~ **DONE** | `pulse-trezor-platform` | [SYNC0-address-story.md](https://github.com/ihelpmaybe/pulse-trezor-platform/blob/main/SYNC0-address-story.md) | — |
 | 2 | SYNC4 stub token+RPC pack (369 + **HEX/PLSX/INC/USDC** for ProveX) | `pulse-trezor-platform` | SYNC4 | After #1 |
 | 3 | Desk A0 shell + Connect warm + Bridge detect | `pulse-trezor` | A0 | After #2 started |
 | 4 | Desk A0 smoke CI scaffold (Gate T start) | `pulse-trezor` | TEST smoke | Parallel w/ #3 |
@@ -135,5 +135,5 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ## Current focus (update when claiming)
 
-**Active band: P0 (#1 → #11).**  
-Next human/AI message should start with: “Taking PRIORITY #N …”
+**Active band: P0.** Next: **#2 SYNC4** token+RPC stub.  
+Say: `Taking PRIORITY #2 …`
