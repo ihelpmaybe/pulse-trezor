@@ -10,6 +10,8 @@ End-to-end **PulseChain ↔ Trezor** program.
 ## Docs
 
 - [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
+- [AGENTS.md](./AGENTS.md) — AI/contributor entry (read TODO first)
+- [CONTRIBUTORS.md](./CONTRIBUTORS.md) — includes @togosh
 - [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) — operator gotchas / reuse / licenses
 - [TESTING.md](./TESTING.md) — smoke / fuzz / pen / full bar (program)
 - [ACCEPTANCE.md](./ACCEPTANCE.md) — E2E journey audit + ship gates

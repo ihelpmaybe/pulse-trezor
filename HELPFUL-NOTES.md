@@ -176,3 +176,8 @@ Copy/adapt into private repos; don’t bind Desk forever to vault paths.
 | First Desk OS | **Windows**, then Lin/Mac/Web |
 | First swap | **One** venue |
 | Tests | Smoke + fuzz + pen + full before ship |
+
+## Contributors
+
+- Owner: [@ihelpmaybe](https://github.com/ihelpmaybe)
+- Contributor: [@togosh](https://github.com/togosh) — may point AI at any repo; start at that repo`AGENTS.md` → `TODO.md`.
