@@ -45,13 +45,13 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Pulse RPC + explorer links (chain 369)
 
 ## A1 — Core custody
-- [ ] Receive + verify-on-device
-- [ ] PLS balance
-- [ ] Send PLS (prepare → Trezor sign → broadcast)
-- [ ] **Fee / gas UI** (estimate, bump; stuck tx speed-up/cancel if feasible)
+- [x] Receive + verify-on-device
+- [x] PLS balance
+- [x] Send PLS (prepare → Trezor sign → broadcast)
+- [x] **Fee / gas UI** (estimate preview; bump / stuck speed-up later)
 - [ ] Tx status + basic history
 - [ ] **Indexer decision** (scan API vs self-host) — document in platform
-- [ ] **Testnet V4 (943)** toggle for safe e2e
+- [x] **Testnet V4 (943)** toggle for safe e2e
 - [ ] **First-run: detect/install Bridge**
 - [ ] **Firmware outdated warning** (Connect device features)
 

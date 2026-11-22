@@ -25,9 +25,16 @@ body {
 }
 
 .page {
-  max-width: 42rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 3rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 0.85rem;
+  align-items: start;
 }
 
 .hdr h1 {
@@ -129,11 +136,68 @@ code {
   border-radius: 4px;
 }
 
-.links ul {
+.links ul,
+.app-grid {
   margin: 0;
   padding-left: 1.2rem;
 }
 
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem 0.75rem;
+  list-style: none;
+  padding-left: 0;
+}
+
 .links a {
   color: var(--accent);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.field input,
+.field select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+.bal {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 0.75rem;
+}
+
+.addr-full {
+  word-break: break-all;
+  margin: 0 0 0.35rem;
+}
+
+.fee {
+  margin: 0 0 0.65rem;
+}
+
+.warn-line {
+  color: var(--warn);
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+}
+
+.err.banner {
+  margin-top: 1rem;
+}
+
+.send .btn {
+  width: 100%;
 }

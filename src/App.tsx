@@ -1,5 +1,19 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  formatEther,
+  isAddress,
+  parseEther,
+  type Address,
+  type Hash,
+} from "viem";
 import rpcPack from "./pack/rpc.json";
+import {
+  explorerAddressUrl,
+  explorerTxUrl,
+  fetchPlsBalance,
+  packFor,
+  type DeskChainId,
+} from "./chain/client";
 import {
   connectTrezorFromGesture,
   humanTrezorError,
@@ -7,13 +21,12 @@ import {
   warmTrezorConnect,
 } from "./trezor/connect";
 import { SCHEME_ID } from "./trezor/paths";
+import { previewFees, sendPlsWithTrezor } from "./trezor/signPulseTx";
 
-const main = rpcPack.chains.find((c) => c.chainId === 369)!;
-const explorer = main.explorers[0]!;
-const apps = main.apps!;
+const apps = packFor(369).apps!;
 
 type Session = {
-  address: string;
+  address: Address;
   derivationIndex: number;
   derivationPath: string;
   deviceId: string;
@@ -31,6 +44,17 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [chainId, setChainId] = useState<DeskChainId>(943);
+  const [balance, setBalance] = useState<bigint | null>(null);
+  const [balBusy, setBalBusy] = useState(false);
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("");
+  const [feeHint, setFeeHint] = useState<string | null>(null);
+  const [lastTx, setLastTx] = useState<Hash | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const pack = packFor(chainId);
+  const explorerName = pack.explorers?.[0]?.name ?? "explorer";
 
   useEffect(() => {
     void warmTrezorConnect()
@@ -41,15 +65,69 @@ export function App() {
     void probeBridge().then(setBridge);
   }, []);
 
+  const refreshBalance = useCallback(async (addr: Address, cid: DeskChainId) => {
+    setBalBusy(true);
+    try {
+      const b = await fetchPlsBalance(cid, addr);
+      setBalance(b);
+    } catch (e) {
+      setBalance(null);
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBalBusy(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setBalance(null);
+      return;
+    }
+    void refreshBalance(session.address, chainId);
+  }, [session, chainId, refreshBalance]);
+
+  useEffect(() => {
+    if (!session || !to || !amount || !isAddress(to)) {
+      setFeeHint(null);
+      return;
+    }
+    let cancelled = false;
+    const t = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const value = parseEther(amount);
+          const p = await previewFees(
+            chainId,
+            session.address,
+            to as Address,
+            value,
+          );
+          if (cancelled) return;
+          const feeWei = p.eip1559
+            ? p.gas * (p.maxFeePerGas ?? 0n)
+            : p.gas * (p.gasPrice ?? 0n);
+          setFeeHint(
+            `~${formatEther(feeWei)} ${pack.currency.symbol} gas cap · gas ${p.gas.toString()}${p.eip1559 ? " · EIP-1559" : " · legacy"}`,
+          );
+        } catch {
+          if (!cancelled) setFeeHint(null);
+        }
+      })();
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [session, to, amount, chainId, pack.currency.symbol]);
+
   function onConnect() {
     setErr(null);
     setBusy(true);
-    // NO await before gesture — popup must open in this turn.
     const pending = connectTrezorFromGesture();
     void pending
       .then((r) => {
         setSession({
-          address: r.address0,
+          address: r.address0 as Address,
           derivationIndex: r.derivationIndex,
           derivationPath: r.derivationPath,
           deviceId: r.deviceId,
@@ -57,9 +135,7 @@ export function App() {
         void probeBridge().then(setBridge);
       })
       .catch((e) => {
-        setErr(
-          humanTrezorError(e instanceof Error ? e.message : String(e)),
-        );
+        setErr(humanTrezorError(e instanceof Error ? e.message : String(e)));
         void probeBridge().then(setBridge);
       })
       .finally(() => setBusy(false));
@@ -68,6 +144,54 @@ export function App() {
   function onDisconnect() {
     setSession(null);
     setErr(null);
+    setLastTx(null);
+    setTo("");
+    setAmount("");
+  }
+
+  function onCopy() {
+    if (!session) return;
+    void navigator.clipboard.writeText(session.address).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  function onSend() {
+    if (!session) return;
+    setErr(null);
+    setLastTx(null);
+    if (!isAddress(to)) {
+      setErr("Recipient must be a valid 0x address.");
+      return;
+    }
+    let value: bigint;
+    try {
+      value = parseEther(amount);
+    } catch {
+      setErr("Amount must be a number (PLS).");
+      return;
+    }
+    if (value <= 0n) {
+      setErr("Amount must be > 0.");
+      return;
+    }
+    setBusy(true);
+    void sendPlsWithTrezor({
+      chainId,
+      account: session.address,
+      to: to as Address,
+      value,
+      derivationIndex: session.derivationIndex,
+    })
+      .then((hash) => {
+        setLastTx(hash);
+        void refreshBalance(session.address, chainId);
+      })
+      .catch((e) => {
+        setErr(humanTrezorError(e instanceof Error ? e.message : String(e)));
+      })
+      .finally(() => setBusy(false));
   }
 
   return (
@@ -80,106 +204,196 @@ export function App() {
         </p>
       </header>
 
-      <section className="card">
-        <h2>Device</h2>
-        <ul className="meta">
-          <li>
-            Connect warm:{" "}
-            <span className={warm ? "ok" : "warn"}>
-              {warm ? "ready" : "starting…"}
-            </span>
-          </li>
-          <li>
-            Bridge (:21325):{" "}
-            <span
-              className={
-                bridge === "ok" ? "ok" : bridge === "missing" ? "bad" : "warn"
+      <div className="grid">
+        <section className="card">
+          <h2>Device</h2>
+          <ul className="meta">
+            <li>
+              Connect:{" "}
+              <span className={warm ? "ok" : "warn"}>
+                {warm ? "ready" : "starting…"}
+              </span>
+            </li>
+            <li>
+              Bridge:{" "}
+              <span
+                className={
+                  bridge === "ok" ? "ok" : bridge === "missing" ? "bad" : "warn"
+                }
+              >
+                {bridge === "ok"
+                  ? "reachable"
+                  : bridge === "missing"
+                    ? "not found"
+                    : bridge === "…"
+                      ? "checking…"
+                      : "unknown"}
+              </span>
+            </li>
+            <li>
+              Scheme: <code>{SCHEME_ID}</code>
+            </li>
+          </ul>
+
+          <label className="field">
+            Network
+            <select
+              value={chainId}
+              onChange={(e) =>
+                setChainId(Number(e.target.value) as DeskChainId)
               }
             >
-              {bridge === "ok"
-                ? "reachable"
-                : bridge === "missing"
-                  ? "not found — start Trezor Suite Bridge"
-                  : bridge === "…"
-                    ? "checking…"
-                    : "unknown — plug device / allow local network"}
-            </span>
-          </li>
-          <li>
-            Chain: {main.name} ({main.chainId}) · {main.currency.symbol}
-          </li>
-          <li>
-            Scheme: <code>{SCHEME_ID}</code>
-          </li>
-        </ul>
+              <option value={943}>Testnet V4 (943) — safe send</option>
+              <option value={369}>PulseChain (369)</option>
+            </select>
+          </label>
 
-        {!session ? (
-          <button
-            type="button"
-            className="btn"
-            disabled={busy || !warm}
-            onClick={onConnect}
-          >
-            {busy ? "Connecting…" : "Connect Trezor"}
-          </button>
-        ) : (
-          <div className="session">
-            <p>
-              Address (verify on device):{" "}
-              <code title={session.address}>{shortAddr(session.address)}</code>
-            </p>
-            <p>
-              Path: <code>{session.derivationPath}</code>
-            </p>
-            <p className="muted">Device id: {session.deviceId}</p>
-            <div className="row">
-              <a
-                className="link"
-                href={`${explorer.url}/address/${session.address}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open on {explorer.name}
-              </a>
-              <button type="button" className="btn ghost" onClick={onDisconnect}>
-                Disconnect
-              </button>
+          {!session ? (
+            <button
+              type="button"
+              className="btn"
+              disabled={busy || !warm}
+              onClick={onConnect}
+            >
+              {busy ? "Connecting…" : "Connect Trezor"}
+            </button>
+          ) : (
+            <div className="session">
+              <p className="addr-full">
+                <code title={session.address}>{session.address}</code>
+              </p>
+              <p className="muted">
+                Path <code>{session.derivationPath}</code> · verify on device
+              </p>
+              <div className="row">
+                <button type="button" className="btn ghost" onClick={onCopy}>
+                  {copied ? "Copied" : "Copy receive"}
+                </button>
+                <a
+                  className="link"
+                  href={explorerAddressUrl(chainId, session.address)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {explorerName}
+                </a>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  onClick={onDisconnect}
+                >
+                  Disconnect
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </section>
 
-        {err ? <p className="err">{err}</p> : null}
-      </section>
+        <section className="card">
+          <h2>Balance · {pack.currency.symbol}</h2>
+          {!session ? (
+            <p className="muted">Connect Trezor to load balance.</p>
+          ) : (
+            <>
+              <p className="bal">
+                {balBusy
+                  ? "…"
+                  : balance == null
+                    ? "—"
+                    : `${formatEther(balance)} ${pack.currency.symbol}`}
+              </p>
+              <button
+                type="button"
+                className="btn ghost"
+                disabled={balBusy}
+                onClick={() => void refreshBalance(session.address, chainId)}
+              >
+                Refresh
+              </button>
+            </>
+          )}
+        </section>
 
-      <section className="card links">
-        <h2>Core apps</h2>
-        <ul>
-          <li>
-            <a href={apps.hex} target="_blank" rel="noreferrer">
-              HEX
-            </a>
-          </li>
-          <li>
-            <a href={apps.pulsex} target="_blank" rel="noreferrer">
-              PulseX
-            </a>
-          </li>
-          <li>
-            <a href={apps.provex} target="_blank" rel="noreferrer">
-              ProveX
-            </a>
-          </li>
-          <li>
-            <a href={explorer.url} target="_blank" rel="noreferrer">
-              {explorer.name}
-            </a>
-          </li>
-        </ul>
-        <p className="muted">
-          A0 bootstrap — send/balance land in PRIORITY #5. Pack: pulse-core v
-          {rpcPack.version}.
-        </p>
-      </section>
+        <section className="card send">
+          <h2>Send PLS</h2>
+          {!session ? (
+            <p className="muted">Connect first. Prefer testnet 943.</p>
+          ) : (
+            <>
+              <label className="field">
+                To
+                <input
+                  value={to}
+                  onChange={(e) => setTo(e.target.value.trim())}
+                  placeholder="0x…"
+                  spellCheck={false}
+                  autoComplete="off"
+                />
+              </label>
+              <label className="field">
+                Amount ({pack.currency.symbol})
+                <input
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.01"
+                  inputMode="decimal"
+                />
+              </label>
+              {feeHint ? <p className="muted fee">{feeHint}</p> : null}
+              <button
+                type="button"
+                className="btn"
+                disabled={busy || !to || !amount}
+                onClick={onSend}
+              >
+                {busy ? "Signing…" : `Sign & send on ${chainId}`}
+              </button>
+              {chainId === 369 ? (
+                <p className="warn-line">Mainnet 369 — real funds.</p>
+              ) : null}
+              {lastTx ? (
+                <p>
+                  Sent{" "}
+                  <a
+                    className="link"
+                    href={explorerTxUrl(chainId, lastTx)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {shortAddr(lastTx)}
+                  </a>
+                </p>
+              ) : null}
+            </>
+          )}
+        </section>
+
+        <section className="card links">
+          <h2>Core apps</h2>
+          <ul className="app-grid">
+            <li>
+              <a href={apps.hex} target="_blank" rel="noreferrer">
+                HEX
+              </a>
+            </li>
+            <li>
+              <a href={apps.pulsex} target="_blank" rel="noreferrer">
+                PulseX
+              </a>
+            </li>
+            <li>
+              <a href={apps.provex} target="_blank" rel="noreferrer">
+                ProveX
+              </a>
+            </li>
+          </ul>
+          <p className="muted">
+            Pack pulse-core v{rpcPack.version} · A1
+          </p>
+        </section>
+      </div>
+
+      {err ? <p className="err banner">{err}</p> : null}
     </div>
   );
 }

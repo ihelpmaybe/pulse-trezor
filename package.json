@@ -19,7 +19,8 @@
   "dependencies": {
     "@trezor/connect-web": "9.7.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "viem": "^2.58.4"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

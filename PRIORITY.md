@@ -18,7 +18,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 2 | ~~SYNC4 stub token+RPC pack~~ **DONE** | `pulse-trezor-platform` | [packs/pulse-core](https://github.com/ihelpmaybe/pulse-trezor-platform/tree/main/packs/pulse-core) | — |
 | 3 | ~~Desk A0 shell + Connect warm + Bridge detect~~ **DONE** | `pulse-trezor` | A0 | Vite + Connect warm + Bridge probe + SYNC0 path |
 | 4 | ~~Desk A0 smoke CI scaffold (Gate T start)~~ **DONE** | `pulse-trezor` | TEST smoke | workflow + path/error unit smoke |
-| 5 | Desk A1 receive + PLS balance + send (testnet) + fees | `pulse-trezor` | A1 | After #3 |
+| 5 | ~~Desk A1 receive + PLS balance + send (testnet) + fees~~ **DONE** | `pulse-trezor` | A1 | 943 default · fee preview · Trezor sign |
 | 6 | Indexer decision note (scan API vs self-host) | `pulse-trezor-platform` | SYNC7 | Parallel w/ #5 |
 | 7 | TIP0 locate Tip source / face-vs-code decision | `Tip-wallet` | TIP0 | Parallel OK |
 | 8 | TIP1 consume SYNC4 pack + RPC align | `Tip-wallet` | TIP1 | After #2+#7 |
@@ -135,5 +135,5 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ## Current focus (update when claiming)
 
-**Active band: P0.** Next: **#5 Desk A1** (receive + PLS balance + testnet send).  
-Say: `Taking PRIORITY #5 …`
+**Active band: P0.** Next: **#6 indexer note** (platform) or **#7 TIP0** / **#9 A2 tokens** if staying on Desk.  
+Say: `Taking PRIORITY #6 …`
