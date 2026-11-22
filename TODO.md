@@ -56,10 +56,10 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] **Firmware outdated warning** (Connect device features)
 
 ## A2 — Tokens
-- [ ] Token list: HEX, PLSX, INC, custom add-by-contract
-- [ ] Token balances
-- [ ] Send ERC-20
-- [ ] Approve / revoke UI (spender, amount clear)
+- [x] Token list: HEX, PLSX, INC, bridged USDC (SYNC4 pack; custom add later)
+- [x] Token balances
+- [x] Send ERC-20
+- [x] Approve / revoke UI (spender, amount / max clear)
 - [ ] **Approval inventory + bulk revoke**
 - [ ] **EIP-712 / typed data / Permit** clear-sign path
 - [ ] **Custom contract call** (ABI/hex assist) for power/rescue

@@ -39,6 +39,7 @@ export type SendPlsArgs = {
   account: Address;
   to: Address;
   value: bigint;
+  data?: Hex;
   derivationIndex?: number;
 };
 
@@ -55,14 +56,15 @@ export async function previewFees(
   account: Address,
   to: Address,
   value: bigint,
+  data: Hex = "0x",
 ): Promise<FeePreview> {
   const client = makePublicClient(chainId);
   let gas: bigint;
   try {
-    gas = await client.estimateGas({ account, to, value, data: "0x" });
+    gas = await client.estimateGas({ account, to, value, data });
     gas = (gas * 12n) / 10n;
   } catch {
-    gas = 21_000n;
+    gas = data === "0x" ? 21_000n : 100_000n;
   }
   const fees = await client.estimateFeesPerGas().catch(() => null);
   const legacyGasPrice =
@@ -93,7 +95,7 @@ export async function sendPlsWithTrezor(args: SendPlsArgs): Promise<Hash> {
   const path = ethAddressPath(index);
   const client = makePublicClient(args.chainId);
   const chain = viemChain(args.chainId);
-  const data = "0x" as Hex;
+  const data = (args.data ?? "0x") as Hex;
 
   const nonce = await client.getTransactionCount({
     address: args.account,
@@ -105,6 +107,7 @@ export async function sendPlsWithTrezor(args: SendPlsArgs): Promise<Hash> {
     args.account,
     args.to,
     args.value,
+    data,
   );
 
   const trezorTx: Record<string, unknown> = {

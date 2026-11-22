@@ -201,3 +201,32 @@ code {
 .send .btn {
   width: 100%;
 }
+
+.token-grid {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.4rem;
+}
+
+.tok {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.45rem 0.55rem;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.tok.on {
+  border-color: var(--accent);
+}

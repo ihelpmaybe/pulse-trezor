@@ -47,4 +47,4 @@ Opens on `http://127.0.0.1:5174`. Needs **Trezor Bridge** (:21325). Address path
 
 ## Status
 
-**A0–A1 + smoke CI:** Connect, receive/copy, PLS balance, fee preview, sign+send (943 default). Next: #6 indexer note or #9 tokens. Device rows: `tests/smoke/README.md`.
+**A0–A2 + smoke CI:** Connect, PLS + ERC-20 balances, send, approve (369). Tip TIP1 blocked until Android source path. Device: `tests/smoke/README.md`.

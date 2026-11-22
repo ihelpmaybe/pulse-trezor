@@ -22,7 +22,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 6 | ~~Indexer decision note (scan API vs self-host)~~ **DONE** | `pulse-trezor-platform` | SYNC7 | public PulseScan; self-host deferred |
 | 7 | ~~TIP0 locate Tip source / face-vs-code decision~~ **DONE** (interim) | `Tip-wallet` | TIP0 | face-only; code path unknown |
 | 8 | TIP1 consume SYNC4 pack + RPC align | `Tip-wallet` | TIP1 | After #2+#7 |
-| 9 | Desk A2 tokens HEX/PLSX + approve (use SYNC4) | `pulse-trezor` | A2 | After #5 |
+| 9 | ~~Desk A2 tokens HEX/PLSX + approve (use SYNC4)~~ **DONE** | `pulse-trezor` | A2 | balances · ERC-20 send · approve |
 | 10 | Guides: Bridge install + Desk receive thin | `pulse-trezor-guides` | G1/G5 | Parallel w/ #5–9 |
 | 11 | Gate T: Desk smoke green + pen draft | `pulse-trezor` | TEST | Blocks Gate 1 claim |
 
@@ -135,5 +135,5 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ## Current focus (update when claiming)
 
-**Active band: P0.** Next: **#9 Desk A2 tokens** (#8 TIP1 blocked on Tip source).  
-Say: `Taking PRIORITY #9 …`
+**Active band: P0.** Next: **#10 guides** or **#11 Gate T pen** (device smoke manual). #8 Tip blocked.  
+Say: `Taking PRIORITY #10 …`

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   formatEther,
   isAddress,
+  maxUint256,
   parseEther,
   type Address,
   type Hash,
@@ -14,6 +15,13 @@ import {
   packFor,
   type DeskChainId,
 } from "./chain/client";
+import {
+  encodeErc20Approve,
+  encodeErc20Transfer,
+  fetchTokenBalances,
+  parseTokenAmount,
+  type PackToken,
+} from "./chain/tokens";
 import {
   connectTrezorFromGesture,
   humanTrezorError,
@@ -32,6 +40,8 @@ type Session = {
   deviceId: string;
 };
 
+type TokenRow = { token: PackToken; raw: bigint; formatted: string };
+
 function shortAddr(a: string) {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }
@@ -47,14 +57,23 @@ export function App() {
   const [chainId, setChainId] = useState<DeskChainId>(943);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [balBusy, setBalBusy] = useState(false);
+  const [tokenRows, setTokenRows] = useState<TokenRow[]>([]);
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [feeHint, setFeeHint] = useState<string | null>(null);
   const [lastTx, setLastTx] = useState<Hash | null>(null);
   const [copied, setCopied] = useState(false);
+  const [asset, setAsset] = useState<"PLS" | string>("PLS");
+  const [spender, setSpender] = useState("");
+  const [approveAmt, setApproveAmt] = useState("");
 
   const pack = packFor(chainId);
   const explorerName = pack.explorers?.[0]?.name ?? "explorer";
+  const selectedToken =
+    asset === "PLS"
+      ? null
+      : tokenRows.find((r) => r.token.address.toLowerCase() === asset.toLowerCase())
+          ?.token ?? null;
 
   useEffect(() => {
     void warmTrezorConnect()
@@ -65,26 +84,33 @@ export function App() {
     void probeBridge().then(setBridge);
   }, []);
 
-  const refreshBalance = useCallback(async (addr: Address, cid: DeskChainId) => {
-    setBalBusy(true);
-    try {
-      const b = await fetchPlsBalance(cid, addr);
-      setBalance(b);
-    } catch (e) {
-      setBalance(null);
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBalBusy(false);
-    }
-  }, []);
+  const refreshBalances = useCallback(
+    async (addr: Address, cid: DeskChainId) => {
+      setBalBusy(true);
+      try {
+        const b = await fetchPlsBalance(cid, addr);
+        setBalance(b);
+        const rows = await fetchTokenBalances(cid, addr);
+        setTokenRows(rows);
+      } catch (e) {
+        setBalance(null);
+        setTokenRows([]);
+        setErr(e instanceof Error ? e.message : String(e));
+      } finally {
+        setBalBusy(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!session) {
       setBalance(null);
+      setTokenRows([]);
       return;
     }
-    void refreshBalance(session.address, chainId);
-  }, [session, chainId, refreshBalance]);
+    void refreshBalances(session.address, chainId);
+  }, [session, chainId, refreshBalances]);
 
   useEffect(() => {
     if (!session || !to || !amount || !isAddress(to)) {
@@ -95,19 +121,32 @@ export function App() {
     const t = window.setTimeout(() => {
       void (async () => {
         try {
-          const value = parseEther(amount);
+          let value = 0n;
+          let data: `0x${string}` = "0x";
+          let txTo = to as Address;
+          if (asset === "PLS") {
+            value = parseEther(amount);
+          } else if (selectedToken) {
+            const raw = parseTokenAmount(amount, selectedToken.decimals);
+            data = encodeErc20Transfer(to as Address, raw);
+            txTo = selectedToken.address as Address;
+          } else {
+            setFeeHint(null);
+            return;
+          }
           const p = await previewFees(
             chainId,
             session.address,
-            to as Address,
+            txTo,
             value,
+            data,
           );
           if (cancelled) return;
           const feeWei = p.eip1559
             ? p.gas * (p.maxFeePerGas ?? 0n)
             : p.gas * (p.gasPrice ?? 0n);
           setFeeHint(
-            `~${formatEther(feeWei)} ${pack.currency.symbol} gas cap · gas ${p.gas.toString()}${p.eip1559 ? " · EIP-1559" : " · legacy"}`,
+            `~${formatEther(feeWei)} ${pack.currency.symbol} gas cap · gas ${p.gas.toString()}`,
           );
         } catch {
           if (!cancelled) setFeeHint(null);
@@ -118,7 +157,15 @@ export function App() {
       cancelled = true;
       window.clearTimeout(t);
     };
-  }, [session, to, amount, chainId, pack.currency.symbol]);
+  }, [
+    session,
+    to,
+    amount,
+    chainId,
+    pack.currency.symbol,
+    asset,
+    selectedToken,
+  ]);
 
   function onConnect() {
     setErr(null);
@@ -165,28 +212,87 @@ export function App() {
       setErr("Recipient must be a valid 0x address.");
       return;
     }
-    let value: bigint;
-    try {
-      value = parseEther(amount);
-    } catch {
-      setErr("Amount must be a number (PLS).");
+    setBusy(true);
+    void (async () => {
+      try {
+        let value = 0n;
+        let data: `0x${string}` | undefined;
+        let txTo = to as Address;
+        if (asset === "PLS") {
+          value = parseEther(amount);
+        } else {
+          if (!selectedToken) throw new Error("Pick a token.");
+          if (chainId !== 369) {
+            throw new Error("ERC-20 list is mainnet 369 only.");
+          }
+          const raw = parseTokenAmount(amount, selectedToken.decimals);
+          if (raw <= 0n) throw new Error("Amount must be > 0.");
+          data = encodeErc20Transfer(to as Address, raw);
+          txTo = selectedToken.address as Address;
+        }
+        if (asset === "PLS" && value <= 0n) {
+          throw new Error("Amount must be > 0.");
+        }
+        const hash = await sendPlsWithTrezor({
+          chainId,
+          account: session.address,
+          to: txTo,
+          value,
+          data,
+          derivationIndex: session.derivationIndex,
+        });
+        setLastTx(hash);
+        void refreshBalances(session.address, chainId);
+      } catch (e) {
+        setErr(humanTrezorError(e instanceof Error ? e.message : String(e)));
+      } finally {
+        setBusy(false);
+      }
+    })();
+  }
+
+  function onApprove(unlimited: boolean) {
+    if (!session) return;
+    setErr(null);
+    setLastTx(null);
+    if (chainId !== 369) {
+      setErr("Approve is mainnet 369 only.");
       return;
     }
-    if (value <= 0n) {
-      setErr("Amount must be > 0.");
+    if (!selectedToken || asset === "PLS") {
+      setErr("Pick an ERC-20 (not PLS) to approve.");
+      return;
+    }
+    if (!isAddress(spender)) {
+      setErr("Spender must be a valid 0x address (e.g. PulseX router).");
+      return;
+    }
+    let raw: bigint;
+    try {
+      raw = unlimited
+        ? maxUint256
+        : parseTokenAmount(approveAmt, selectedToken.decimals);
+    } catch {
+      setErr("Approve amount invalid.");
+      return;
+    }
+    if (!unlimited && raw < 0n) {
+      setErr("Approve amount invalid.");
       return;
     }
     setBusy(true);
+    const data = encodeErc20Approve(spender as Address, raw);
     void sendPlsWithTrezor({
       chainId,
       account: session.address,
-      to: to as Address,
-      value,
+      to: selectedToken.address as Address,
+      value: 0n,
+      data,
       derivationIndex: session.derivationIndex,
     })
       .then((hash) => {
         setLastTx(hash);
-        void refreshBalance(session.address, chainId);
+        void refreshBalances(session.address, chainId);
       })
       .catch((e) => {
         setErr(humanTrezorError(e instanceof Error ? e.message : String(e)));
@@ -239,12 +345,13 @@ export function App() {
             Network
             <select
               value={chainId}
-              onChange={(e) =>
-                setChainId(Number(e.target.value) as DeskChainId)
-              }
+              onChange={(e) => {
+                setChainId(Number(e.target.value) as DeskChainId);
+                setAsset("PLS");
+              }}
             >
-              <option value={943}>Testnet V4 (943) — safe send</option>
-              <option value={369}>PulseChain (369)</option>
+              <option value={943}>Testnet V4 (943) — safe PLS send</option>
+              <option value={369}>PulseChain (369) — tokens</option>
             </select>
           </label>
 
@@ -290,9 +397,9 @@ export function App() {
         </section>
 
         <section className="card">
-          <h2>Balance · {pack.currency.symbol}</h2>
+          <h2>Balances</h2>
           {!session ? (
-            <p className="muted">Connect Trezor to load balance.</p>
+            <p className="muted">Connect Trezor to load balances.</p>
           ) : (
             <>
               <p className="bal">
@@ -302,22 +409,54 @@ export function App() {
                     ? "—"
                     : `${formatEther(balance)} ${pack.currency.symbol}`}
               </p>
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={balBusy}
-                onClick={() => void refreshBalance(session.address, chainId)}
-              >
-                Refresh
-              </button>
+              {chainId === 369 ? (
+                <ul className="token-grid">
+                  {tokenRows.map((r) => (
+                    <li key={r.token.address}>
+                      <button
+                        type="button"
+                        className={
+                          asset === r.token.address ? "tok on" : "tok"
+                        }
+                        onClick={() => setAsset(r.token.address)}
+                        title={r.token.name}
+                      >
+                        <span>{r.token.symbol}</span>
+                        <span className="muted">{r.formatted}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">
+                  ERC-20 (HEX/PLSX/…) on mainnet 369 only.
+                </p>
+              )}
+              <div className="row">
+                <button
+                  type="button"
+                  className={asset === "PLS" ? "btn" : "btn ghost"}
+                  onClick={() => setAsset("PLS")}
+                >
+                  Use PLS
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={balBusy}
+                  onClick={() => void refreshBalances(session.address, chainId)}
+                >
+                  Refresh
+                </button>
+              </div>
             </>
           )}
         </section>
 
         <section className="card send">
-          <h2>Send PLS</h2>
+          <h2>Send {asset === "PLS" ? "PLS" : selectedToken?.symbol ?? "token"}</h2>
           {!session ? (
-            <p className="muted">Connect first. Prefer testnet 943.</p>
+            <p className="muted">Connect first. Prefer testnet 943 for PLS.</p>
           ) : (
             <>
               <label className="field">
@@ -331,7 +470,7 @@ export function App() {
                 />
               </label>
               <label className="field">
-                Amount ({pack.currency.symbol})
+                Amount
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
@@ -353,7 +492,7 @@ export function App() {
               ) : null}
               {lastTx ? (
                 <p>
-                  Sent{" "}
+                  Tx{" "}
                   <a
                     className="link"
                     href={explorerTxUrl(chainId, lastTx)}
@@ -364,6 +503,63 @@ export function App() {
                   </a>
                 </p>
               ) : null}
+            </>
+          )}
+        </section>
+
+        <section className="card send">
+          <h2>Approve (clear-sign)</h2>
+          {!session || chainId !== 369 ? (
+            <p className="muted">
+              Switch to 369 + pick HEX/PLSX/… then set spender.
+            </p>
+          ) : (
+            <>
+              <p className="muted">
+                Token:{" "}
+                <strong>
+                  {selectedToken ? selectedToken.symbol : "pick from balances"}
+                </strong>
+              </p>
+              <label className="field">
+                Spender (router / escrow)
+                <input
+                  value={spender}
+                  onChange={(e) => setSpender(e.target.value.trim())}
+                  placeholder="0x… PulseX router etc."
+                  spellCheck={false}
+                />
+              </label>
+              <label className="field">
+                Amount (or use unlimited)
+                <input
+                  value={approveAmt}
+                  onChange={(e) => setApproveAmt(e.target.value)}
+                  placeholder="exact amount"
+                  inputMode="decimal"
+                />
+              </label>
+              <div className="row">
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={busy || !spender || !selectedToken}
+                  onClick={() => onApprove(false)}
+                >
+                  Approve amount
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={busy || !spender || !selectedToken}
+                  onClick={() => onApprove(true)}
+                >
+                  Approve max
+                </button>
+              </div>
+              <p className="warn-line">
+                Read spender on device. Max = unlimited allowance.
+              </p>
             </>
           )}
         </section>
@@ -388,7 +584,7 @@ export function App() {
             </li>
           </ul>
           <p className="muted">
-            Pack pulse-core v{rpcPack.version} · A1
+            Pack pulse-core v{rpcPack.version} · A2
           </p>
         </section>
       </div>

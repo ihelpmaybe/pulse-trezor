@@ -1,0 +1,84 @@
+{
+  "name": "Pulse Core (HEX / PulseX / ProveX)",
+  "timestamp": "2026-11-22T00:00:00.000Z",
+  "version": { "major": 1, "minor": 0, "patch": 0 },
+  "keywords": ["pulsechain", "hex", "pulsex", "provex"],
+  "tags": {
+    "core": { "name": "Core", "description": "Required for Tip/Desk core loop" },
+    "bridged": {
+      "name": "Bridged",
+      "description": "From Ethereum via Pulse bridge — not the inherited fork copy"
+    },
+    "inherited": {
+      "name": "Inherited",
+      "description": "Fork-state copy — not Circle/issuer redeemable"
+    }
+  },
+  "tokens": [
+    {
+      "chainId": 369,
+      "address": "0x0000000000000000000000000000000000000000",
+      "symbol": "PLS",
+      "name": "Pulse",
+      "decimals": 18,
+      "tags": ["core"],
+      "extensions": { "native": true }
+    },
+    {
+      "chainId": 369,
+      "address": "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+      "symbol": "WPLS",
+      "name": "Wrapped Pulse",
+      "decimals": 18,
+      "tags": ["core"]
+    },
+    {
+      "chainId": 369,
+      "address": "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+      "symbol": "HEX",
+      "name": "HEX",
+      "decimals": 8,
+      "tags": ["core"]
+    },
+    {
+      "chainId": 369,
+      "address": "0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",
+      "symbol": "PLSX",
+      "name": "PulseX",
+      "decimals": 18,
+      "tags": ["core"]
+    },
+    {
+      "chainId": 369,
+      "address": "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
+      "symbol": "INC",
+      "name": "Incentive",
+      "decimals": 18,
+      "tags": ["core"]
+    },
+    {
+      "chainId": 369,
+      "address": "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
+      "symbol": "USDC",
+      "name": "USD Coin from Ethereum",
+      "decimals": 6,
+      "tags": ["core", "bridged"],
+      "extensions": {
+        "provex": true,
+        "note": "Bridged USDC — use for ProveX / real dollar-linked flows; verify on scan before send"
+      }
+    },
+    {
+      "chainId": 369,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "symbol": "USDC",
+      "name": "USD Coin (inherited / pUSDC)",
+      "decimals": 6,
+      "tags": ["inherited"],
+      "extensions": {
+        "provex": false,
+        "redFlag": "Inherited fork copy — not Circle-backed; do not treat as $1 ProveX USDC"
+      }
+    }
+  ]
+}
