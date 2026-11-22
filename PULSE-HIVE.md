@@ -1,10 +1,12 @@
 # Pulse Hive — PulseChain always-on backlog
 
-**Scope: anything PulseChain needs built, fixed, documented, or wrapped** — wallets, DeFi, HEX, fiat, infra, creators, data, security, education. Not a Trezor-only list.
+**Scope: anything PulseChain needs** — but **prefer wrap / guide / custody glue over rebuilding** what other HEX/Pulse builders already ship.
 
-**What this is:** hive mind queue. Spare Cursor / AI tokens (end of month or idle) → claim an **H#** → ship a slice → stop.
+**What this is:** hive mind queue. Spare Cursor / AI tokens → claim an **H#** → ship a slice → stop.
 
-**What this is not:** a new agent runtime · inventing a second soft Android wallet · fake “official Suite” · AI custody.
+**What this is not:** a new DEX · lending protocol · analytics dashboard · second soft Android wallet · fake “official Suite” · AI custody.
+
+**Follow + adopt map:** vault `memory/crypto/2026-11-21-pulse-builders-follow-gaps.md` (and section **0** below).
 
 | Queue | When |
 |-------|------|
@@ -31,6 +33,39 @@ Custody features still prefer core loop **PulseChain · HEX · PulseX · ProveX*
 **Never empty:** run **SPARE generator** at bottom; append H#s ≥ next free number.
 
 Legend: `[ ]` open · `[~]` partial · `[x]` done
+
+---
+
+## 0 — Follow builders · adopt · fill gaps (don’t redo)
+
+### Follow on X (pump account)
+**Official:** @PulsechainCom · @HEXcrypto · @PulseXcom · @ProveXCom · @RichardHeartWin  
+
+**Builders (ship product):** @sinofrebellion · @piteasio · @9mm_pro · @joltdotbuild · @StarfireDV · @phiatcrypto · @liquidloansio · @POWERCITYio · @IMPLSfinance · OpenPulsechain / Peplord (PulseTickers)  
+
+**Listen:** t.me/PulseDEV · t.me/HEXcryptoDev  
+
+### Already shipped — do NOT rebuild
+| They ship | We do |
+|-----------|--------|
+| Piteas / 9mm / JOLT / Starfire routing | PulseX-first in Desk/Tip; deep-link others |
+| Phiat / Liquid Loans / POWERCITY / IMPLS credit+vaults | Guides + WC clear-sign — no CDP product |
+| OpenPulsechain safety/MCP/whales | Call MCP/API — no parallel scanner |
+| Sino PulseBasis / Bag Builder | Link from HEX companion |
+| PulseTickers / Peplord intel | Link — no GoPulse clone |
+
+### Gap H#s (our wedge + glue)
+
+| H# | Task | Owner | Notes |
+|----|------|-------|-------|
+| H140 | [ ] Desk deep-link / “open in” map to PulseX · ProveX · Phiat · Liquid Loans | Desk + guides | WC later |
+| H141 | [ ] Guide: use PulseBasis cost-basis + Desk HWW receive | guides | don’t clone Sino |
+| H142 | [ ] Guide: Bag Builder rotates → execute on Tip/Desk (PulseX) | guides | |
+| H143 | [ ] Wire OpenPulsechain free MCP into agent ops (no new scanner) | platform | adopt |
+| H144 | [ ] “Pulse DeFi map” one-pager: who owns what (table above) | guides | anti-redo |
+| H145 | [ ] Piteas/9mm embed or deep-link notes — after PulseX Desk B | Desk BONUS | wrap |
+| H146 | [ ] ProveX + bridged USDC warnings in Tip/Desk face copy | Tip/Desk | gap |
+| H147 | [ ] Follow-list hygiene: quarterly re-verify handles/domains | this file | H200+ |
 
 ---
 
@@ -94,11 +129,11 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H51 | [ ] Tip: PulseX swap regression checklist | Tip | |
 | H52 | [ ] PulseX router/ABI pack in platform | platform | |
 | H53 | [ ] LP add/remove clear-sign checklist | Desk / guides | |
-| H54 | [ ] Liquid Loans / lending Pulse path notes | guides / platform | adopt |
-| H55 | [ ] PhiAT / other Pulse DeFi: status + risk one-pagers | guides | |
-| H56 | [ ] Honeypot / token safety read tooling for Pulse | platform / MCP | |
-| H57 | [ ] Alt DEX wrap notes (Piteas/Switch/9mm) — after PulseX | Desk BONUS | |
-| H58 | [ ] Farming / bribes UX honesty (no points-farm product) | guides | |
+| H54 | [ ] Liquid Loans path notes → their app (no rebuild) | guides | @liquidloansio |
+| H55 | [ ] Phiat path notes → their app (no rebuild) | guides | @phiatcrypto |
+| H56 | [ ] Token safety via OpenPulsechain MCP — wire, don’t rebuild | platform | adopt |
+| H57 | [ ] Alt DEX deep-link notes (Piteas/9mm/JOLT) — after PulseX | Desk BONUS | wrap |
+| H58 | [ ] Farming / bribes UX honesty (point at IMPLS/POWERCITY; no farm product) | guides | |
 
 ---
 
@@ -136,8 +171,8 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 |----|------|--------------|-------|
 | H80 | [ ] Shared HistoryProvider (PulseScan) for Desk+Tip | platform + Desk | |
 | H81 | [ ] Token list governance: how to add PRC-20 safely | platform | |
-| H82 | [ ] Top Pulse pairs / TVL dashboard notes (DefiLlama wrap) | platform / MCP | |
-| H83 | [ ] Smart-money / whale feed read tooling (RO) | MCP / platform | |
+| H82 | [ ] Top pairs / TVL — DefiLlama or OpenPulsechain wrap (no new dashboard) | platform | |
+| H83 | [ ] Smart-money feed — OpenPulsechain MCP if free tier enough | platform | don’t rebuild |
 | H84 | [ ] Portfolio snapshot export (CSV/JSON) for tax-ish | Desk / Tip | |
 | H85 | [ ] Address activity “what is this contract?” explainer | AI + scan | |
 | H86 | [ ] Subgraph / PulseX data freshness check script | platform | |
@@ -238,6 +273,7 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 - Fake official Trezor Suite · Suite redistribute  
 - Second soft Android wallet (keep Tip)  
 - MetaMask/Rabby as products we ship  
+- **Rebuild Piteas/9mm/JOLT/Starfire DEX · Phiat/LiquidLoans CDP · OpenPulsechain scanner · PulseBasis**  
 - Seed in SYNC / AI holds keys / AI signs alone  
 - Paid hosted infra as day-one requirement  
 - Replan the whole E2E instead of shipping an H#  
@@ -249,16 +285,16 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 
 If unchecked SPARE &lt; 5 **or** monthly token burn night: append new H#s (next free ≥ H220) from:
 
-1. User pain on Pulse (can’t swap / stake / fiat / pay / bridge)  
-2. Broken or missing infra (RPC, explorer, indexers)  
-3. HEX / PulseX / ProveX gap  
-4. Creator/pay gap  
-5. Security/scam education  
-6. Adopt OSS instead of inventing  
-7. Sibling repo Pulse path (hearts-archive, 681, PulseTEXT, HEX-watch, mhex…)  
-8. Dev onboarding (templates, snippets)  
-9. Status/docs drift  
-10. Custody friction (any wallet — Tip, Desk, or guide for others)
+1. User pain — then ask “does a followed builder already ship this?”  
+2. If yes → guide / deep-link / WC / clear-sign H# (don’t rebuild)  
+3. If no → custody / Tip / Desk / SYNC / ProveX glue / docs  
+4. Broken infra (RPC, explorer) — prefer public API wrap  
+5. HEX / PulseX / ProveX gap that **nobody** owns  
+6. Creator/pay gap  
+7. Security education (point at OpenPulsechain scores)  
+8. Sibling repo Pulse path  
+9. Dev onboarding  
+10. Follow-list / domain hygiene  
 
 Log under **Current hive focus**.
 
@@ -266,6 +302,6 @@ Log under **Current hive focus**.
 
 ## Current hive focus
 
-**Hive = all PulseChain.** Trezor PRIORITY is only the Gate custody lane.  
-Spare tokens → lowest free **H#** or **SPARE H200+**.  
-Say: `Taking HIVE H1 …`
+**Adopt first.** Follow list in §0 · gaps = HWW + Tip + SYNC + ProveX glue + guides to peers.  
+Spare tokens → **H140+** or lowest free H# that isn’t a redo.  
+Say: `Taking HIVE H140 …`
