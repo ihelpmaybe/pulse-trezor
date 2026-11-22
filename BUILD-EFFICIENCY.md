@@ -88,6 +88,24 @@ For humans and AI (@ihelpmaybe, @togosh). **Forward-looking once > re-explaining
 
 ---
 
+## Other wallets — decision (don’t expand scope)
+
+| Wallet / class | Do we add it? | Why |
+|----------------|---------------|-----|
+| **Tip** (ours) | Yes — keep | Soft mobile already |
+| **Desk + Trezor** | Yes — primary | Unique Suite-gap wedge |
+| **WalletConnect → Desk** | Yes — P2 | Lets *dapps* reach us; not “add wallets” |
+| **MetaMask / Rabby** | No product | Competitors / today’s fallback; guides may mention |
+| **Second soft Android wallet** | **No** | Rebuild Tip = token burn |
+| **Ledger** | Research only (P3) | Unknown Pulse path; after Gate 1–2 |
+| **Keystone / Coldcard / etc.** | **No** for now | Dilutes Trezor+Tip story |
+| **Safe {Wallet} multisig** | Later optional | Power users; not Gate 1 |
+| **Account abstraction / smart EOA** | Later optional | Chain/ecosystem dependent |
+| “Support every HWW in Desk” | **No** | One Connect stack first |
+
+**Infra still needed for E2E (already on TODOs — execute, don’t replan):** shared indexer adapter · SYNC packs · Bridge first-run · fees · EIP-712 · WC on Desk · release channels · Gate T.  
+**Not missing as new wallet brands** — missing as **shared plumbing**.
+
 ## Conflict
 
 If a flashy idea fights this file, **this file wins** until owner overrides in chat.
