@@ -9,7 +9,7 @@ For humans and AI (@ihelpmaybe, @togosh). **Forward-looking once > re-explaining
 1. **One source of truth** — shared token/RPC/registry packs live in `pulse-trezor-platform` (SYNC4). Apps **consume**; don’t fork copies per repo.
 2. **Don’t rebuild Tip inside Desk** — Tip = soft mobile; Desk = HWW. Integrate via SYNC.
 3. **Don’t redistribute / re-implement Suite** — Desk is the product; Suite track = gap map + upstream only.
-4. **Reuse before invent** — Connect patterns from pulse-publish / pqq-wallet; rescue contract from vault; EIP-681 from existing repos.
+4. **Reuse before invent** — see [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md). Connect/viem from pulse-publish; Tip not a new app; tokenlists format; Blockscout/scan API; Reown WC; Foundry; trezor-firmware mirror.
 5. **Ship order beats curiosity** — next unchecked item in **this repo’s TODO ship order**. No parallel greenfield.
 6. **Tick the box** — when done, update TODO in the same PR. Unchecked = unfinished; don’t re-discover.
 7. **Gate T evidence once** — write smoke/fuzz/pen so the next agent **runs** them, doesn’t redesign the bar.

@@ -10,6 +10,7 @@ End-to-end **PulseChain ↔ Trezor** program.
 ## Docs
 
 - [PRIORITY.md](./PRIORITY.md) — **global ranked build queue (AIs start here)**
+- [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md) — adopt/wrap OSS vs build new
 - [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
 - [AGENTS.md](./AGENTS.md) — AI/contributor entry → PRIORITY then TODO
 - [CONTRIBUTORS.md](./CONTRIBUTORS.md) — includes @togosh

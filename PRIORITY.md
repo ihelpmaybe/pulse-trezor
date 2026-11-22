@@ -2,7 +2,9 @@
 
 **Single ordered list.** Agents: take the **first unchecked** row you can own → open that **repo** → do that **TODO id** → tick both here and the repo TODO → stop.
 
-Rules: [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) · Tests: [TESTING.md](./TESTING.md) · Gates: [ACCEPTANCE.md](./ACCEPTANCE.md)
+Rules: [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) · OSS: [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md) · Tests: [TESTING.md](./TESTING.md) · Gates: [ACCEPTANCE.md](./ACCEPTANCE.md)
+
+**Before coding:** check OPEN-SOURCE-INFRA — wrap existing OSS / vault code; don’t greenfield.
 
 Legend: **Solo** = one agent · **Parallel OK** = different rows same band only if no file conflict
 
