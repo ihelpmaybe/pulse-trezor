@@ -161,6 +161,38 @@ Existing product. Do **not** rebuild soft mobile inside Desk.
 
 ---
 
+## GROWTH — adoption (software that pulls people to Pulse)
+
+See [ADOPTION.md](./ADOPTION.md). After Gate 1 smoke — don’t ads-before-product.
+
+### P0
+- [ ] “Trezor on Pulse” landing (Suite gap → Desk)
+- [ ] Bridge → Desk receive 1-click / guided flow
+- [ ] EIP-681 pay links default to Tip (creators/merchants)
+- [ ] Graphene / de-Google Tip story + checksums
+- [ ] Watch-only Desk for Tip users (SYNC)
+- [ ] Bunker narrative (honest quantum-prep)
+- [ ] WalletConnect “Open in Pulse Desk” for dapps
+- [ ] “Works on Pulse” badge / deep-link kit
+
+### P1
+- [ ] Migrate-from-ETH wizard (same-addr risk + checklist)
+- [ ] HEX companion as destination app
+- [ ] Creator tip kit (QR + 681)
+- [ ] Status page: what works today
+- [ ] Locales after English
+- [ ] Obtainium / F-Droid install docs
+
+### P2+
+- [ ] Fiat on-ramp pointers · CEX withdraw guides
+- [ ] iOS · PWA try-Desk · Ledger if verified
+- [ ] AI explain-before-sign as confidence feature
+
+### Avoid
+- Fake “official Suite” · custodial easy mode · points farms before product
+
+---
+
 ## Ship order (full program)
 
 **Wave 1 — leave MetaMask + Tip soft + sync foundation**  

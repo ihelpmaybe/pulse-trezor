@@ -9,6 +9,7 @@ You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/to
 3. [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) — gotchas, licenses, reuse paths
 4. [ACCEPTANCE.md](./ACCEPTANCE.md) — journey gates
 5. [END-TO-END.md](./END-TO-END.md) / [ROADMAP.md](./ROADMAP.md) — only if you need program context
+6. [ADOPTION.md](./ADOPTION.md) — if working growth / funnel / “why Pulse” features
 
 ## How to work
 

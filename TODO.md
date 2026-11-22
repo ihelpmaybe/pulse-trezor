@@ -107,5 +107,12 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Signed/notarized where OS requires (Mac later)
 - [ ] Smoke checklist vs [ACCEPTANCE.md](./ACCEPTANCE.md) Gate 1
 
+## Growth (Desk surfaces) — see [ADOPTION.md](./ADOPTION.md)
+- [ ] First-run: Bridge → receive after Bridge guide
+- [ ] Migrate-from-ETH wizard entry
+- [ ] WC peer name “Pulse Desk” + Pulse chain
+- [ ] Deep link / badge target for “Open in Desk”
+- [ ] Watch-only mode pitched for Tip users (SYNC)
+
 ## Ship order (this repo)
 1. A0 → A1 (Win, Bridge, fees, history) → A2 → SYNC hooks → A3 → Lin/Mac/Web → C → B → WC → AI → E

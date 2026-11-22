@@ -13,6 +13,7 @@ End-to-end **PulseChain ↔ Trezor** program.
 - [AGENTS.md](./AGENTS.md) — AI/contributor entry (read TODO first)
 - [CONTRIBUTORS.md](./CONTRIBUTORS.md) — includes @togosh
 - [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) — operator gotchas / reuse / licenses
+- [ADOPTION.md](./ADOPTION.md) — software levers that pull people onto Pulse
 - [TESTING.md](./TESTING.md) — smoke / fuzz / pen / full bar (program)
 - [ACCEPTANCE.md](./ACCEPTANCE.md) — E2E journey audit + ship gates
 - [ROADMAP.md](./ROADMAP.md) — master program todo
