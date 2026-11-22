@@ -13,8 +13,8 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 - [x] `pulse-trezor` — Desk + master docs
 - [x] `hexican-rescue` — bunker / quantum-prep
 - [x] `pulse-trezor-guides` — normie docs
-- [ ] `pulse-trezor-suite` — Suite reference / upstream (T-RSL, private)
-- [ ] `pulse-trezor-firmware` — firmware fork / tokens / emu (GPL)
+- [x] `pulse-trezor-suite` — Suite reference / upstream (T-RSL, private)
+- [x] `pulse-trezor-firmware` — firmware fork / tokens / emu (GPL)
 
 ---
 
