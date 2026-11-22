@@ -1,0 +1,25 @@
+name: smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      # ignore-scripts: Connect→Stellar postinstall uses `yarn || true` (Windows cmd break);
+      # Linux is fine with scripts, but we keep one path + fetch esbuild binary.
+      - run: npm ci --ignore-scripts
+      - run: node node_modules/esbuild/install.js
+      - run: npm run smoke
+      - name: Note device smoke
+        run: |
+          echo "Device/emu steps stay in tests/smoke/README.md (Bridge required)."

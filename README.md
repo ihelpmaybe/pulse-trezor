@@ -47,4 +47,4 @@ Opens on `http://127.0.0.1:5174`. Needs **Trezor Bridge** (:21325). Address path
 
 ## Status
 
-**A0 done** — Connect warm + Bridge detect + connect/disconnect. Next: PRIORITY #4 smoke CI, then #5 A1 send.
+**A0 + smoke CI scaffold done.** Next: PRIORITY #5 A1 (balance + testnet send). Device rows: `tests/smoke/README.md`.

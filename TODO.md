@@ -9,7 +9,7 @@ Legend: `[ ]` todo · `[x]` done
 Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 
 ### Smoke
-- [ ] CI `smoke`: warm Connect (fake or emu), address derive
+- [x] CI `smoke`: typecheck + build + SYNC0 path / error unit tests (no Bridge in CI)
 - [ ] Manual/emu: address matches device screen
 - [ ] Send PLS dust (testnet) → confirmed
 - [ ] ERC-20 send once

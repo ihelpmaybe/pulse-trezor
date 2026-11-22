@@ -9,7 +9,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "setup": "npm install --ignore-scripts && node node_modules/esbuild/install.js"
+    "setup": "npm install --ignore-scripts && node node_modules/esbuild/install.js",
+    "test": "vitest run",
+    "smoke": "npm run typecheck && npm run build && vitest run"
   },
   "engines": {
     "node": ">=20"
@@ -24,6 +26,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react-swc": "^3.0.0",
     "typescript": "~5.7.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^3.2.7"
   }
 }
