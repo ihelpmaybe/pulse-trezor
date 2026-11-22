@@ -7,7 +7,7 @@ import {
   type Address,
   type Hash,
 } from "viem";
-import rpcPack from "./pack/rpc.json";
+import deeplinks from "./pack/deeplinks.json";
 import {
   explorerAddressUrl,
   explorerTxUrl,
@@ -565,26 +565,43 @@ export function App() {
         </section>
 
         <section className="card links">
-          <h2>Core apps</h2>
-          <ul className="app-grid">
-            <li>
-              <a href={apps.hex} target="_blank" rel="noreferrer">
-                HEX
-              </a>
-            </li>
-            <li>
-              <a href={apps.pulsex} target="_blank" rel="noreferrer">
-                PulseX
-              </a>
-            </li>
-            <li>
-              <a href={apps.provex} target="_blank" rel="noreferrer">
-                ProveX
-              </a>
-            </li>
+          <h2>Open on Pulse</h2>
+          <p className="muted">
+            Adopt builders — we don’t rebuild these. Pack deeplinks v
+            {deeplinks.version}.
+          </p>
+          <ul className="app-grid open-rail">
+            {[...deeplinks.core, ...deeplinks.defi, ...deeplinks.tools]
+              .filter((d) => d.quality === "A" || d.quality === "B")
+              .map((d) => {
+                const href =
+                  ("app" in d && d.app) ||
+                  ("url" in d && d.url) ||
+                  ("github" in d && d.github) ||
+                  "#";
+                return (
+                  <li key={d.id}>
+                    <a href={href} target="_blank" rel="noreferrer">
+                      {d.name}
+                      <span className="muted"> · {d.quality}</span>
+                    </a>
+                  </li>
+                );
+              })}
           </ul>
           <p className="muted">
-            Pack pulse-core v{rpcPack.version} · A2
+            Legacy pack apps:{" "}
+            <a href={apps.hex} target="_blank" rel="noreferrer">
+              HEX
+            </a>{" "}
+            ·{" "}
+            <a href={apps.pulsex} target="_blank" rel="noreferrer">
+              PulseX
+            </a>{" "}
+            ·{" "}
+            <a href={apps.provex} target="_blank" rel="noreferrer">
+              ProveX
+            </a>
           </p>
         </section>
       </div>

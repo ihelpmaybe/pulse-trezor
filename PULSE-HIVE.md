@@ -67,7 +67,7 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H146 | [ ] ProveX + bridged USDC warnings in Tip/Desk face copy | Tip/Desk | gap |
 | H147 | [ ] Follow-list hygiene: quarterly re-verify handles/domains | this file | H200+ |
 | H148 | [x] Seamless kit: one deep-link JSON (HEX/PulseX/ProveX/Phiat/LL/Sino/OPC) | platform | packs/pulse-core/v1/deeplinks.json |
-| H149 | [ ] Desk “Open app” rail from deep-link kit (no iframe rebuild) | Desk | seamless |
+| H149 | [x] Desk “Open app” rail from deep-link kit (no iframe rebuild) | Desk | Open on Pulse grid |
 | H150 | [ ] Tip same kit after source unblocked | Tip | seamless |
 | H151 | [ ] Re-score DefiLlama Pulse top-25 quality quarterly → hive | this file | H200+ |
 | H152 | [ ] Wire OpenPulsechain free MCP + PulseScan history into one agent path | platform | seamless data |
