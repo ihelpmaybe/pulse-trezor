@@ -10,7 +10,8 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ## Repo map
 
-- [x] `pulse-trezor` — Desk + master docs
+- [x] `pulse-trezor` — Desk + master docs (HWW)
+- [x] [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet) — mobile soft Pulse (public; EIP-681 / PulseX)
 - [x] `hexican-rescue` — bunker / quantum-prep
 - [x] `pulse-trezor-guides` — normie docs
 - [x] `pulse-trezor-suite` — Suite reference / upstream (T-RSL, private)
@@ -44,7 +45,19 @@ Constraint: **GPL-3** OK to fork. Pulse network already upstream. Unsigned build
 
 ---
 
-## A — Pulse Trezor Desk (shippable “Suite for Pulse”)
+## TIP — Tip Wallet (mobile soft) → [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet)
+
+Existing product. Do **not** rebuild soft mobile inside Desk.
+
+- [ ] TIP0 Locate full Tip source; decide if GH stays face-only or gets code
+- [ ] TIP1 Align RPC / token list / safety copy with Desk
+- [ ] TIP2 Optional Trezor Connect on Android (after Desk A1)
+- [ ] TIP3 Cross-links: bunker, guides, same receive-address story
+- [ ] TIP4 Distribution (sideload → Play) — separate from HWW
+
+---
+
+## A — Pulse Trezor Desk (shippable “Suite for Pulse” / HWW)
 
 ### A0 — Bootstrap
 - [ ] App shell (Vite + Connect patterns)
@@ -121,21 +134,22 @@ Constraint: **GPL-3** OK to fork. Pulse network already upstream. Unsigned build
 
 ## Ship order (full program)
 
-**Wave 1 — users leave MetaMask**  
+**Wave 1 — users leave MetaMask (HWW) + Tip stays mobile soft**  
 1. Desk A0 + A1  
 2. Desk A2 (HEX/PLSX)  
-3. Guides F (thin)
+3. TIP0–TIP1 (source home + align with Desk)  
+4. Guides F (Tip for phone, Desk for Trezor)
 
 **Wave 2 — own the stack**  
-4. Firmware FW0–FW1 (mirror + audit)  
-5. Suite SU0–SU2 (map + backend notes)  
-6. Desk A3 + C thin
+5. Firmware FW0–FW1 (mirror + audit)  
+6. Suite SU0–SU2 (map + backend notes)  
+7. Desk A3 + C thin
 
 **Wave 3 — depth**  
-7. Desk B swap + D rescue deploy  
-8. Firmware FW2–FW3 tokens + emu  
-9. Suite SU3–SU4 spike + upstream  
-10. E power tools · FW5 PQ later
+8. Desk B swap + D rescue deploy  
+9. Firmware FW2–FW3 tokens + emu  
+10. Suite SU3–SU4 spike + upstream  
+11. TIP2 Trezor-on-Tip (optional) · E power tools · FW5 PQ later
 
 ---
 

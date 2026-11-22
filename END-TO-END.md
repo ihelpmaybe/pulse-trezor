@@ -5,24 +5,26 @@ What “everything” means, layer by layer. This is the program map for all pri
 ## Stack (bottom → top)
 
 ```
-Keys / Secure Element
-        ↑
-Firmware (GPL) — ethereum app, networks, tokens, on-device review
-        ↑
-Bridge / WebUSB / Suite-hosted Connect transport
-        ↑
-Connect API  — derive, ethereumSignTransaction, typed data, …
-        ↑
-┌───────────────────┬────────────────────┬─────────────────┐
-│ Official Suite    │ Pulse Desk (ours)  │ MM / Rabby      │
-│ (T-RSL, no Pulse) │ shippable product  │ today’s path    │
-└───────────────────┴────────────────────┴─────────────────┘
+Keys / Secure Element          Soft keys (phone)
+        ↑                              ↑
+Firmware (GPL)                    Tip Wallet (Android)
+        ↑                         EIP-681 · PulseX 0% fee
+Bridge / WebUSB                        │
+        ↑                              │  (HWW not in Tip yet)
+Connect API                            │
+        ↑                              │
+┌──────────────┬──────────────┬────────┴────────┐
+│ Official     │ Pulse Desk   │ Tip (mobile)    │ MM/Rabby
+│ Suite        │ (desktop    │ soft custody    │ today HWW
+│ (no Pulse)   │  HWW UX)    │                 │ path
+└──────────────┴──────────────┴─────────────────┘
         ↑
 PulseChain 369 — RPC, tokens, HEX, DEX, bunker, bridge
 ```
 
-Today: **firmware can sign Pulse**; **Suite does not show Pulse**; users bounce through MetaMask/Rabby.  
-E2E goal: every layer we control is Pulse-aware, and users can live without MetaMask.
+Today: **firmware can sign Pulse**; **Suite does not show Pulse**; HWW users bounce through MetaMask/Rabby.  
+**Tip Wallet** already covers Pulse **phone / soft** custody (EIP-681, send/receive, PulseX).  
+E2E goal: Pulse-aware at every layer we control — Tip (mobile soft) + Desk (desktop HWW) + Suite/FW tracks.
 
 ---
 
@@ -103,9 +105,9 @@ S1/S2 still run so we know exact gaps and can push Trezor.
 
 ---
 
-## Layer 4 — Pulse Desk (`pulse-trezor`) — shippable Suite replacement
+## Layer 4 — Pulse Desk (`pulse-trezor`) — shippable Suite replacement (HWW)
 
-Real Connect + Bridge. This is the product that makes E2E true for users **now**.
+Real Connect + Bridge. Desktop/hardware path that makes HWW E2E true **without MetaMask**.
 
 | Epic | Outcome |
 |------|---------|
@@ -117,6 +119,33 @@ Real Connect + Bridge. This is the product that makes E2E true for users **now**
 | E | Migrate / power tools |
 
 **E2E Desk done:** no MetaMask needed for custody + one DeFi action + HEX view.
+
+---
+
+## Layer 4b — Tip Wallet ([Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet)) — mobile soft
+
+**Already exists** (public stub repo + sideload Android product). PulseChain-first, Rabby Mobile lineage.
+
+| Has today | Explicitly not (yet) |
+|-----------|----------------------|
+| EIP-681 scan/pay QRs | Hardware wallets |
+| Send / receive on 369 | WalletConnect / website connect |
+| PulseX swap (0% Tip fee) | Multi-chain portfolio clouds |
+| Seed / key backup on phone | |
+
+### How Tip fits the program
+- **Soft mobile** lane = Tip (don’t rebuild a second phone soft wallet in Desk).
+- **Hardware** lane = Desk (and later optional Tip←Trezor Connect on Android).
+- Guides funnel: phone → Tip; Trezor on PC → Desk.
+- Shared: Pulse RPC, token lists, EIP-681, bunker register, brand/safety copy.
+- Related EIP-681 work also lives in `Internetmoney681-Android` / `Internetmoney681-Chrome` — reuse patterns, don’t fork thrice.
+
+### Tip work packages (link from this program)
+- TIP0 Confirm where full Tip source lives; keep `Tip-wallet` as public face or monorepo home
+- TIP1 Align token list / RPC with Desk
+- TIP2 Optional: Trezor Connect on Android (Safe 7 / Suite mobile flow) — after Desk A1 solid
+- TIP3 Deep link Desk↔Tip (same receive address story, bunker, guides)
+- TIP4 Play listing / distribution (separate from HWW)
 
 ---
 
@@ -134,37 +163,42 @@ Also document “Suite doesn’t support Pulse yet; use Desk / upstream status.�
 
 ---
 
-## Repo map (private)
+## Repo map
 
-| Repo | Layer | Role |
-|------|-------|------|
-| `pulse-trezor-firmware` | 1 | GPL fork / tokens / emu / PQ research |
-| `pulse-trezor-suite` | 3 | T-RSL reference; mapping; upstream pack; **no public redistribute** |
-| `pulse-trezor` | 4 | Ship Desk + master ROADMAP |
-| `hexican-rescue` | 5 | Bunker registry |
-| `pulse-trezor-guides` | 6 | Docs / funnel |
+| Repo | Layer | Role | Visibility |
+|------|-------|------|------------|
+| `pulse-trezor-firmware` | 1 | GPL fork / tokens / emu / PQ research | private |
+| `pulse-trezor-suite` | 3 | T-RSL reference; mapping; upstream; **no redistribute** | private |
+| `pulse-trezor` | 4 | Ship Desk (HWW) + master ROADMAP | private |
+| [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet) | 4b | Mobile soft Pulse wallet (EIP-681, PulseX) | **public** |
+| `hexican-rescue` | 5 | Bunker registry | private |
+| `pulse-trezor-guides` | 6 | Docs / funnel (Tip + Desk) | private |
 
 ---
 
 ## Dependency order (honest E2E)
 
 ```
+Tip (mobile soft) ── already ships Pulse phone UX ── TIP1 align
+                         │
 FW already signs Pulse ──┐
-                         ├──► Desk A0–A2 ──► users leave MetaMask
+                         ├──► Desk A0–A2 ──► HWW users leave MetaMask
 Suite S1 map (parallel) ─┘         │
                                    ▼
                          Desk B + C + Rescue
                                    │
                     Suite S2 upstream (slow win)
                                    │
-                         FW2 tokens / FW3 emu harden
+                         FW2 tokens / FW3 emu · TIP2 Trezor-on-Tip
                                    │
                               FW5 PQ (later)
 ```
 
-**Critical path for “feels like Suite for Pulse”:** Desk A → B → C.  
-**Critical path for “we own the full stack”:** Firmware repo + Suite study + Desk, in parallel.  
-**Critical path for “official Suite has Pulse”:** S2 only (out of our hands).
+**Critical path for “feels like Suite for Pulse” (HWW):** Desk A → B → C.  
+**Critical path for mobile soft (already):** Tip — maintain/align, don’t rebuild.  
+**Critical path for “we own the full stack”:** Firmware + Suite study + Desk + Tip, in parallel.  
+**Critical path for “official Suite has Pulse”:** S2 only (out of our hands).  
+**Later: Tip + Trezor on phone** = TIP2 after Desk proves Connect UX.
 
 ---
 
