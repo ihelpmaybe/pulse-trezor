@@ -71,6 +71,9 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H150 | [ ] Tip same kit after source unblocked | Tip | seamless |
 | H151 | [ ] Re-score DefiLlama Pulse top-25 quality quarterly → hive | this file | H200+ |
 | H152 | [ ] Wire OpenPulsechain free MCP + PulseScan history into one agent path | platform | seamless data |
+| H153 | [ ] Parse hexikani/pulsechain-projects → expand GH/GL builder map | vault / hive | catalog |
+| H154 | [ ] Compare DavidFeder MCP vs OpenPulsechain MCP vs ours → wrap order | platform | no seed |
+| H155 | [ ] Guides: link GitLab self-host mirrors (hex-server, pulsex-server, bridge) | guides | official |
 
 ---
 
