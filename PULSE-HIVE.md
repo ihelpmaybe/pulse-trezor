@@ -66,13 +66,13 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H145 | [ ] Piteas/9mm embed or deep-link notes — after PulseX Desk B | Desk BONUS | wrap |
 | H146 | [ ] ProveX + bridged USDC warnings in Tip/Desk face copy | Tip/Desk | gap |
 | H147 | [ ] Follow-list hygiene: quarterly re-verify handles/domains | this file | H200+ |
-| H148 | [ ] Seamless kit: one deep-link JSON (HEX/PulseX/ProveX/Phiat/LL/Sino/OPC) | platform | map canvas |
+| H148 | [x] Seamless kit: one deep-link JSON (HEX/PulseX/ProveX/Phiat/LL/Sino/OPC) | platform | packs/pulse-core/v1/deeplinks.json |
 | H149 | [ ] Desk “Open app” rail from deep-link kit (no iframe rebuild) | Desk | seamless |
 | H150 | [ ] Tip same kit after source unblocked | Tip | seamless |
 | H151 | [ ] Re-score DefiLlama Pulse top-25 quality quarterly → hive | this file | H200+ |
 | H152 | [ ] Wire OpenPulsechain free MCP + PulseScan history into one agent path | platform | seamless data |
-| H153 | [ ] Parse hexikani/pulsechain-projects → expand GH/GL builder map | vault / hive | catalog |
-| H154 | [ ] Compare DavidFeder MCP vs OpenPulsechain MCP vs ours → wrap order | platform | no seed |
+| H153 | [x] Parse hexikani/pulsechain-projects → expand GH/GL builder map | vault | 199 YAML · 15 GH |
+| H154 | [x] Compare DavidFeder MCP vs OpenPulsechain MCP vs ours → wrap order | vault | ours→OPC safety; no Feder wallets |
 | H155 | [ ] Guides: link GitLab self-host mirrors (hex-server, pulsex-server, bridge) | guides | official |
 
 ---

@@ -1,0 +1,210 @@
+{
+  "packId": "pulse-core",
+  "kind": "deeplinks",
+  "version": "1.0.0",
+  "doc": "Seamless kit — link to builders; do not rebuild. Sources: official sites + hexikani usable + DefiLlama 2026-11.",
+  "updated": "2026-11-21",
+  "core": [
+    {
+      "id": "pulsechain",
+      "name": "PulseChain",
+      "url": "https://pulsechain.com",
+      "quality": "A",
+      "github": null,
+      "gitlab": "https://gitlab.com/pulsechaincom",
+      "twitter": "PulsechainCom"
+    },
+    {
+      "id": "hex",
+      "name": "HEX",
+      "url": "https://hex.com",
+      "app": "https://go.hex.com",
+      "selfHost": "https://gitlab.com/pulsechaincom/hex-server",
+      "quality": "A",
+      "twitter": "HEXcrypto"
+    },
+    {
+      "id": "pulsex",
+      "name": "PulseX",
+      "url": "https://pulsex.com",
+      "app": "https://app.pulsex.com",
+      "selfHost": "https://gitlab.com/pulsechaincom/pulsex-server",
+      "quality": "A",
+      "twitter": "PulseXcom"
+    },
+    {
+      "id": "provex",
+      "name": "ProveX",
+      "url": "https://provex.com",
+      "app": "https://app.provex.com",
+      "quality": "A",
+      "twitter": "ProveXCom",
+      "notes": "Bridged USDC only for dollar-linked flows"
+    },
+    {
+      "id": "bridge",
+      "name": "Pulse Bridge",
+      "app": "https://bridge.pulsechain.com",
+      "selfHost": "https://gitlab.com/pulsechaincom/pulsechain-bridge-server",
+      "quality": "A"
+    },
+    {
+      "id": "scan",
+      "name": "PulseScan",
+      "app": "https://scan.pulsechain.com",
+      "api": "https://api.scan.pulsechain.com",
+      "quality": "A"
+    }
+  ],
+  "defi": [
+    {
+      "id": "piteas",
+      "name": "Piteas",
+      "app": "https://piteas.io",
+      "github": "https://github.com/piteasio",
+      "quality": "B",
+      "twitter": "piteasio",
+      "role": "aggregator"
+    },
+    {
+      "id": "liquid-loans",
+      "name": "Liquid Loans",
+      "app": "https://liquidloans.io",
+      "quality": "B",
+      "twitter": "liquidloansio",
+      "role": "cdp"
+    },
+    {
+      "id": "phiat",
+      "name": "Phiat",
+      "app": "https://dapp.phiat.io",
+      "quality": "B",
+      "twitter": "phiatcrypto",
+      "role": "lending"
+    },
+    {
+      "id": "powercity",
+      "name": "POWERCITY",
+      "app": "https://www.powercity.io",
+      "quality": "B",
+      "twitter": "POWERCITYio",
+      "role": "suite"
+    },
+    {
+      "id": "powercity-portalx",
+      "name": "PortalX",
+      "app": "https://portalxswap.io",
+      "quality": "B",
+      "twitter": "POWERCITYio",
+      "role": "cross-swap"
+    },
+    {
+      "id": "phux",
+      "name": "PHUX",
+      "app": "https://phux.io",
+      "quality": "B",
+      "twitter": "PHUXGiven",
+      "role": "dex"
+    },
+    {
+      "id": "9mm",
+      "name": "9mm",
+      "app": "https://dex.9mm.pro",
+      "quality": "B",
+      "twitter": "9mm_pro",
+      "role": "dex",
+      "notes": "Not in hexikani catalog; DefiLlama listed"
+    },
+    {
+      "id": "9inch",
+      "name": "9inch",
+      "app": "https://www.9inch.io",
+      "quality": "B",
+      "twitter": "9inch_io",
+      "role": "dex",
+      "notes": "Distinct from 9mm"
+    },
+    {
+      "id": "impls",
+      "name": "IMPLS",
+      "app": "https://impls.finance",
+      "quality": "C",
+      "twitter": "IMPLSfinance",
+      "role": "yield",
+      "notes": "Thin TVL — careful"
+    },
+    {
+      "id": "daytona",
+      "name": "Daytona Finance",
+      "app": "https://www.daytona.finance",
+      "github": "https://github.com/Daytona-Finance/Contracts",
+      "quality": "B",
+      "twitter": "DaytonaFinance",
+      "role": "dex"
+    }
+  ],
+  "tools": [
+    {
+      "id": "openpulsechain",
+      "name": "OpenPulsechain",
+      "app": "https://openpulsechain.com",
+      "github": "https://github.com/openpulsechain/public",
+      "mcp": "npx @openpulsechain/mcp-server",
+      "quality": "B",
+      "role": "safety-analytics"
+    },
+    {
+      "id": "pulsebasis",
+      "name": "PulseBasis",
+      "app": "https://pulsebasis.netlify.app",
+      "github": "https://github.com/SinofRebellion/pulsebasis",
+      "quality": "B",
+      "twitter": "sinofrebellion",
+      "role": "cost-basis"
+    },
+    {
+      "id": "gopulse",
+      "name": "GoPulse",
+      "app": "https://gopulse.com",
+      "quality": "B",
+      "twitter": "GoPulsecom",
+      "role": "portfolio"
+    },
+    {
+      "id": "howtopulse",
+      "name": "HowToPulse",
+      "app": "https://www.howtopulse.com",
+      "quality": "B",
+      "twitter": "HowtoPulse",
+      "role": "education"
+    },
+    {
+      "id": "hexikani-catalog",
+      "name": "PulseChain projects YAML",
+      "github": "https://github.com/hexikani/pulsechain-projects",
+      "quality": "B",
+      "role": "catalog",
+      "notes": "199 projects; many closed-source; last push ~2025-06"
+    }
+  ],
+  "custodyOurs": [
+    {
+      "id": "desk",
+      "name": "Pulse Desk",
+      "github": "https://github.com/ihelpmaybe/pulse-trezor",
+      "role": "hww"
+    },
+    {
+      "id": "tip",
+      "name": "Tip wallet",
+      "github": "https://github.com/ihelpmaybe/Tip-wallet",
+      "role": "soft-mobile"
+    }
+  ],
+  "mcpOrder": [
+    "user-pulsechain-mcp (RO default)",
+    "openpulsechain free safety",
+    "openpulsechain Pro optional",
+    "never DavidFeder wallets-on for hive agents"
+  ]
+}
