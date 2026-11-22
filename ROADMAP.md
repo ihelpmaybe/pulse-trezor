@@ -16,6 +16,18 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 - [x] `pulse-trezor-guides` — normie docs
 - [x] `pulse-trezor-suite` — Suite reference / upstream (T-RSL, private)
 - [x] `pulse-trezor-firmware` — firmware fork / tokens / emu (GPL)
+- [ ] `pulse-trezor-platform` — sync · multi-OS · MPC · AI
+
+---
+
+## PLATFORM — sync / OS / MPC / AI → `pulse-trezor-platform`
+
+Full checklist lives in that repo’s [TODO.md](https://github.com/ihelpmaybe/pulse-trezor-platform/blob/main/TODO.md). Summary:
+
+- [ ] **SYNC** Tip↔Desk watch-only + QR pair + shared tokens/RPC/bunker
+- [ ] **PLAT** Win · Android · Graphene · Linux · macOS · Web/PWA → then Ext/WC → iOS
+- [ ] **MPC** Survey + 2-of-2 Tip recovery spike (not Trezor keys)
+- [ ] **AI** Explain/prepare txs + MCP reads (never custody)
 
 ---
 
@@ -134,22 +146,21 @@ Existing product. Do **not** rebuild soft mobile inside Desk.
 
 ## Ship order (full program)
 
-**Wave 1 — users leave MetaMask (HWW) + Tip stays mobile soft**  
-1. Desk A0 + A1  
-2. Desk A2 (HEX/PLSX)  
-3. TIP0–TIP1 (source home + align with Desk)  
-4. Guides F (Tip for phone, Desk for Trezor)
+**Wave 1 — leave MetaMask + Tip soft + sync foundation**  
+1. Desk A0 + A1 (Windows first)  
+2. Desk A2 + TIP0–TIP1  
+3. SYNC0–SYNC4 (shared registry/tokens/bunker)  
+4. Guides: Tip · Desk · Graphene sideload  
 
-**Wave 2 — own the stack**  
-5. Firmware FW0–FW1 (mirror + audit)  
-6. Suite SU0–SU2 (map + backend notes)  
-7. Desk A3 + C thin
+**Wave 2 — multi-OS + stack ownership**  
+5. Desk Linux + macOS + Web/PWA  
+6. Firmware FW0–FW1 · Suite SU0–SU2  
+7. Desk A3 + C thin · PLAT-Ext/WC  
 
 **Wave 3 — depth**  
-8. Desk B swap + D rescue deploy  
-9. Firmware FW2–FW3 tokens + emu  
-10. Suite SU3–SU4 spike + upstream  
-11. TIP2 Trezor-on-Tip (optional) · E power tools · FW5 PQ later
+8. Desk B + Rescue D · AI0–AI2  
+9. FW2–FW3 · Suite SU3–SU4 · MPC0–MPC2 spike  
+10. TIP2 Trezor-on-Tip · iOS · deeper MPC/AI · FW5 PQ  
 
 ---
 
@@ -157,7 +168,11 @@ Existing product. Do **not** rebuild soft mobile inside Desk.
 
 | Bar | Meaning |
 |-----|---------|
-| **User E2E** | Desk: receive/send/tokens/swap/HEX/bunker — no MetaMask |
-| **Stack E2E** | User E2E + FW repo building + Suite gap mapped + upstream filed |
-| **Official Suite E2E** | Trezor ships Pulse in Suite (out of our control; SU4) |
-| **Quantum E2E** | Stretch: chain + device PQ — not required for User/Stack E2E |
+| **User E2E** | Desk HWW custody without MetaMask |
+| **Mobile↔Desktop E2E** | Tip + Desk share watch-only portfolio + bunker (SYNC) |
+| **Platform E2E** | Win + Android/Graphene + Lin + Mac (+ Web) |
+| **Stack E2E** | + FW building + Suite gap mapped + upstream filed |
+| **AI E2E** | Agent explains/prepares; device or human signs |
+| **MPC E2E** | Optional Tip recovery path live (stretch) |
+| **Official Suite E2E** | Trezor ships Pulse (out of our control) |
+| **Quantum E2E** | Stretch PQ — not required above |

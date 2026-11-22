@@ -5,26 +5,24 @@ What “everything” means, layer by layer. This is the program map for all pri
 ## Stack (bottom → top)
 
 ```
-Keys / Secure Element          Soft keys (phone)
-        ↑                              ↑
-Firmware (GPL)                    Tip Wallet (Android)
-        ↑                         EIP-681 · PulseX 0% fee
-Bridge / WebUSB                        │
-        ↑                              │  (HWW not in Tip yet)
-Connect API                            │
-        ↑                              │
-┌──────────────┬──────────────┬────────┴────────┐
-│ Official     │ Pulse Desk   │ Tip (mobile)    │ MM/Rabby
-│ Suite        │ (desktop    │ soft custody    │ today HWW
-│ (no Pulse)   │  HWW UX)    │                 │ path
-└──────────────┴──────────────┴─────────────────┘
-        ↑
-PulseChain 369 — RPC, tokens, HEX, DEX, bunker, bridge
+                    ┌── AI / agents (explain · prepare · MCP reads — never keys)
+                    │
+Keys / SE ──────────┼──────── Soft keys (Tip) ──── optional MPC recovery
+   ↑                │              ↑
+Firmware            │         Android · Graphene · (iOS later)
+   ↑                │              │
+Bridge/Connect ─────┤         EIP-681 · PulseX
+   ↑                │              │
+┌───┴────┬──────────┴───┬──────────┴────┬────────────┐
+│ Suite  │ Pulse Desk   │ Tip mobile    │ Ext/WC/PWA │
+│ (gap)  │ Win·Lin·Mac  │ soft + sync   │ EIP-681    │
+└────────┴──────┬───────┴───────┬───────┴────────────┘
+                └──── SYNC ─────┘  watch-only · bunker · tokens
+                        ↓
+              PulseChain 369
 ```
 
-Today: **firmware can sign Pulse**; **Suite does not show Pulse**; HWW users bounce through MetaMask/Rabby.  
-**Tip Wallet** already covers Pulse **phone / soft** custody (EIP-681, send/receive, PulseX).  
-E2E goal: Pulse-aware at every layer we control — Tip (mobile soft) + Desk (desktop HWW) + Suite/FW tracks.
+**E2E** = every client we ship can share portfolio/bunker story; HWW signs on Trezor; Tip covers phone; AI assists; MPC optional for soft recovery — not a second Suite.
 
 ---
 
@@ -163,6 +161,31 @@ Also document “Suite doesn’t support Pulse yet; use Desk / upstream status.�
 
 ---
 
+## Platforms (ROI)
+
+| Platform | Vehicle | Priority |
+|----------|---------|----------|
+| Windows | Desk | P1 |
+| Android | Tip | P1 (exists) |
+| GrapheneOS | Tip sideload | P1 (privacy ROI) |
+| Linux | Desk | P1 |
+| macOS (Apple) | Desk | P1 |
+| Web / PWA | Desk Connect-web | P1 |
+| Chrome EIP-681 | Internetmoney681-Chrome | P2 |
+| WalletConnect | Desk → dapps | P2 |
+| iOS (Apple) | Tip/Desk companion | P3 |
+| ChromeOS | Desk web | P3 |
+| Ledger | research only | P3 |
+| F-Droid / de-Googled APK | Tip channel | P2 |
+
+## Layer 7 — Sync / MPC / AI → `pulse-trezor-platform`
+
+| Track | Intent |
+|-------|--------|
+| **SYNC** | Tip↔Desk watch-only registry, QR pair, shared tokens/RPC/bunker — **no seed bridge** |
+| **MPC** | Optional Tip soft recovery (2-of-2); never wraps Trezor SE keys |
+| **AI** | Explain / prepare / MCP reads; human or device signs |
+
 ## Repo map
 
 | Repo | Layer | Role | Visibility |
@@ -172,7 +195,8 @@ Also document “Suite doesn’t support Pulse yet; use Desk / upstream status.�
 | `pulse-trezor` | 4 | Ship Desk (HWW) + master ROADMAP | private |
 | [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet) | 4b | Mobile soft Pulse wallet (EIP-681, PulseX) | **public** |
 | `hexican-rescue` | 5 | Bunker registry | private |
-| `pulse-trezor-guides` | 6 | Docs / funnel (Tip + Desk) | private |
+| `pulse-trezor-guides` | 6 | Docs / funnel (Tip + Desk + Graphene) | private |
+| `pulse-trezor-platform` | 7 | Sync · OS matrix · MPC · AI | private |
 
 ---
 

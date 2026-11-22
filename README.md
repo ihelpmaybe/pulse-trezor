@@ -23,6 +23,7 @@ End-to-end **PulseChain ↔ Trezor** program.
 | [pulse-trezor-firmware](https://github.com/ihelpmaybe/pulse-trezor-firmware) | Firmware fork / lab |
 | [hexican-rescue](https://github.com/ihelpmaybe/hexican-rescue) | Never-sign bunker |
 | [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides |
+| [pulse-trezor-platform](https://github.com/ihelpmaybe/pulse-trezor-platform) | Sync · multi-OS · MPC · AI |
 
 ## Status
 

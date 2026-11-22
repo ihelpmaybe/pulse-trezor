@@ -47,6 +47,17 @@ Legend: `[ ]` todo · `[x]` done
 ## G — Ecosystem (desk-owned bits)
 - [ ] Link Suite gap / upstream status from Desk UI or about page
 - [ ] Cross-link Tip (mobile soft) + guides + rescue
+- [ ] Consume SYNC registry / token pack from `pulse-trezor-platform`
+
+## PLAT — Desk targets (this app)
+- [ ] Windows (primary)
+- [ ] Linux
+- [ ] macOS (Apple)
+- [ ] Web / PWA (Connect-web)
+- [ ] WalletConnect host (dapps → Trezor) — see platform TODO
+
+## AI — desk surface
+- [ ] Explain / simulate pane (AI0–AI1) — agent never signs
 
 ## Ship order (this repo)
-1. A0 → A1 → A2 → A3 → C thin → B → E
+1. A0 → A1 (Win) → A2 → SYNC hooks → A3 → Lin/Mac/Web → C → B → WC → AI → E
