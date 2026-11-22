@@ -8,7 +8,8 @@ End-to-end **PulseChain ↔ Trezor** for core apps: **PulseChain · HEX · Pulse
 
 ## Docs
 
-- [PRIORITY.md](./PRIORITY.md) — **global ranked build queue (AIs start here)**
+- [PRIORITY.md](./PRIORITY.md) — **Gate-critical build queue (AIs start here if free)**
+- [PULSE-HIVE.md](./PULSE-HIVE.md) — **always-on PulseChain hive backlog (spare / end-of-month tokens)**
 - [CORE-APPS.md](./CORE-APPS.md) — PulseChain · HEX · PulseX · ProveX only
 - [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md) — adopt/wrap OSS vs build new
 - [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
