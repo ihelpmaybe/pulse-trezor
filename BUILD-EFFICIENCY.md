@@ -82,7 +82,8 @@ For humans and AI (@ihelpmaybe, @togosh). **Forward-looking once > re-explaining
 - **Windows Desk A0–A1** first (proves Connect+Pulse)  
 - **SYNC schema** early (even stub) so Tip/Desk don’t diverge  
 - **Testnet 943** for smoke (cheap, repeatable)  
-- **One swap venue**  
+- **PulseX** as the swap (ProveX for fiat); not a DEX buffet  
+
 - **Docs as you ship** (one guide per Gate), not a docs rewrite  
 - **togosh / AI:** same TODO, same rules — parallelize *different* TODO rows, not the same feature twice  
 

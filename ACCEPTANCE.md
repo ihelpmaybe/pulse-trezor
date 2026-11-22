@@ -16,7 +16,8 @@ Legend: **OK** = covered in some TODO · **GAP** = missing/weak · **OUT** = exp
 | See PLS + token balances | OK | Desk A1–A2 · Tip exists |
 | Send PLS / ERC-20 | OK | Desk A1–A2 · Tip |
 | Approve / revoke spender | OK | Desk A2 |
-| Swap once on Pulse | OK | Desk B · Tip PulseX |
+| Swap once on **PulseX** | OK | Desk B · Tip |
+| Fiat via **ProveX** (USDC) | GAP→now core | Desk/Tip deep link · guides |
 | HEX stake portfolio + end stake | OK | Desk C |
 | Use a Pulse dapp with Trezor | OK | Platform PLAT-WC |
 | Phone soft wallet day-to-day | OK | Tip |

@@ -32,8 +32,9 @@ Bridge/Connect ─────┤         EIP-681 · PulseX
 |------|--------|
 | RPC + explorer | `rpc.pulsechain.com`, scan.pulsechain.com |
 | Native PLS + ERC-20 | HEX, PLSX, INC, custom |
-| DeFi | PulseX / Piteas / Switch |
-| HEX stakes | Protocol + our companion UX |
+| DeFi | **PulseX** (core) |
+| Fiat | **ProveX** USDC P2P ramp (core) |
+| HEX stakes | Protocol + our companion UX (core) |
 | Bridge in/out | Guide + receive on Trezor address |
 | Quantum-prep | Never-sign bunker (registry) until PQ exists on-chain |
 

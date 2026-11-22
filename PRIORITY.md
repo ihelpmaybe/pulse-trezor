@@ -2,9 +2,9 @@
 
 **Single ordered list.** Agents: take the **first unchecked** row you can own → open that **repo** → do that **TODO id** → tick both here and the repo TODO → stop.
 
-Rules: [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) · OSS: [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md) · Tests: [TESTING.md](./TESTING.md) · Gates: [ACCEPTANCE.md](./ACCEPTANCE.md)
+Rules: [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) · [CORE-APPS.md](./CORE-APPS.md) (PulseChain·HEX·PulseX·ProveX) · OSS: [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md) · Tests: [TESTING.md](./TESTING.md)
 
-**Before coding:** check OPEN-SOURCE-INFRA — wrap existing OSS / vault code; don’t greenfield.
+**Before coding:** wrap OSS (OPEN-SOURCE-INFRA); feature must serve a **core app**.
 
 Legend: **Solo** = one agent · **Parallel OK** = different rows same band only if no file conflict
 
@@ -15,7 +15,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | # | Task | Repo | TODO id | Parallel |
 |---|------|------|---------|----------|
 | 1 | SYNC0 address/BIP44 story spec (1 page) | `pulse-trezor-platform` | SYNC0 | Solo |
-| 2 | SYNC4 stub token+RPC JSON pack (369 + HEX/PLSX/INC) | `pulse-trezor-platform` | SYNC4 | After #1 |
+| 2 | SYNC4 stub token+RPC pack (369 + **HEX/PLSX/INC/USDC** for ProveX) | `pulse-trezor-platform` | SYNC4 | After #1 |
 | 3 | Desk A0 shell + Connect warm + Bridge detect | `pulse-trezor` | A0 | After #2 started |
 | 4 | Desk A0 smoke CI scaffold (Gate T start) | `pulse-trezor` | TEST smoke | Parallel w/ #3 |
 | 5 | Desk A1 receive + PLS balance + send (testnet) + fees | `pulse-trezor` | A1 | After #3 |
@@ -54,7 +54,8 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | # | Task | Repo | TODO id | Parallel |
 |---|------|------|---------|----------|
 | 24 | Desk C HEX companion thin | `pulse-trezor` | C | After A2 |
-| 25 | Desk B one swap venue | `pulse-trezor` | B | After A2 |
+| 25 | Desk B **PulseX** swap (quote → Trezor sign) | `pulse-trezor` | B | After A2 |
+| 25b | ProveX deep link / USDC flow (guide + Desk entry) | guides + Desk | G6/ProveX | After A2 |
 | 26 | PLAT-WC WalletConnect → Desk | `pulse-trezor-platform` + Desk | PLAT-WC | After A1 |
 | 27 | Rescue R1 deploy + R2 thin UI | `hexican-rescue` | R1–R2 | After R0 |
 | 28 | SYNC3 bunker deeplink | `pulse-trezor-platform` | SYNC3 | After R1 |

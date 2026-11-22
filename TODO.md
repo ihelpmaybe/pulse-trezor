@@ -71,14 +71,16 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Watch-only after disconnect (persisted registry)
 - [ ] Export / import registry JSON
 
-## B — DeFi
-- [ ] One swap venue (quote → Trezor sign)
+## B — DeFi (core: PulseX · ProveX)
+- [ ] **PulseX** swap (quote → Trezor sign) — first-class, not “any DEX”
 - [ ] Slippage / deadline controls
-- [ ] Second venue later
+- [ ] **ProveX** entry: deep link / open app + USDC balance awareness
+- [ ] Clear-sign ProveX escrow txs when user hits them via WC/Desk
+- [ ] Other DEXes (Piteas/Switch/9mm) — BONUS only
 
-## C — HEX companion
+## C — HEX companion (core app)
 - [ ] Reuse pqq-wallet derivation + Connect adapter
-- [ ] Portfolio view (stakes + liquid HEX)
+- [ ] Portfolio view (stakes + liquid HEX on Pulse)
 - [ ] Stake / end / good-accounting (exact-path sign)
 - [ ] Advanced claim / migrate tools
 

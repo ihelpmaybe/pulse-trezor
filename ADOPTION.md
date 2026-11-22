@@ -53,7 +53,7 @@ Our wedge: **Tip (phone) + Desk (Trezor) + SYNC + honest Suite gap** = Pulse-nat
 | Idea | Why | Notes |
 |------|-----|--------|
 | **iOS Tip** | Normie volume | App Store tax; after Android+SYNC |
-| **Fiat on-ramp deep links** | Money-in (third-party) | Pointers only; no custody |
+| **ProveX deep links** | Fiat↔USDC on Pulse (core app) | Primary money-in; not generic ramp list |
 | **Exchange withdraw guides** → Tip/Desk | CEX → Pulse last mile | Per-exchange snippets |
 | **MPC social recovery marketing** | Soft-wallet fear | Only after MPC2 real |
 | **AI “explain before you sign”** | Normie confidence | Never AI custody |

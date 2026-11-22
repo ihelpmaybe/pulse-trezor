@@ -4,7 +4,7 @@ You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/to
 
 ## Efficiency (read once)
 
-**[PRIORITY.md](./PRIORITY.md)** = build queue · **[OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md)** = what to adopt/wrap · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)**
+**[PRIORITY.md](./PRIORITY.md)** = build queue · **[CORE-APPS.md](./CORE-APPS.md)** = PulseChain·HEX·PulseX·ProveX · **[OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)**
 
 ## Load order (minimum tokens)
 
@@ -19,7 +19,7 @@ Do **not** reread END-TO-END / ROADMAP / ADOPTION unless planning.
 ## How to work
 
 - Announce: `Taking PRIORITY #N …` then implement **only** that id.  
-- Name the **OSS/vault row** you’re wrapping (OPEN-SOURCE-INFRA); don’t invent stacks.  
+- Name the **OSS/vault row** you’re wrapping; feature must serve **PulseChain / HEX / PulseX / ProveX**.  
 - Smallest slice → smoke evidence → tick **repo TODO + PRIORITY row** → stop.  
 - Shared packs → `pulse-trezor-platform`. No fake Trezor HD. No Suite redistribute.  
 - SYNC watch-only; AI never signs/holds keys.  

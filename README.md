@@ -1,15 +1,15 @@
 # Pulse Trezor
 
-End-to-end **PulseChain ↔ Trezor** program.
+End-to-end **PulseChain ↔ Trezor** for core apps: **PulseChain · HEX · PulseX · ProveX**.
 
-- **Desk (this repo):** shippable Pulse wallet via Trezor Connect (Suite replacement for Pulse).
-- **Suite track:** private reference + upstream (T-RSL — no redistribute).
-- **Firmware track:** GPL fork — tokens, emulator, later PQ research.
-- **Rescue / guides:** sibling repos.
+- **Desk (this repo):** Trezor Connect wallet for that loop (Suite replacement for Pulse).
+- **Tip:** soft mobile (PulseX + pay links) — sibling.
+- **Suite / firmware / rescue / guides / platform:** supporting tracks.
 
 ## Docs
 
 - [PRIORITY.md](./PRIORITY.md) — **global ranked build queue (AIs start here)**
+- [CORE-APPS.md](./CORE-APPS.md) — PulseChain · HEX · PulseX · ProveX only
 - [OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md) — adopt/wrap OSS vs build new
 - [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
 - [AGENTS.md](./AGENTS.md) — AI/contributor entry → PRIORITY then TODO

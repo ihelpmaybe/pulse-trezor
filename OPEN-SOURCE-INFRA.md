@@ -68,12 +68,13 @@ For AIs and humans. Pair with [PRIORITY.md](./PRIORITY.md) · [BUILD-EFFICIENCY.
 | Wallet side | **Reown WalletKit** (WalletConnect) | Desk as wallet peer “Pulse Desk” |
 | Dapp side (if any) | Reown AppKit / wagmi WC connector | Guides/badge only |
 
-### Swaps (PRIORITY #25)
+### Swaps + fiat (PRIORITY #25 / #25b) — core apps
 
 | Need | Adopt | Note |
 |------|-------|------|
-| Quotes | **PulseX / Piteas / Switch** existing APIs or router ABIs | Pick **one**; wrap |
-| Avoid | Building an AMM | |
+| DEX | **PulseX** (router/API/ABI) — wrap | First-class; not Piteas/Switch first |
+| Fiat ramp | **ProveX** (app.provex.com + docs.provex.com) | Deep link / WC / clear-sign escrow — don’t rebuild ramp |
+| Avoid | Building an AMM or alternate fiat protocol | |
 
 ### HEX / stakes (PRIORITY #24)
 

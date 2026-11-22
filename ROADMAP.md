@@ -111,11 +111,12 @@ Existing product. Do **not** rebuild soft mobile inside Desk.
 
 ---
 
-## B — DeFi face
+## B — DeFi face (PulseX + ProveX)
 
-- [ ] One swap venue (quote → Trezor sign)
+- [ ] **PulseX** swap (quote → Trezor sign)
 - [ ] Slippage / deadline
-- [ ] Second venue later
+- [ ] **ProveX** fiat↔USDC deep links + clear-sign
+- [ ] Other DEXes — BONUS only
 
 ---
 
@@ -184,7 +185,7 @@ See [ADOPTION.md](./ADOPTION.md). After Gate 1 smoke — don’t ads-before-prod
 - [ ] Obtainium / F-Droid install docs
 
 ### P2+ / BONUS (filed on owning repos — after Gate 1–2)
-- [ ] Fiat pointers · CEX guides → **guides BONUS**
+- [ ] ProveX guides + CEX snippets → **guides** (ProveX = core, not bonus)
 - [ ] iOS · PWA · locales → **Tip / Desk BONUS**
 - [ ] Ledger / Safe / AA research → **platform BONUS** (go/no-go)
 - [ ] 681 Chrome/Android funnel → **platform BONUS**

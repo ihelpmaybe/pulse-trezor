@@ -69,13 +69,18 @@ Desk is the **shippable** “Suite for Pulse.” Suite repo = study + upstream o
 
 ---
 
+## Core apps (don’t dilute)
+
+**PulseChain · HEX · PulseX · ProveX** — see [CORE-APPS.md](./CORE-APPS.md).
+
 ## Tokens / DeFi (starter)
 
-Confirm contract addresses on Pulse scan before hardcoding (ETH-mainnet HEX address is often the same hex on Pulse for the fork copy — **verify**):
+Confirm addresses on Pulse scan before hardcoding:
 
-- Prefer a **shared token JSON** from `pulse-trezor-platform` (SYNC4) over copy-paste per app.
-- Swap venues: PulseX / Piteas / Switch — pick **one** for Desk B first.
-- Approvals: always show spender + amount; offer revoke; inventory = pen bar.
+- SYNC4 pack: PLS, **HEX**, **PLSX**, INC, **USDC** (ProveX).
+- Swap: **PulseX** first-class on Desk/Tip.
+- Fiat: **ProveX** deep links — not a generic on-ramp shopping list.
+- Approvals: spender + amount clear; revoke inventory = pen bar.
 
 ---
 
