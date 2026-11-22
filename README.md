@@ -9,8 +9,9 @@ End-to-end **PulseChain ↔ Trezor** program.
 
 ## Docs
 
+- [PRIORITY.md](./PRIORITY.md) — **global ranked build queue (AIs start here)**
 - [TODO.md](./TODO.md) — **this repo’s checklist** (Desk)
-- [AGENTS.md](./AGENTS.md) — AI/contributor entry (read TODO first)
+- [AGENTS.md](./AGENTS.md) — AI/contributor entry → PRIORITY then TODO
 - [CONTRIBUTORS.md](./CONTRIBUTORS.md) — includes @togosh
 - [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) — operator gotchas / reuse / licenses
 - [ADOPTION.md](./ADOPTION.md) — software levers that pull people onto Pulse

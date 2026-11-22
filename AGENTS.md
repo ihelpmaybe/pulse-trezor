@@ -4,26 +4,25 @@ You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/to
 
 ## Efficiency (read once)
 
-**[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)** — no redo, shared packs first, context diet, ship-order only.
+**[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)** · **[PRIORITY.md](./PRIORITY.md)** = global build queue.
 
 ## Load order (minimum tokens)
 
-1. [TODO.md](./TODO.md) — **this repo only**; first unchecked ship-order item  
-2. Repo `NOTES.md` **if blocked**  
-3. [TESTING.md](./TESTING.md) **only when adding tests / claiming done**  
-4. [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) **section search**, not full reread  
-5. END-TO-END / ROADMAP / ACCEPTANCE / ADOPTION — **planning tasks only**, not every feature PR  
+1. **[PRIORITY.md](./PRIORITY.md)** — take lowest unchecked **#** (or skip if another agent owns it)  
+2. Open the **repo named in that row** → that repo’s `TODO.md` for the TODO id  
+3. Repo `NOTES.md` **if blocked**  
+4. [TESTING.md](./TESTING.md) when testing / claiming done  
+5. HELPFUL-NOTES section search only if needed  
+
+Do **not** reread END-TO-END / ROADMAP / ADOPTION unless planning.
 
 ## How to work
 
-- One TODO row → smallest slice → smoke evidence → **tick the box** → stop.  
-- Shared stuff → `pulse-trezor-platform` (don’t copy token lists / registry formats).  
-- Connect → Bridge → device/emu only — **no fake “Trezor” HD**.  
-- Suite = study/upstream; **no redistribute**. Tip ≠ Desk; SYNC = watch-only.  
-- AI never holds keys / auto-signs.  
-- Do **not** replan E2E, re-explain T-RSL, or expand GROWTH/BONUS before Gate 1 smoke.  
-- **BONUS** sections = after Gate 1–2 only (Ledger/Safe/AA/iOS/locales/etc.).  
-- Parallel agents (@togosh): **different TODO rows**, never the same feature twice.
+- Announce: `Taking PRIORITY #N …` then implement **only** that id.  
+- Smallest slice → smoke evidence → tick **repo TODO + PRIORITY row** → stop.  
+- Shared packs → `pulse-trezor-platform`. No fake Trezor HD. No Suite redistribute.  
+- SYNC watch-only; AI never signs/holds keys.  
+- BONUS / P4 only after Gate 1–2. Parallel agents = **different PRIORITY #s**.
 
 ## Sibling repos
 

@@ -2,7 +2,7 @@
 
 Goal: **end-to-end PulseChain ↔ Trezor** — Desk users ship now; Suite + firmware tracks owned in parallel.
 
-See [END-TO-END.md](./END-TO-END.md) · [ACCEPTANCE.md](./ACCEPTANCE.md) · **[TESTING.md](./TESTING.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)** (no redo / shared-first / token diet).
+See **[PRIORITY.md](./PRIORITY.md)** (ranked build queue) · [END-TO-END.md](./END-TO-END.md) · [ACCEPTANCE.md](./ACCEPTANCE.md) · [TESTING.md](./TESTING.md) · [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md).
 
 ---
 

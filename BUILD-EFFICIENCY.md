@@ -14,7 +14,7 @@ For humans and AI (@ihelpmaybe, @togosh). **Forward-looking once > re-explaining
 6. **Tick the box** — when done, update TODO in the same PR. Unchecked = unfinished; don’t re-discover.
 7. **Gate T evidence once** — write smoke/fuzz/pen so the next agent **runs** them, doesn’t redesign the bar.
 8. **Thin vertical slice** — A0→A1 happy path before fee UI polish, WC, MPC, iOS, PQ.
-9. **Context diet for AI** — load only: `AGENTS.md` → `TODO.md` → `NOTES.md` (repo) → maybe HELPFUL-NOTES *section*. Do **not** reload END-TO-END + ROADMAP + ADOPTION + ACCEPTANCE every turn unless the task is planning.
+9. **Context diet for AI** — load: `AGENTS.md` → **[PRIORITY.md](./PRIORITY.md)** → owning repo `TODO.md` → `NOTES.md` if blocked. Do **not** reload END-TO-END + ROADMAP + ADOPTION + ACCEPTANCE every turn unless planning.
 10. **No re-audit loops** — ACCEPTANCE / ADOPTION / TESTING are settled until a Gate fails; don’t re-litigate “is Suite open source?”
 
 ---
