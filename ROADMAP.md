@@ -2,7 +2,24 @@
 
 Goal: **end-to-end PulseChain ↔ Trezor** — Desk users ship now; Suite + firmware tracks owned in parallel.
 
-See [END-TO-END.md](./END-TO-END.md) for layer map · [ACCEPTANCE.md](./ACCEPTANCE.md) for journey audit / ship gates.
+See [END-TO-END.md](./END-TO-END.md) · [ACCEPTANCE.md](./ACCEPTANCE.md) · **[TESTING.md](./TESTING.md)** (smoke / fuzz / pen / full).
+
+---
+
+## TEST — all repos (Gate T)
+
+Program standard: [TESTING.md](./TESTING.md). Each repo TODO has a TEST section.
+
+- [ ] Desk smoke/fuzz/pen/full  
+- [ ] Tip smoke/fuzz/pen/full  
+- [ ] Platform SYNC + MPC + AI test bars  
+- [ ] hexican-rescue forge + fuzz + pen  
+- [ ] Firmware emu smoke + matrix  
+- [ ] Suite: redistribute pen + parity vs Desk FULL  
+- [ ] Guides: link-check + scam-copy pen  
+- [ ] CI smoke + fuzz on every code repo  
+- [ ] Pen report required before release tags  
+- [ ] ACCEPTANCE Gate T blocks Gate 1–3
 
 Legend: `[ ]` todo · `[~]` partial · `[x]` done
 

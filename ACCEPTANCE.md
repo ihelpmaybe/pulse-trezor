@@ -73,16 +73,28 @@ Legend: **OK** = covered in some TODO · **GAP** = missing/weak · **OUT** = exp
 
 ## C. “E2E done” gates (ship bars)
 
+### Gate T — Tests (blocks every other Gate)
+See **[TESTING.md](./TESTING.md)** — SMOKE · FUZZ · PEN · FULL.
+
+- [ ] Desk: smoke CI + pen report  
+- [ ] Tip: smoke + backup/seed pen  
+- [ ] Platform SYNC: roundtrip smoke + seed-reject fuzz  
+- [ ] Rescue: forge (+ fuzz) green; pen authz  
+- [ ] Firmware: emu smoke matrix started  
+- [ ] No Gate 1–3 ship with open **Critical** pen or red FULL row  
+
 ### Gate 1 — HWW without MetaMask
 - [ ] Desk A0–A2 on Windows  
 - [ ] Bridge first-run covered  
 - [ ] Receive / send PLS + HEX/PLSX  
 - [ ] Fee UI + basic history (indexer decided)  
+- [ ] **Gate T** green for Desk  
 
 ### Gate 2 — Mobile↔desktop
 - [ ] Tip TIP0–TIP1 + SYNC1–SYNC2  
 - [ ] Graphene guide  
 - [ ] Shared bunker link  
+- [ ] **Gate T** green for Tip + SYNC  
 
 ### Gate 3 — Full program stack
 - [ ] Desk Lin/Mac/Web + WC  
@@ -90,9 +102,10 @@ Legend: **OK** = covered in some TODO · **GAP** = missing/weak · **OUT** = exp
 - [ ] FW0–FW3 lab green  
 - [ ] Suite gap mapped + SU4 filed  
 - [ ] AI0–AI1 live (optional but tracked)  
+- [ ] **FULL matrix** for Desk + Tip primary OS  
 
 ### Gate 4 — Stretch
-- [ ] MPC2 Tip recovery  
+- [ ] MPC2 Tip recovery (+ MPC pen)  
 - [ ] iOS  
 - [ ] Official Suite Pulse  
 - [ ] PQ firmware  
@@ -101,5 +114,5 @@ Legend: **OK** = covered in some TODO · **GAP** = missing/weak · **OUT** = exp
 
 ## Verdict
 
-**Program shape is end-to-end** across custody → device → apps → sync → OS → safety → Suite/FW.  
-**Not yet checklist-complete:** fee/nonce, EIP-712, indexer, Bridge first-run, backup verify, releases, threat model — patched into repo TODOs after this audit.
+**Program shape is end-to-end** across custody → device → apps → sync → OS → safety → Suite/FW · **tests**.  
+Gaps from journey audit + **smoke/fuzz/pen/full** bars are on every repo `TODO.md`.

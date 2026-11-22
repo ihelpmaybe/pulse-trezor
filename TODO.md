@@ -1,8 +1,42 @@
 # TODO — pulse-trezor (Desk / HWW)
 
-This repo only. Program-wide map: [ROADMAP.md](./ROADMAP.md) · [END-TO-END.md](./END-TO-END.md)
+This repo only. Program-wide map: [ROADMAP.md](./ROADMAP.md) · [END-TO-END.md](./END-TO-END.md) · **[TESTING.md](./TESTING.md)** · [ACCEPTANCE.md](./ACCEPTANCE.md)
 
 Legend: `[ ]` todo · `[x]` done
+
+## TEST — Desk (smoke / fuzz / pen / full)
+
+Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
+
+### Smoke
+- [ ] CI `smoke`: warm Connect (fake or emu), address derive
+- [ ] Manual/emu: address matches device screen
+- [ ] Send PLS dust (testnet) → confirmed
+- [ ] ERC-20 send once
+- [ ] Disconnect → watch-only registry loads
+- [ ] Bridge-down and user-cancel-on-device paths
+
+### Fuzz
+- [ ] Bad addresses / amounts / chainId / paths
+- [ ] Malformed token meta + RPC error bodies
+- [ ] Registry JSON import fuzz (no crash; reject seed-like fields)
+- [ ] EIP-681 / WC session fuzz when those land
+- [ ] Time-boxed fuzz job in CI
+
+### Pen
+- [ ] Phishing UX: PulseChain labeled; spender clear-sign
+- [ ] Approve/Permit/EIP-712 review
+- [ ] Blind calldata extra confirm
+- [ ] No seed/key in logs; AI prepare-only
+- [ ] WC origin shown before sign
+- [ ] Dependabot/lockfile; Connect version pin
+- [ ] Pen report in `tests/pen/REPORT.md` before Gate 1
+
+### Full bar
+- [ ] Matrix: Win×Lin×Mac×Web × Safe 3/5/7/emu × receive/send/token/approve
+- [ ] Main 369 + testnet 943 rows
+- [ ] FULL green before ACCEPTANCE Gate 1–2
+- [ ] Re-run pen &lt; 30 days before each release tag
 
 ## A0 — Bootstrap
 - [ ] App shell (Vite + Connect patterns)
