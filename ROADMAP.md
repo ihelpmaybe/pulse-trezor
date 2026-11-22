@@ -1,125 +1,149 @@
-# Pulse Trezor — master todo
+# Pulse Trezor — master todo (full stack)
 
-Goal: **full PulseChain ↔ Trezor** so users never need MetaMask/Rabby for day-to-day Pulse.
+Goal: **end-to-end PulseChain ↔ Trezor** — Desk users ship now; Suite + firmware tracks owned in parallel.
 
-Legend: `[ ]` todo · `[~]` partial / exists elsewhere · `[x]` done
+See [END-TO-END.md](./END-TO-END.md) for layer map and dependencies.
+
+Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ---
 
 ## Repo map
 
-- [x] Private GitHub: `pulse-trezor` (desk)
-- [x] Private GitHub: `hexican-rescue` (bunker)
-- [x] Private GitHub: `pulse-trezor-guides` (docs/funnel)
-- [ ] Decide later spin-outs (swap kit, claim tools) only if desk gets heavy
+- [x] `pulse-trezor` — Desk + master docs
+- [x] `hexican-rescue` — bunker / quantum-prep
+- [x] `pulse-trezor-guides` — normie docs
+- [ ] `pulse-trezor-suite` — Suite reference / upstream (T-RSL, private)
+- [ ] `pulse-trezor-firmware` — firmware fork / tokens / emu (GPL)
 
 ---
 
-## A — Pulse Trezor Desk (Suite replacement)
+## SUITE — official Suite track → `pulse-trezor-suite`
+
+Constraint: **T-RSL** — study + local spike + upstream; do **not** redistribute Suite binaries/source publicly.
+
+- [ ] SU0 Private repo + LICENSE banner (no redistribute)
+- [ ] SU1 Map Pulse absence in `coins-eth.json` + Suite Networks UI
+- [ ] SU2 Document backend needs (indexer / Blockbook-class for 369)
+- [ ] SU3 Local-only spike: enable Pulse in Suite on a lab machine
+- [ ] SU4 Upstream issue/PR pack for SatoshiLabs
+- [ ] SU5 Parity checklist: Suite features vs Desk
+
+---
+
+## FIRMWARE — device track → `pulse-trezor-firmware`
+
+Constraint: **GPL-3** OK to fork. Pulse network already upstream. Unsigned builds = lab only.
+
+- [ ] FW0 Private mirror of `trezor-firmware` + build docs
+- [ ] FW1 Audit Pulse (`chain_id` 369) + per-model support
+- [ ] FW2 Pulse token pack (HEX, PLSX, …) for clearer sign UI
+- [ ] FW3 Emulator e2e: Connect → sign PLS + ERC-20
+- [ ] FW4 Upstream PRs when we improve defs
+- [ ] FW5 PQ research spike (parked until chain accepts non-ECDSA)
+
+---
+
+## A — Pulse Trezor Desk (shippable “Suite for Pulse”)
 
 ### A0 — Bootstrap
-- [ ] App shell (Vite + existing Connect patterns)
-- [ ] Warm Connect + Bridge; human-readable device errors
-- [ ] Connect / disconnect; show address matching device screen
-- [ ] Pulse RPC + explorer links (369)
+- [ ] App shell (Vite + Connect patterns)
+- [ ] Warm Connect + Bridge; human-readable errors
+- [ ] Connect / disconnect; address matches device
+- [ ] Pulse RPC + explorer (369)
 
 ### A1 — Core custody
-- [ ] Receive: show address, copy, verify-on-device
+- [ ] Receive + verify-on-device
 - [ ] PLS balance
-- [ ] Send PLS (prepare → Trezor sign → broadcast)
-- [ ] Pending / confirmed tx status
-- [ ] Basic tx history (indexer or scan API)
+- [ ] Send PLS (prepare → sign → broadcast)
+- [ ] Tx status + basic history
 
 ### A2 — Tokens
-- [ ] Token list: HEX, PLSX, INC, custom add-by-contract
-- [ ] Token balances
-- [ ] Send ERC-20
-- [ ] Approve ERC-20 (clear UI: spender, amount, revoke)
+- [ ] HEX, PLSX, INC, custom contract
+- [ ] Balances / send ERC-20 / approve+revoke
 
 ### A3 — Accounts
-- [ ] Multi-account BIP44 discovery (`m/44'/60'/0'/0/n`)
-- [ ] Passphrase / hidden wallet callouts (docs link)
-- [ ] Watch-only after disconnect (persisted registry)
-- [ ] Export / import address registry JSON
+- [ ] BIP44 multi-account
+- [ ] Passphrase callouts
+- [ ] Watch-only registry + export/import JSON
 
 ---
 
-## B — DeFi face (same desk)
+## B — DeFi face
 
-- [ ] One swap venue (PulseX or Piteas or Switch) — quote → sign
-- [ ] Slippage / deadline controls
-- [ ] Second venue only after first is solid
-- [ ] Liquidity / farm — later if demand
-
----
-
-## C — HEX / stake companion
-
-- [ ] Port / reuse `@hex/pqq-wallet` derivation + Connect adapter
-- [ ] Discover stake-related addresses
-- [ ] Portfolio view (stakes, liquid HEX)
-- [ ] Stake / end / good-accounting flows with exact-path signing
-- [ ] Claim / migrate power tools (from existing lab walks) behind “Advanced”
+- [ ] One swap venue (quote → Trezor sign)
+- [ ] Slippage / deadline
+- [ ] Second venue later
 
 ---
 
-## D — Rescue / quantum-prep → `hexican-rescue`
+## C — HEX companion
 
-- [ ] Deploy RescueRegistry (when ready)
-- [ ] Thin register UI (EOA → bunker)
-- [ ] Rebind / clear flows
-- [ ] “Move liquid bag” checklist
-- [ ] Emergency advocacy docs (Pulse/client cooperation)
+- [ ] Reuse pqq-wallet derivation + Connect adapter
+- [ ] Portfolio / stake / end / good-accounting
+- [ ] Advanced claim/migrate tools
 
 ---
 
-## E — Power / migrate tools
+## D — Rescue → `hexican-rescue`
 
-- [ ] Portfolio snapshot helpers
-- [ ] Cross-wallet migrate walks (lab → product)
-- [ ] Fixture / e2e harness for Connect (CI-friendly fakes + manual device checklist)
+- [ ] Deploy RescueRegistry
+- [ ] Register / rebind / clear UI
+- [ ] Move-bag checklist + emergency docs
+
+---
+
+## E — Power tools
+
+- [ ] Portfolio snapshot
+- [ ] Migrate walks → product
+- [ ] Connect e2e harness (fake + device checklist)
 
 ---
 
 ## F — Guides → `pulse-trezor-guides`
 
-- [ ] “PLS on Trezor without MetaMask”
-- [ ] Bridge → receive on Trezor
+- [ ] PLS without MetaMask (Desk)
+- [ ] Bridge → Trezor receive
 - [ ] Passphrase / hidden wallet
-- [ ] Safe vs Model T notes (Connect version / Suite mobile)
-- [ ] Funnel: guide → desk download / URL
+- [ ] Device / Connect version notes
+- [ ] Suite status + upstream link
+- [ ] Funnel → Desk
 
 ---
 
-## G — Upstream / ecosystem (optional)
+## G — Ecosystem
 
-- [ ] Document Suite gap for users
-- [ ] Upstream ask / PR for Suite Pulse visibility (nice-to-have; not blocking)
-
----
-
-## H — Parked (explicit non-goals until revisited)
-
-- [ ] Custom Trezor firmware
-- [ ] On-device PQ (Dilithium / ML-DSA) — needs chain + SE support
-- [ ] Full Suite fork redistribute (T-RSL)
-- [ ] Ledger path (unknown; research only)
+- [ ] Public writeup of Suite gap (optional)
+- [ ] Coordinate SU4 upstream with firmware token PRs
 
 ---
 
-## Ship order (ROI)
+## Ship order (full program)
 
-1. A0 + A1 (connect, receive, PLS send)
-2. A2 (HEX + PLSX)
-3. A3 (multi-account + watch-only)
-4. C thin (portfolio)
-5. B one swap
-6. D deploy + register UI
-7. F guides in parallel as content
-8. E advanced last
+**Wave 1 — users leave MetaMask**  
+1. Desk A0 + A1  
+2. Desk A2 (HEX/PLSX)  
+3. Guides F (thin)
+
+**Wave 2 — own the stack**  
+4. Firmware FW0–FW1 (mirror + audit)  
+5. Suite SU0–SU2 (map + backend notes)  
+6. Desk A3 + C thin
+
+**Wave 3 — depth**  
+7. Desk B swap + D rescue deploy  
+8. Firmware FW2–FW3 tokens + emu  
+9. Suite SU3–SU4 spike + upstream  
+10. E power tools · FW5 PQ later
 
 ---
 
-## Definition of “E2E done”
+## Definitions of done
 
-A Trezor user can: **receive PLS/tokens, see balances, send, swap once, manage HEX stakes, and register a bunker** — all without MetaMask/Rabby.
+| Bar | Meaning |
+|-----|---------|
+| **User E2E** | Desk: receive/send/tokens/swap/HEX/bunker — no MetaMask |
+| **Stack E2E** | User E2E + FW repo building + Suite gap mapped + upstream filed |
+| **Official Suite E2E** | Trezor ships Pulse in Suite (out of our control; SU4) |
+| **Quantum E2E** | Stretch: chain + device PQ — not required for User/Stack E2E |

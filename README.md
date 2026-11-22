@@ -1,23 +1,27 @@
 # Pulse Trezor
 
-End-to-end **PulseChain** support for **Trezor** — without MetaMask/Rabby as the daily driver.
+End-to-end **PulseChain ↔ Trezor** program.
 
-Device firmware already signs chain **369**. Trezor Suite does not surface Pulse. This repo is the product that fills that gap via **Trezor Connect + Bridge** (real device path only).
+- **Desk (this repo):** shippable Pulse wallet via Trezor Connect (Suite replacement for Pulse).
+- **Suite track:** private reference + upstream (T-RSL — no redistribute).
+- **Firmware track:** GPL fork — tokens, emulator, later PQ research.
+- **Rescue / guides:** sibling repos.
+
+## Docs
+
+- [END-TO-END.md](./END-TO-END.md) — full stack map
+- [ROADMAP.md](./ROADMAP.md) — master todo
 
 ## Sibling private repos
 
 | Repo | Role |
 |------|------|
-| **pulse-trezor** (this) | Desk / wallet / DeFi / HEX companion |
-| [hexican-rescue](https://github.com/ihelpmaybe/hexican-rescue) | Never-sign bunker registry (quantum-prep safety) |
-| [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides, funnel, support docs |
+| [pulse-trezor](https://github.com/ihelpmaybe/pulse-trezor) | Desk + master plan |
+| [pulse-trezor-suite](https://github.com/ihelpmaybe/pulse-trezor-suite) | Suite study / upstream |
+| [pulse-trezor-firmware](https://github.com/ihelpmaybe/pulse-trezor-firmware) | Firmware fork / lab |
+| [hexican-rescue](https://github.com/ihelpmaybe/hexican-rescue) | Never-sign bunker |
+| [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides |
 
 ## Status
 
-Scaffold + roadmap. See [ROADMAP.md](./ROADMAP.md).
-
-## Non-goals (for now)
-
-- Custom Trezor firmware
-- Post-quantum signatures on-device (chain must accept first)
-- Forking Trezor Suite under T-RSL for redistribution
+Planning + scaffolds. Wave 1 = Desk A0/A1.
