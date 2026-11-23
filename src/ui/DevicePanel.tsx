@@ -168,7 +168,9 @@ export function DevicePanel({
           {suiteChannel === "desktop"
             ? "Desktop detected"
             : "Desktop not seen — Suite Web / Desktop both work with Connect 10"}
-          ) → Connect → Load full bag → Sites to pair a dApp.
+          ) → Connect → Allow in Suite (other screen OK) → confirm address on
+          device → Load full bag → Sites or the lab Chrome extension for dApps.
+          Stuck? hit Cancel, then Connect again.
         </p>
       ) : null}
       {deviceHints?.outdated ? (

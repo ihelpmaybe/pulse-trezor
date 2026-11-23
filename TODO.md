@@ -15,7 +15,7 @@ What MetaMask can do that Perch still can’t (or hasn’t proven). Product law:
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX (Sites remains MM-replacement path)
 7. [ ] **Ship surfaces** — extension and/or mobile (desktop web + Suite today)
-8. [~] **Softer first-run** — Cancel while signing; signing cue + “other screen”; fee wild-testnet note; reconcile Suite-linked vs err (2026-11-22)
+8. [x] **Softer first-run** — Cancel while Connecting/Signing; Suite other-screen cue; fee wild-testnet note; reconcile Suite-linked vs err; empty-teach + FAQ (2026-11-23)
 9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts — not Pulse daily-life blockers. **EVM peers in pack:** ETH / Sepolia / Holesky + Pulse test (same BIP44); Pulse remains product center.
 
 Already covered enough for law path: bag, send, approve, multi-account load, WC methods (tx / personal_sign / typed data / switch 369), Trezor clear-sign, Pulse RPC.
@@ -36,7 +36,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Suite-down and user-cancel-on-device — cancel + Suite-quit PASS (`SUITE-DOWN-CANCEL-2026-11-22.md` · 2026-11-23)
 
 ### Fuzz
-- [ ] Bad addresses / amounts / chainId / paths
+- [x] Bad addresses / amounts / chainId / paths — string guards in `npm run fuzz` (2026-11-23)
 - [ ] Malformed token meta + RPC error bodies
 - [x] Registry JSON import fuzz (no crash; reject seed-like fields) — `npm run fuzz`
 - [ ] EIP-681 / WC session fuzz when those land

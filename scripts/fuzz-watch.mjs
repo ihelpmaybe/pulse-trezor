@@ -98,8 +98,57 @@ for (const a of crazyAmts) {
   }
 }
 
+/** Desk send guards — bad recipients / chainIds must be rejectable without throw. */
+function looksLikeHexAddress(s) {
+  return /^0x[0-9a-fA-F]{40}$/.test(String(s || ""));
+}
+function deskChainOk(id) {
+  // Desk select uses decimal chain ids only — reject hex / junk strings.
+  if (typeof id === "string" && /[^0-9]/.test(id.trim())) return false;
+  return [369, 943, 1, 11155111, 17000].includes(Number(id));
+}
+const badAddrs = [
+  "",
+  "0x",
+  "0xgg",
+  "not-an-address",
+  "0x73d0385f4d8e00c5e6504c6030f47bf6212736a", // too short
+  whale + "00", // too long
+  "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+];
+for (const a of badAddrs) {
+  try {
+    if (looksLikeHexAddress(a)) {
+      console.error("FAIL accepted bad addr:", a);
+      fail += 1;
+    }
+  } catch (e) {
+    console.error("FAIL addr threw:", a, e);
+    fail += 1;
+  }
+}
+if (!looksLikeHexAddress(whale)) {
+  console.error("FAIL rejected good addr");
+  fail += 1;
+}
+for (const id of ["0", "-1", "999999", "foo", "", "0x171"]) {
+  try {
+    if (deskChainOk(id)) {
+      console.error("FAIL accepted bad chainId:", id);
+      fail += 1;
+    }
+  } catch (e) {
+    console.error("FAIL chainId threw:", id, e);
+    fail += 1;
+  }
+}
+if (!deskChainOk(369) || !deskChainOk(943)) {
+  console.error("FAIL rejected good chainId");
+  fail += 1;
+}
+
 if (fail) {
   console.error(`fuzz-watch: ${fail} failure(s)`);
   process.exit(1);
 }
-console.log("fuzz-watch: OK (seed rejects + 200 junk + extreme)");
+console.log("fuzz-watch: OK (seed rejects + 200 junk + extreme + addr/chain)");

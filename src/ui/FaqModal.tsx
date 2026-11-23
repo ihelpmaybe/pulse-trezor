@@ -17,7 +17,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "How do I start?",
-    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Connect (or Load accounts). 3) Allow in Suite and confirm the address on the Trezor. 4) Load full bag on Pulse (369) or stay on testnet (943) for practice. Longer walkthrough: github.com/ihelpmaybe/pulse-trezor-guides (Suite + Connect, Try Perch).",
+    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Connect (or Load accounts). 3) Allow in Suite — it may be on another monitor — and confirm the address on the Trezor. 4) Load full bag on Pulse (369) or stay on testnet (943) for practice. If Connect hangs, Cancel then retry. Longer walkthrough: github.com/ihelpmaybe/pulse-trezor-guides (Suite + Connect, Try Perch).",
   },
   {
     q: "Do I need MetaMask?",
@@ -65,11 +65,11 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Testnet vs mainnet?",
-    a: "Lab default is Pulse testnet 943. Switch the network control to PulseChain 369 for real funds. First mainnet send asks for an extra ack.",
+    a: "Lab default is Pulse testnet 943. Switch the network control to PulseChain 369 for real funds. First mainnet send asks for an extra ack. Fee quotes on testnets can look wild — that’s the network, not your bag.",
   },
   {
     q: "Chrome extension?",
-    a: "Lab sideload only (not Chrome Web Store yet). Download the release zip, check the SHA256, Load unpacked, keep Perch Connected. Prefer Sites when the dApp supports WalletConnect.",
+    a: "Lab sideload only (not Chrome Web Store yet). Download the release zip, check the SHA256, Load unpacked, keep Perch Connected. Account/network changes on the desk should update open dApp tabs without a reload. Prefer Sites when the dApp supports WalletConnect.",
   },
   {
     q: "Something looks phishing-y — what do I do?",
