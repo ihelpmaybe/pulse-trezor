@@ -75,7 +75,7 @@ Also exported: Connect helpers + `sendPlsWithTrezor` + `RpcOverride` from `src/i
 
 **Modular first** (see `.cursor/rules/modular-first.mdc`): new face → `src/ui/*Panel.tsx`, not more paste into `PulseTrezor.tsx`. Kernel wires state only.
 
-Extracts: `BagPanel`, `ApprovePanel`, `SendPanel`, `SwapPanel`, `ActivityPanel`, `AppsPanel`, `SettingsModal`, `FaqModal`, `CoreFooter`, `deskStorage`, `AddrParts`, `HexStakeMark`, `swapFace`, `InstallPwa`, `SyncPair`, …
+Extracts: `DevicePanel`, `TopStrip`, `DeskTools`, `BagPanel`, `ApprovePanel`, `SendPanel`, `SwapPanel`, `ActivityPanel`, `AppsPanel`, `SettingsModal`, `FaqModal`, `CoreFooter`, `deskStorage`, …
 
 ---
 

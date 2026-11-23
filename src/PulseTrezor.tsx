@@ -24,7 +24,6 @@ import {
   packFor,
   resolveRpcUrl,
   chainLabel,
-  DESK_CHAIN_IDS,
   isDeskChainId,
   waitForTxStatus,
   type DeskChainId,
@@ -55,13 +54,6 @@ import {
   deadEndNativeSend,
   deadEndTokenTransfer,
 } from "./chain/deadEndRecipients";
-import {
-  ACCOUNT_COUNT_MAX,
-  ACCOUNT_COUNT_MIN,
-  clampAccountCount,
-  shortAddr,
-  shortNative,
-} from "./ui/faceFormat";
 import {
   addCustomToken,
   fetchCustomBalances,
@@ -109,7 +101,6 @@ import {
   signTypedData,
 } from "./trezor/signMessage";
 import { WcPanel } from "./wc/WcPanel";
-import { ReceiveQr } from "./ui/ReceiveQr";
 import { loadFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
 import {
@@ -119,14 +110,15 @@ import {
 import { decodeSyncPayload } from "./chain/syncPair";
 import { FaqModal } from "./ui/FaqModal";
 import { CoreFooter } from "./ui/CoreFooter";
-import { AddrParts } from "./ui/AddrParts";
-import { HexStakeMark } from "./ui/HexStakeMark";
 import { AppsPanel } from "./ui/AppsPanel";
 import { ActivityPanel } from "./ui/ActivityPanel";
 import { SwapPanel } from "./ui/SwapPanel";
 import { SendPanel } from "./ui/SendPanel";
 import { BagPanel } from "./ui/BagPanel";
 import { ApprovePanel } from "./ui/ApprovePanel";
+import { DevicePanel } from "./ui/DevicePanel";
+import { TopStrip } from "./ui/TopStrip";
+import { DeskTools } from "./ui/DeskTools";
 import { SettingsModal } from "./ui/SettingsModal";
 import { trimGwei } from "./ui/swapFace";
 import {
@@ -2257,127 +2249,20 @@ export function PulseTrezor({
     .join(" ");
 
   const deskTools = (
-    <div className="rpc-pop-wrap desk-tools">
-      <button
-        type="button"
-        className={faqOpen ? "btn ghost rpc-pop-btn on" : "btn ghost rpc-pop-btn"}
-        aria-haspopup="dialog"
-        aria-expanded={faqOpen}
-        aria-label="Frequently asked questions"
-        title="FAQ — how to use Perch"
-        onClick={() => {
+    <>
+      <DeskTools
+        faqOpen={faqOpen}
+        onOpenFaq={() => {
           setSettingsOpen(false);
           setFaqOpen(true);
         }}
-      >
-        <span className="faq-btn-label" aria-hidden="true">
-          ?
-        </span>
-      </button>
-      <button
-        type="button"
-        className={
-          privacyHide
-            ? "btn ghost rpc-pop-btn privacy-btn on"
-            : "btn ghost rpc-pop-btn privacy-btn"
-        }
-        aria-pressed={privacyHide}
-        title={
-          privacyHide
-            ? "Show addresses & amounts"
-            : "Hide addresses & amounts (********)"
-        }
-        aria-label={
-          privacyHide
-            ? "Show addresses and amounts"
-            : "Hide addresses and amounts"
-        }
-        onClick={togglePrivacyHide}
-      >
-        {privacyHide ? (
-          <svg
-            className="privacy-eye"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10.4 10.4 0 0 1 12 5c5 0 9.3 3.1 11 7.5a11.5 11.5 0 0 1-4.2 5.1M6.6 6.6A11.4 11.4 0 0 0 1 12.5C2.7 16.9 7 20 12 20a10.5 10.5 0 0 0 4.3-.9"
-            />
-          </svg>
-        ) : (
-          <svg
-            className="privacy-eye"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M2 12.5C3.7 8.1 7.9 5 12 5s8.3 3.1 10 7.5c-1.7 4.4-5.9 7.5-10 7.5S3.7 16.9 2 12.5z"
-            />
-            <circle
-              cx="12"
-              cy="12.5"
-              r="3"
-              stroke="currentColor"
-              strokeWidth="1.75"
-            />
-          </svg>
-        )}
-      </button>
-      {showSettings ? (
-      <button
-        type="button"
-        ref={settingsBtnRef}
-        className={
-          settingsOpen ? "btn ghost rpc-pop-btn on" : "btn ghost rpc-pop-btn"
-        }
-        aria-haspopup="dialog"
-        aria-expanded={settingsOpen}
-        aria-label="Settings"
-        title="Settings"
-        onClick={() => setSettingsOpen(true)}
-      >
-        <svg
-          className="settings-gear"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-          />
-          <circle
-            cx="12"
-            cy="12"
-            r="3"
-            stroke="currentColor"
-            strokeWidth="1.75"
-          />
-        </svg>
-      </button>
-      ) : null}
+        privacyHide={privacyHide}
+        togglePrivacyHide={togglePrivacyHide}
+        showSettings={showSettings}
+        settingsOpen={settingsOpen}
+        onOpenSettings={() => setSettingsOpen(true)}
+        settingsBtnRef={settingsBtnRef}
+      />
       {showSettings && settingsOpen ? (
         <SettingsModal
           panelRef={settingsRef}
@@ -2427,7 +2312,7 @@ export function PulseTrezor({
           setInjectEth={setInjectEth}
         />
       ) : null}
-    </div>
+    </>
   );
 
   return (
@@ -2449,252 +2334,47 @@ export function PulseTrezor({
         </div>
         {deskTools}
       </div>
-      <div className="top-strip">
-        {active ? (
-          <button
-            type="button"
-            className="addr-bar"
-            onClick={onCopy}
-            title={
-              privacyHide
-                ? "Unhide to copy address"
-                : copied
-                  ? "Copied"
-                  : "Click to copy full address"
-            }
-            aria-label={
-              privacyHide
-                ? "Address hidden"
-                : copied
-                  ? `Copied address ${active.address}`
-                  : `Copy address ${active.address}`
-            }
-          >
-            <AddrParts address={active.address} />
-            {copied ? (
-              <span className="addr-copied" aria-hidden="true">
-                Copied
-              </span>
-            ) : null}
-            <svg
-              className="addr-copy-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <rect
-                x="5.5"
-                y="5.5"
-                width="8"
-                height="8"
-                rx="1.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-              <path
-                d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        ) : null}
-        {watch ? (
-          <button
-            type="button"
-            className="btn ghost addr-forget"
-            onClick={onForget}
-            title="Forget watched address"
-          >
-            Forget
-          </button>
-        ) : null}
-        {active ? (
-          <ReceiveQr address={active.address as Address} chainId={chainId} />
-        ) : null}
-      </div>
+      <TopStrip
+        activeAddress={active?.address ?? null}
+        privacyHide={privacyHide}
+        copied={copied}
+        onCopy={onCopy}
+        watch={!!watch}
+        onForget={onForget}
+        chainId={chainId}
+      />
       <div className="grid">
-        <section className="card device">
-          <div className="device-head">
-            <h2>Device</h2>
-          </div>
-          {showTestnet ? (
-            <label className="field">
-              Network
-              <select
-                value={chainId}
-                onChange={(e) => {
-                  setChainId(Number(e.target.value) as DeskChainId);
-                  setAsset("PLS");
-                }}
-              >
-                {DESK_CHAIN_IDS.map((id) => (
-                  <option key={id} value={id}>
-                    {chainLabel(id)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-
-          <label className="field">
-            How many addresses?
-            <input
-              type="number"
-              min={ACCOUNT_COUNT_MIN}
-              max={ACCOUNT_COUNT_MAX}
-              step={1}
-              value={accountCount}
-              disabled={connecting}
-              onChange={(e) => {
-                const n = clampAccountCount(Number(e.target.value));
-                setAccountCount(n);
-                saveAccountCount(n);
-              }}
-            />
-          </label>
-          <div className="row" style={{ marginTop: 0 }}>
-            <button
-              type="button"
-              className="btn"
-              disabled={connecting}
-              onClick={onLoadAccounts}
-            >
-              {listing ? "Loading…" : `Load ${accountCount} accounts`}
-            </button>
-            {!session ? (
-              <button
-                type="button"
-                className="btn ghost"
-                disabled={connecting}
-                onClick={onConnect}
-              >
-                {connecting && !listing
-                  ? "Connecting…"
-                  : `Connect #${accountIndex + 1} only`}
-              </button>
-            ) : null}
-            {connecting || busy ? (
-              <button
-                type="button"
-                className="btn ghost"
-                onClick={connecting ? onCancelConnect : onCancelBusy}
-              >
-                Cancel
-              </button>
-            ) : null}
-          </div>
-          {connecting && suiteCue ? (
-            <p className="muted" role="status">
-              {suiteCue}
-            </p>
-          ) : null}
-          {!active ? (
-            <p className="muted empty-teach">
-              First run: open Trezor Suite (
-              {suiteChannel === "desktop"
-                ? "Desktop detected"
-                : "Desktop not seen — Suite Web / Desktop both work with Connect 10"}
-              ) → Connect → Load full bag → Sites to pair a dApp.
-            </p>
-          ) : null}
-          {deviceHints?.outdated ? (
-            <p className="warn-line" role="status">
-              Firmware {deviceHints.firmware ?? "?"} looks outdated — update in
-              Suite before big moves.
-            </p>
-          ) : null}
-          {deviceHints?.passphraseProtection ? (
-            <p className="muted fee" role="status">
-              Passphrase / hidden wallet is on this device — the account you
-              unlock in Suite is the one Perch will use.
-            </p>
-          ) : null}
-          {busy && !connecting ? (
-            <p className="muted" role="status">
-              Signing — confirm in Trezor Suite / on device (may be on another
-              screen). Fee on Pulse testnet can look huge; that&apos;s the
-              network, not Perch.
-            </p>
-          ) : null}
-
-          {accountList.length > 0 ? (
-            <div className="acct-grid" role="list">
-              {accountList.map((a) => {
-                const key = a.address.toLowerCase();
-                const on = active?.address?.toLowerCase() === key;
-                const wei = acctPls[key];
-                const hexN = acctHexStakes[key] ?? 0;
-                const balText =
-                  wei != null
-                    ? `${shortNative(wei)} ${pack.currency.symbol}`
-                    : "…";
-                return (
-                  <button
-                    key={a.derivationIndex}
-                    type="button"
-                    role="listitem"
-                    className={on ? "acct-card on" : "acct-card"}
-                    onClick={() => selectListedAccount(a)}
-                    title={a.derivationPath}
-                    aria-label={
-                      privacyHide
-                        ? `Account #${a.derivationIndex + 1}${on ? ", selected" : ""}, values hidden`
-                        : `Account #${a.derivationIndex + 1}, ${a.address}, ${balText}${
-                            hexModule && hexN > 0
-                              ? `, ${hexN} HEX stakes`
-                              : ""
-                          }${on ? ", selected" : ""}`
-                    }
-                    aria-current={on ? "true" : undefined}
-                  >
-                    <span className="acct-label">
-                      #{a.derivationIndex + 1}
-                    </span>
-                    <code className="acct-addr">{shortAddr(a.address)}</code>
-                    <span className="acct-bal">{balText}</span>
-                    {hexModule && hexN > 0 ? (
-                      <HexStakeMark
-                        count={hexN}
-                        onOpen={() => {
-                          selectListedAccount(a);
-                          setBagTab("stakes");
-                        }}
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-          {active ? (
-            <div className="session">
-              {!canSign ? (
-                <p className="muted">
-                  Watching — click Connect, then green Confirm in Suite (check
-                  other screens).
-                </p>
-              ) : null}
-              {canSign ? (
-                <div className="row">
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    onClick={onDisconnect}
-                  >
-                    Disconnect
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-        </section>
+        <DevicePanel
+          showTestnet={showTestnet}
+          chainId={chainId}
+          setChainId={setChainId}
+          setAsset={setAsset}
+          accountCount={accountCount}
+          setAccountCount={setAccountCount}
+          connecting={connecting}
+          listing={listing}
+          busy={busy}
+          session={session}
+          active={active}
+          canSign={canSign}
+          onLoadAccounts={onLoadAccounts}
+          onConnect={onConnect}
+          onCancelConnect={onCancelConnect}
+          onCancelBusy={onCancelBusy}
+          onDisconnect={onDisconnect}
+          accountIndex={accountIndex}
+          suiteCue={suiteCue}
+          suiteChannel={suiteChannel}
+          deviceHints={deviceHints}
+          accountList={accountList}
+          acctPls={acctPls}
+          acctHexStakes={acctHexStakes}
+          packSymbol={pack.currency.symbol}
+          privacyHide={privacyHide}
+          hexModule={hexModule}
+          selectListedAccount={selectListedAccount}
+          setBagTab={setBagTab}
+        />
 
         <BagPanel
           active={active}

@@ -176,7 +176,7 @@ Before writing >50 lines of new infra: name the OSS row above you’re wrapping.
 
 | Area | Status | Next adopt if it grows |
 |------|--------|------------------------|
-| Focus trap | Tiny local helper | `focus-trap` / `focus-trap-react` |
+| Focus trap | Tiny local helper (~25 LOC) — **keep**; not worth a dep yet | `focus-trap` / `focus-trap-react` if it grows |
 | Gas speed UI | Product chrome | Stay custom (HWW copy) |
 | Address book / poison | Product chrome | Stay custom |
 | Clear-sign strips | Product chrome | Stay custom; decode via **viem** |
