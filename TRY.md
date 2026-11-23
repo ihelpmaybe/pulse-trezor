@@ -52,10 +52,10 @@ Get test PLS from a Pulse testnet faucet if the bag is empty.
 
 Sites that only look for MetaMask.
 
-**Download:** [pulse-perch-extension-0.1.1.zip](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.1/pulse-perch-extension-0.1.1.zip) (GitHub Release `extension-0.1.1`)
+**Download:** [pulse-perch-extension-0.1.2.zip](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.2/pulse-perch-extension-0.1.2.zip) (GitHub Release `extension-0.1.2`)
 
-**SHA256:** `c36c25d20eb71b816e2a2ee1b24ce8472be1eb16e5eb9e3e92d13c9a30d4b394`  
-([checksum file](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.1/pulse-perch-extension-0.1.1.sha256))
+**SHA256:** `e57f289b978a2ff3223ec3e65b8af4e9efb3a9b36d7b5b311d5209c7bb3ae07a`  
+([checksum file](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.2/pulse-perch-extension-0.1.2.sha256))
 
 1. Unzip the pack.
 2. Chrome → Extensions → Developer mode → **Load unpacked** → that folder.

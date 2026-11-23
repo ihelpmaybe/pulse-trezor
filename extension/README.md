@@ -13,7 +13,7 @@ Zip + SHA256 land at `dist-ext/pulse-perch-extension-<version>.zip` (and `.sha25
 
 Release `extension-0.1.2` SHA256:
 
-`2b31f8355dde5e63457f79a0bdcb2b61d8a074869b703241c46b12e890e009a7`
+`e57f289b978a2ff3223ec3e65b8af4e9efb3a9b36d7b5b311d5209c7bb3ae07a`
 
 ## Install (Load unpacked)
 1. `npm run dev` (desk on `:5174`) — or open your hosted Perch build

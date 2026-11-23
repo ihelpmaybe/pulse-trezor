@@ -26,7 +26,7 @@ Lab default = **Pulse testnet 943**. Guides: [Suite + Connect](https://github.co
 | Artifact | Link |
 |----------|------|
 | Try / install | [TRY.md](./TRY.md) |
-| Extension sideload | [TRY.md](./TRY.md) · release [`extension-0.1.1`](https://github.com/ihelpmaybe/pulse-trezor/releases/tag/extension-0.1.1) (pack `0.1.2` via `npm run ext:pack`) |
+| Extension sideload | [TRY.md](./TRY.md) · release [`extension-0.1.2`](https://github.com/ihelpmaybe/pulse-trezor/releases/tag/extension-0.1.2) |
 | Pen report | [tests/pen/REPORT-2026-11-23.md](./tests/pen/REPORT-2026-11-23.md) |
 | Threat watch | [docs/THREAT-WATCH-2026-11.md](./docs/THREAT-WATCH-2026-11.md) |
 
@@ -87,4 +87,4 @@ Extracts: `DevicePanel`, `TopStrip`, `DeskTools`, `BagPanel`, `ApprovePanel`, `S
 
 ## License / trademark
 
-Not affiliated with SatoshiLabs / Trezor. “Trezor” is their mark. PulseChain / HEX / PulseX / ProveX belong to their respective projects.
+**Private — not open source.** All rights reserved. Not affiliated with SatoshiLabs / Trezor. “Trezor” is their mark. PulseChain / HEX / PulseX / ProveX belong to their respective projects.
