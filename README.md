@@ -73,7 +73,9 @@ Also exported: Connect helpers + `sendPlsWithTrezor` + `RpcOverride` from `src/i
 
 ## Modularity / layout
 
-Prefer small modules under `src/ui/` and `src/chain/` / `src/wc/` over growing `PulseTrezor.tsx` further. Recent extracts: `FaqModal`, `CoreFooter`, `SettingsModal`, `AppsPanel`, `ActivityPanel`, `SendPanel`, `SwapPanel`, `deskStorage`, `AddrParts`, `HexStakeMark`, `swapFace`, `InstallPwa`, `SyncPair`, clear-sign / verify / dead-end recipients.
+**Modular first** (see `.cursor/rules/modular-first.mdc`): new face → `src/ui/*Panel.tsx`, not more paste into `PulseTrezor.tsx`. Kernel wires state only.
+
+Extracts: `BagPanel`, `ApprovePanel`, `SendPanel`, `SwapPanel`, `ActivityPanel`, `AppsPanel`, `SettingsModal`, `FaqModal`, `CoreFooter`, `deskStorage`, `AddrParts`, `HexStakeMark`, `swapFace`, `InstallPwa`, `SyncPair`, …
 
 ---
 

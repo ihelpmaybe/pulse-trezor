@@ -1,0 +1,27 @@
+---
+description: Build modular UI/logic first — never grow PulseTrezor into a monolith
+alwaysApply: true
+---
+
+# Modular first (desk)
+
+Do **not** dump new features into `src/PulseTrezor.tsx`. That file is a thin kernel: connect session, shared state, wiring panels.
+
+## Default
+1. New face → new module under `src/ui/` (or `src/chain/` / `src/wc/` / `src/trezor/` for logic).
+2. Kernel only **imports + props + handlers** that span panels.
+3. If a panel grows past ~400 lines or a second concern appears → **split before merging**.
+
+## Forbidden
+- Pasting 100+ lines of JSX into `PulseTrezor.tsx` “just this once”
+- Mixing send / swap / activity / settings / bag markup back into the kernel
+- “I’ll extract later” — extract **now** or don’t ship the feature
+
+## Pattern
+- Presentational / tab bodies: `src/ui/*Panel.tsx`, `*Modal.tsx`
+- Prefs / session persistence: `src/ui/deskStorage.ts` (or peer)
+- Chain/math/RPC: `src/chain/*` — not inline in the face
+- Reuse existing extracts: `SendPanel`, `SwapPanel`, `ActivityPanel`, `AppsPanel`, `SettingsModal`, `FaqModal`, `CoreFooter`, …
+
+## Test
+Would a stranger find the change by opening one small file named for the job? If they must scroll a 3k-line god component → you built it wrong. Fix before push.
