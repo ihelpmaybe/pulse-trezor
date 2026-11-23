@@ -19,7 +19,7 @@
 12. [~] Tx status after send (pending → confirmed) — face poll 2026-11-22; full history still #13
 13. [~] Activity / history feed on face — PulseScan v2 (369+943) compact card 2026-11-22
 14. [~] Speed-up / cancel stuck tx (replace-by-fee) — Send face pending/timeout 2026-11-22
-15. [~] Custom gas / tip / max fee controls — Send details gwei override 2026-11-22
+15. [x] Custom gas / tip / max fee controls — Send Advanced in **beats** on 369/943 (not gwei) 2026-11-22
 16. [x] Nonce display + manual override (power)
 17. [x] Passphrase / hidden wallet callouts
 18. [x] Address book + warn new recipient + recent chips + Paste
@@ -45,7 +45,7 @@
 34. [x] Pair wc: URI from Sites tab
 35. [x] Approve / reject session
 36. [~] eth_sendTransaction via WC → Trezor
-37. [~] personal_sign via WC (inject proven; WC live still needs pair+request)
+37. [x] personal_sign via WC — live PASS 2026-11-22 (lab.pulseperch.dev pair + Suite); inject also PASS
 38. [~] eth_signTypedData_v4 / EIP-712 — wired WC+inject; inject smoke PASS 2026-11-22
 39. [~] wallet_switchEthereumChain → 369
 40. [x] Show dapp origin before every sign
@@ -55,8 +55,8 @@
 44. [ ] HEX site WC pair smoke
 45. [ ] ProveX WC / connect smoke
 46. [ ] End-to-end WC sign confirmed on device (blocked: 0 PLS on #1)
-47. [~] Injected provider (window.ethereum) — EIP-1193 + Settings this-tab lab (2026-11-22)
-48. [~] Browser extension shell — MV3 lab under `extension/` (load unpacked); not store-ready
+47. [x] Injected provider (window.ethereum) — this-tab lab personal_sign + EIP-712 PASS 2026-11-22
+48. [~] Browser extension shell — MV3 lab under `extension/` (load unpacked); CDP smoke deferred; not store-ready
 49. [x] Deep link open-in-Perch from Pulse sites — `?uri=` / `web+pulseperch:` → Sites
 50. [ ] Concurrent multi-dapp sessions without clobber
 51. [x] Per-origin permissions (accounts / methods) — remember allow/deny origin + cue on proposal

@@ -2,6 +2,12 @@
  * Compact face formatters — shared so extreme/fuzz tests can hit real logic.
  */
 import { formatEther } from "viem";
+import type { DeskChainId } from "../chain/client";
+
+/** Pulse gas unit is beats (not gwei). Same 1e9 wei scale as ETH gwei. */
+export function gasUnitLabel(chainId: DeskChainId): "beats" | "gwei" {
+  return chainId === 369 || chainId === 943 ? "beats" : "gwei";
+}
 
 export const ACCOUNT_COUNT_MIN = 1;
 /** Suite address-pull headroom (not Blsx monthly product cap). */

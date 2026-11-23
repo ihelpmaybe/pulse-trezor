@@ -21,6 +21,7 @@ import {
   ACCOUNT_COUNT_MIN,
   clampAccountCount,
   fmtActivityAmtParts,
+  gasUnitLabel,
   shortAddr,
   shortNative,
 } from "./faceFormat";
@@ -69,6 +70,12 @@ describe("extreme · face amounts", () => {
     expect(shortAddr("")).toBe("");
     expect(shortAddr("0xab")).toBe("0xab");
     expect(shortAddr(WHALE)).toMatch(/^0x73d0…/);
+  });
+
+  it("Pulse gas unit is beats, not gwei", () => {
+    expect(gasUnitLabel(369)).toBe("beats");
+    expect(gasUnitLabel(943)).toBe("beats");
+    expect(gasUnitLabel(1)).toBe("gwei");
   });
 });
 

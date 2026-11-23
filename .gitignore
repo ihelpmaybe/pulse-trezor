@@ -7,3 +7,8 @@ dist/
 .DS_Store
 Thumbs.db
 .vite/
+tmp-chrome-*/
+tmp-wc-*.json
+tmp-wc-*.txt
+tmp-ext-*.json
+tmp-wc-uri.txt

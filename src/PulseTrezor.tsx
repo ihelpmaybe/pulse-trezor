@@ -67,6 +67,7 @@ import {
   ACCOUNT_COUNT_MIN,
   clampAccountCount,
   fmtActivityAmtParts,
+  gasUnitLabel,
   shortAddr,
   shortNative,
 } from "./ui/faceFormat";
@@ -1059,7 +1060,7 @@ export function PulseTrezor({
           const feeWei = p.eip1559
             ? p.gas * (p.maxFeePerGas ?? 0n)
             : p.gas * (p.gasPrice ?? 0n);
-          // Pulse testnet often quotes absurd gwei — show raw + short note, don't hide it.
+          // Pulse testnet often quotes absurd beats — show raw + short note, don't hide it.
           const feeStr = formatEther(feeWei);
           const wild = feeWei > 100_000_000_000_000_000n; // > 0.1 native
           setFeeHint(
@@ -3989,14 +3990,18 @@ export function PulseTrezor({
                       ? "Normal uses the network quote. Want it mined sooner? Pick Faster — that raises the priority tip validators earn."
                       : gasSpeed === "faster"
                         ? `Priority tip raised (~1.5×). You’re paying validators more to pick you sooner.${
-                            tipGwei ? ` Tip ${tipGwei} gwei.` : ""
+                            tipGwei
+                              ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.`
+                              : ""
                           }`
                         : `Highest tip (~2×). Use when a tx is urgent or the mempool is busy.${
-                            tipGwei ? ` Tip ${tipGwei} gwei.` : ""
+                            tipGwei
+                              ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.`
+                              : ""
                           }`}
                   </p>
                   <details className="gas-details">
-                    <summary>Advanced (gwei)</summary>
+                    <summary>Advanced ({gasUnitLabel(chainId)})</summary>
                     <div className="gas-grid">
                       <label className="field">
                         Priority tip
@@ -4011,6 +4016,7 @@ export function PulseTrezor({
                           placeholder="auto"
                           inputMode="decimal"
                           autoComplete="off"
+                          aria-label={`Priority tip in ${gasUnitLabel(chainId)}`}
                         />
                       </label>
                       <label className="field">
@@ -4024,12 +4030,16 @@ export function PulseTrezor({
                           placeholder="auto"
                           inputMode="decimal"
                           autoComplete="off"
+                          aria-label={`Max fee ceiling in ${gasUnitLabel(chainId)}`}
                         />
                       </label>
                     </div>
                     <p className="muted fee">
                       Tip = what validators get to include you. Max fee = hard
                       ceiling (base fee + tip). Blank = network estimate.
+                      {chainId === 369 || chainId === 943
+                        ? " Pulse gas is in beats — not gwei."
+                        : ""}
                     </p>
                   </details>
                   {to && isAddress(to) ? (

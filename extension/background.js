@@ -1,3 +1,6 @@
+/* Pulse Perch MV3 background — keep classic (no type:module) for Chrome load-unpacked lab. */
+self.__PULSE_PERCH_EXT__ = true;
+
 const PERCH_MATCH = [
   "http://127.0.0.1:5174/*",
   "http://localhost:5174/*",
