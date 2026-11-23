@@ -10,8 +10,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PORT = Number(process.env.CDP_PORT || 9233);
-const projectId =
-  process.env.REOWN_PROJECT_ID || "eb3cea87fdb235c24fbdf42761c00e63";
+const projectId = (process.env.REOWN_PROJECT_ID || "").trim();
+if (!projectId) {
+  console.error("Set REOWN_PROJECT_ID (see .env.example)");
+  process.exit(1);
+}
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
 function wsRpc(url) {

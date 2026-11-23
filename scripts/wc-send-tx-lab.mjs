@@ -6,8 +6,11 @@
 import { writeFileSync } from "node:fs";
 import { SignClient } from "@walletconnect/sign-client";
 
-const projectId =
-  process.env.REOWN_PROJECT_ID || "eb3cea87fdb235c24fbdf42761c00e63";
+const projectId = (process.env.REOWN_PROJECT_ID || "").trim();
+if (!projectId) {
+  console.error("Set REOWN_PROJECT_ID (see .env.example)");
+  process.exit(1);
+}
 const chainPref = process.env.WC_CHAIN || "eip155:943";
 const valueWei = process.env.WC_VALUE_WEI || "0x38d7ea4c68000"; // 0.001 PLS
 /** Optional: wrap / contract call — e.g. WC_TO=WPLS WC_DATA=0xd0e30db0 */

@@ -5,8 +5,11 @@
 import { writeFileSync } from "node:fs";
 import { SignClient } from "@walletconnect/sign-client";
 
-const projectId =
-  process.env.REOWN_PROJECT_ID || "eb3cea87fdb235c24fbdf42761c00e63";
+const projectId = (process.env.REOWN_PROJECT_ID || "").trim();
+if (!projectId) {
+  console.error("Set REOWN_PROJECT_ID (see .env.example)");
+  process.exit(1);
+}
 const msg = `Pulse Perch live WC smoke ${Date.now()}`;
 const msgHex =
   "0x" + Buffer.from(msg, "utf8").toString("hex");

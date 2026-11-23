@@ -4,8 +4,11 @@
  */
 import { SignClient } from "@walletconnect/sign-client";
 
-const projectId =
-  process.env.REOWN_PROJECT_ID || "eb3cea87fdb235c24fbdf42761c00e63";
+const projectId = (process.env.REOWN_PROJECT_ID || "").trim();
+if (!projectId) {
+  console.error("Set REOWN_PROJECT_ID (see .env.example)");
+  process.exit(1);
+}
 const name = process.env.WC_NAME || "Perch Concurrent";
 const holdMs = Number(process.env.WC_HOLD_MS || 120_000);
 
