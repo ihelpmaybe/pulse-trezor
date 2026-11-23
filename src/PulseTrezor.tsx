@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   formatEther,
   formatGwei,
-  formatUnits,
   hexToString,
   isAddress,
   isHex,
@@ -21,7 +20,6 @@ import {
 import {
   explorerAddressUrl,
   explorerNftUrl,
-  explorerTxUrl,
   failoverRpc,
   fetchPlsBalance,
   makePublicClient,
@@ -35,12 +33,8 @@ import {
   type RpcOverride,
 } from "./chain/client";
 import {
-  activityPoison,
   bookLabel,
-  isKnownRecipient,
   loadAddressBook,
-  lookalikePoison,
-  upsertAddressBook,
   type BookEntry,
 } from "./chain/addressBook";
 import {
@@ -58,8 +52,6 @@ import {
 } from "./chain/portfolio";
 import {
   fetchAddressActivity,
-  fullWhen,
-  shortWhen,
   type ActivityRow,
 } from "./chain/activity";
 import {
@@ -70,8 +62,6 @@ import {
   ACCOUNT_COUNT_MAX,
   ACCOUNT_COUNT_MIN,
   clampAccountCount,
-  fmtActivityAmtParts,
-  gasUnitLabel,
   shortAddr,
   shortNative,
 } from "./ui/faceFormat";
@@ -126,7 +116,6 @@ import {
 } from "./trezor/signMessage";
 import { WcPanel } from "./wc/WcPanel";
 import { ReceiveQr } from "./ui/ReceiveQr";
-import { TxExplain } from "./ui/TxExplain";
 import { loadFavorites, toggleFavorite } from "./chain/favorites";
 import {
   fetchTokenUsdHints,
@@ -143,12 +132,11 @@ import { CoreFooter } from "./ui/CoreFooter";
 import { AddrParts } from "./ui/AddrParts";
 import { HexStakeMark } from "./ui/HexStakeMark";
 import { AppsPanel } from "./ui/AppsPanel";
+import { ActivityPanel } from "./ui/ActivityPanel";
+import { SwapPanel } from "./ui/SwapPanel";
+import { SendPanel } from "./ui/SendPanel";
 import { SettingsModal } from "./ui/SettingsModal";
-import {
-  SWAP_FACE,
-  swapAssetLabel,
-  trimGwei,
-} from "./ui/swapFace";
+import { trimGwei } from "./ui/swapFace";
 import {
   type A11yPrefs,
   type ThemePref,
@@ -185,7 +173,6 @@ import {
   preparePulsexSwap,
   quotePulsexSwap,
   routerAllowance,
-  swapTokenMeta,
   type SwapAsset,
   type SwapQuote,
 } from "./chain/pulsex";
@@ -3267,227 +3254,25 @@ export function PulseTrezor({
           </div>
         </section>
 
-        <section className="card activity">
-          <div className="device-head activity-head">
-            <h2>Activity</h2>
-            {active ? (
-              <div className="row activity-tools">
-                <div className="gas-speed" role="group" aria-label="Activity filter">
-                  {(
-                    [
-                      ["all", "All"],
-                      ["in", "In"],
-                      ["out", "Out"],
-                    ] as const
-                  ).map(([id, label]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={
-                        actFilter === id
-                          ? "btn gas-pill on"
-                          : "btn ghost gas-pill"
-                      }
-                      onClick={() => setActFilter(id)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  className="btn ghost gas-pill"
-                  disabled={actBusy}
-                  onClick={() => void refreshActivity(active.address, chainId)}
-                >
-                  {actBusy ? "…" : "↻"}
-                </button>
-              </div>
-            ) : null}
-          </div>
-          {!active ? (
-            <p className="muted empty-teach">
-              Next: Connect, then Refresh here for recent PulseScan txs.
-            </p>
-          ) : actErr ? (
-            <p className="muted">{actErr}</p>
-          ) : actBusy && !activity.length ? (
-            <p className="muted">…</p>
-          ) : !activity.length ? (
-            <p className="muted">No recent txs on this chain.</p>
-          ) : (
-            <ul className="activity-list">
-              {lastTx &&
-              txStatus === "pending" &&
-              !activity.some((a) => a.hash.toLowerCase() === lastTx.toLowerCase()) ? (
-                <li className="activity-row pending">
-                  <button
-                    type="button"
-                    className="activity-dir"
-                    title={`Copy ${lastTx}`}
-                    onClick={() => {
-                      void navigator.clipboard.writeText(lastTx);
-                    }}
-                  >
-                    …
-                  </button>
-                  <span className="activity-amt">
-                    <span className="activity-int">…</span>
-                    <span className="activity-frac" />
-                  </span>
-                  <span className="activity-when">mining</span>
-                  {(txStatus === "pending" || txStatus === "timeout") &&
-                  session ? (
-                    <span className="row activity-stuck">
-                      <button
-                        type="button"
-                        className="btn ghost gas-pill"
-                        disabled={busy}
-                        onClick={onSpeedUp}
-                      >
-                        Speed up
-                      </button>
-                      <button
-                        type="button"
-                        className="btn ghost gas-pill"
-                        disabled={busy}
-                        onClick={onCancelStuck}
-                      >
-                        Cancel
-                      </button>
-                    </span>
-                  ) : null}
-                </li>
-              ) : null}
-              {(() => {
-                const poisonPeers: { address: string; label: string }[] = [
-                  ...addressBook.map((b) => ({
-                    address: b.address,
-                    label: b.label,
-                  })),
-                ];
-                const seen = new Set(
-                  poisonPeers.map((p) => p.address.toLowerCase()),
-                );
-                for (const a of activity) {
-                  if (a.direction !== "out" || !a.counterparty) continue;
-                  const k = a.counterparty.toLowerCase();
-                  if (seen.has(k)) continue;
-                  seen.add(k);
-                  poisonPeers.push({
-                    address: a.counterparty,
-                    label:
-                      bookLabel(a.counterparty) ||
-                      `${a.counterparty.slice(0, 6)}…${a.counterparty.slice(-4)}`,
-                  });
-                }
-                return activity
-                  .filter((row) =>
-                    actFilter === "all" ? true : row.direction === actFilter,
-                  )
-                  .map((row) => {
-                    const parts =
-                      !row.method && Number(row.valueEth) !== 0
-                        ? fmtActivityAmtParts(row.valueEth)
-                        : null;
-                    const dirLabel =
-                      row.direction === "in"
-                        ? "In"
-                        : row.direction === "out"
-                          ? "Out"
-                          : row.direction === "self"
-                            ? "Self"
-                            : row.direction;
-                    const poison = activityPoison(row, poisonPeers);
-                    const poisonTitle = poison
-                      ? poison.direction === "in"
-                        ? `Possible poison${poison.dust ? " dust" : ""} — lookalike of “${poison.label}”. Don’t copy this sender as a recipient.`
-                        : `Lookalike of “${poison.label}” — confirm full address before trusting this Out.`
-                      : undefined;
-                    return (
-                      <li
-                        key={row.hash}
-                        className={
-                          poison
-                            ? poison.dust
-                              ? "activity-row poison dust"
-                              : "activity-row poison"
-                            : "activity-row"
-                        }
-                      >
-                        <button
-                          type="button"
-                          className={`activity-dir ${row.direction}`}
-                          title={`Copy ${row.hash}`}
-                          onClick={() => {
-                            void navigator.clipboard.writeText(row.hash);
-                          }}
-                        >
-                          {dirLabel}
-                        </button>
-                        <span
-                          className="activity-amt"
-                          title={
-                            row.asset || row.method
-                              ? `${row.asset || row.method} · ${row.valueEth}`
-                              : row.valueEth
-                          }
-                        >
-                          {parts ? (
-                            <>
-                              <span className="activity-int">{parts.int}</span>
-                              <span className="activity-frac">
-                                {parts.frac != null ? `.${parts.frac}` : ""}
-                              </span>
-                              {row.asset && row.asset !== "PLS" ? (
-                                <span className="activity-asset">
-                                  {" "}
-                                  {row.asset}
-                                </span>
-                              ) : null}
-                            </>
-                          ) : (
-                            <span className="activity-int method">
-                              {row.method || "—"}
-                            </span>
-                          )}
-                        </span>
-                        <span
-                          className={
-                            poison ? "activity-poison on" : "activity-poison"
-                          }
-                          title={poisonTitle}
-                          aria-label={poisonTitle}
-                        >
-                          {poison ? "!" : ""}
-                        </span>
-                        <span
-                          className="activity-when"
-                          title={fullWhen(row.timestamp) || undefined}
-                        >
-                          {shortWhen(row.timestamp)}
-                        </span>
-                      </li>
-                    );
-                  });
-              })()}
-            </ul>
-          )}
-          {active && activity.length > 0 ? (
-            <button
-              type="button"
-              className="btn ghost"
-              disabled={actBusy}
-              onClick={() => {
-                const next = actLimit + 24;
-                setActLimit(next);
-                void refreshActivity(active.address, chainId, next);
-              }}
-            >
-              {actBusy ? "…" : "Load more history"}
-            </button>
-          ) : null}
-        </section>
+        <ActivityPanel
+          active={active}
+          session={!!session}
+          chainId={chainId}
+          activity={activity}
+          actBusy={actBusy}
+          actErr={actErr}
+          actFilter={actFilter}
+          setActFilter={setActFilter}
+          actLimit={actLimit}
+          setActLimit={setActLimit}
+          refreshActivity={refreshActivity}
+          addressBook={addressBook}
+          lastTx={lastTx}
+          txStatus={txStatus}
+          busy={busy}
+          onSpeedUp={onSpeedUp}
+          onCancelStuck={onCancelStuck}
+        />
 
         <section className="card send">
           <div className="action-tabs" role="tablist" aria-label="Actions">
@@ -3567,564 +3352,61 @@ export function PulseTrezor({
             hidden={actionTab !== "send"}
           >
             {actionTab === "send" ? (
-              !canSign ? (
-                <p className="muted empty-teach">
-                  Next: Connect Trezor, then paste a recipient and amount.
-                </p>
-              ) : (
-                <>
-                  {chainId === 369 &&
-                  balance != null &&
-                  balance === 0n &&
-                  asset === "PLS" ? (
-                    <p className="muted empty-teach">
-                      Bag is 0 PLS on mainnet — bridge or receive first (Apps →
-                      Bridge), or switch to testnet for lab dust.
-                    </p>
-                  ) : null}
-                  <label className="field">
-                    To
-                    <span className="amount-row">
-                      <input
-                        value={to}
-                        onChange={(e) => setTo(e.target.value.trim())}
-                        placeholder="0x…"
-                        spellCheck={false}
-                        autoComplete="off"
-                        list="perch-address-book"
-                      />
-                      <button
-                        type="button"
-                        className="btn ghost gas-pill"
-                        onClick={() => {
-                          void navigator.clipboard.readText().then(
-                            (t) => {
-                              const v = t.trim();
-                              if (v) setTo(v);
-                            },
-                            () => setErr("Clipboard paste blocked by browser."),
-                          );
-                        }}
-                      >
-                        Paste
-                      </button>
-                    </span>
-                  </label>
-                  <datalist id="perch-address-book">
-                    {addressBook.map((b) => (
-                      <option
-                        key={b.address}
-                        value={b.address}
-                        label={b.label}
-                      />
-                    ))}
-                  </datalist>
-                  {addressBook.length ||
-                  activity.some((a) => a.counterparty) ? (
-                    <div className="book-chips" role="list">
-                      {addressBook.slice(0, 8).map((b) => (
-                        <button
-                          key={b.address}
-                          type="button"
-                          role="listitem"
-                          className={
-                            to.toLowerCase() === b.address.toLowerCase()
-                              ? "btn gas-pill on"
-                              : "btn ghost gas-pill"
-                          }
-                          onClick={() => setTo(b.address)}
-                          title={b.address}
-                        >
-                          {b.label || shortAddr(b.address)}
-                        </button>
-                      ))}
-                      {Array.from(
-                        new Set(
-                          activity
-                            .filter((a) => a.direction === "out" && a.counterparty)
-                            .map((a) => a.counterparty!.toLowerCase()),
-                        ),
-                      )
-                        .filter(
-                          (addr) =>
-                            !addressBook.some(
-                              (b) => b.address.toLowerCase() === addr,
-                            ),
-                        )
-                        .slice(0, 4)
-                        .map((addr) => (
-                          <button
-                            key={addr}
-                            type="button"
-                            role="listitem"
-                            className={
-                              to.toLowerCase() === addr
-                                ? "btn gas-pill on"
-                                : "btn ghost gas-pill"
-                            }
-                            onClick={() => setTo(addr)}
-                            title={addr}
-                          >
-                            recent {shortAddr(addr)}
-                          </button>
-                        ))}
-                    </div>
-                  ) : null}
-                  {to && isAddress(to)
-                    ? (() => {
-                        const dead =
-                          asset === "PLS"
-                            ? deadEndNativeSend(to, "0x")
-                            : selectedToken
-                              ? deadEndTokenTransfer(selectedToken.address, to)
-                              : null;
-                        if (dead) {
-                          return (
-                            <p className="warn-line" role="alert">
-                              Blocked · {dead.name}: {dead.reason}
-                            </p>
-                          );
-                        }
-                        const poison = lookalikePoison(to, addressBook);
-                        return poison ? (
-                          <p className="warn-line" role="alert">
-                            Lookalike of “{poison.label}” — same start/end,
-                            different middle. Clipboard scams do this. Check
-                            every character on Trezor.
-                          </p>
-                        ) : null;
-                      })()
-                    : null}
-                  {to && isAddress(to) ? (
-                    isKnownRecipient(to) ? (
-                      <p className="muted fee">
-                        Address book: {bookLabel(to)}
-                      </p>
-                    ) : (
-                      <div className="row revoke-bulk">
-                        <p className="warn-line">New recipient — not in book.</p>
-                        <input
-                          className="book-label-in"
-                          value={bookLabelDraft}
-                          onChange={(e) => setBookLabelDraft(e.target.value)}
-                          placeholder="label"
-                        />
-                        <button
-                          type="button"
-                          className="btn ghost"
-                          onClick={() => {
-                            setAddressBook(
-                              upsertAddressBook(
-                                to,
-                                bookLabelDraft || shortAddr(to),
-                              ),
-                            );
-                            setBookLabelDraft("");
-                          }}
-                        >
-                          Save
-                        </button>
-                      </div>
-                    )
-                  ) : null}
-                  <label className="field">
-                    Amount
-                    <span className="amount-row">
-                      <input
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder="0.01"
-                        inputMode="decimal"
-                      />
-                      <button
-                        type="button"
-                        className="btn ghost gas-pill"
-                        disabled={
-                          asset === "PLS"
-                            ? balance == null
-                            : !selectedToken
-                        }
-                        onClick={onMaxSend}
-                      >
-                        Max
-                      </button>
-                    </span>
-                  </label>
-                  {amount.trim() &&
-                  (() => {
-                    try {
-                      if (asset === "PLS" && balance != null) {
-                        return parseEther(amount.trim()) > balance;
-                      }
-                      if (selectedToken) {
-                        const raw = parseTokenAmount(
-                          amount.trim(),
-                          selectedToken.decimals,
-                        );
-                        const core = tokenRows.find(
-                          (r) =>
-                            r.token.address.toLowerCase() ===
-                            selectedToken.address.toLowerCase(),
-                        );
-                        if (core) return raw > core.raw;
-                        const custom = customRows.find(
-                          (r) =>
-                            r.token.address.toLowerCase() ===
-                            selectedToken.address.toLowerCase(),
-                        );
-                        if (custom) return raw > custom.raw;
-                        const extra = fullBag?.tokens.find(
-                          (t) =>
-                            t.address.toLowerCase() ===
-                            selectedToken.address.toLowerCase(),
-                        );
-                        if (extra) return raw > extra.raw;
-                      }
-                      return false;
-                    } catch {
-                      return false;
-                    }
-                  })() ? (
-                    <p className="warn-line">Amount exceeds balance.</p>
-                  ) : null}
-                  <details className="gas-details">
-                    <summary>
-                      Nonce
-                      {nonceHint != null ? ` (pending ${nonceHint})` : ""}
-                    </summary>
-                    <label className="field">
-                      Override
-                      <input
-                        value={nonceOverride}
-                        onChange={(e) => setNonceOverride(e.target.value)}
-                        placeholder="auto"
-                        inputMode="numeric"
-                        autoComplete="off"
-                      />
-                    </label>
-                    <p className="muted fee">
-                      Leave blank for next pending nonce. Only set this if you
-                      know why (stuck queue / replace).
-                    </p>
-                  </details>
-                  {feeHint ? <p className="muted fee">{feeHint}</p> : null}
-                  <div className="gas-speed" role="group" aria-label="Send speed">
-                    <span className="gas-speed-label">Speed</span>
-                    {(
-                      [
-                        ["normal", "Normal"],
-                        ["faster", "Faster"],
-                        ["fastest", "Fastest"],
-                      ] as const
-                    ).map(([id, label]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        className={
-                          gasSpeed === id ? "btn gas-pill on" : "btn ghost gas-pill"
-                        }
-                        disabled={!feePreview && id !== "normal"}
-                        onClick={() => applyGasSpeed(feePreview, id)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="muted fee gas-explain">
-                    {gasSpeed === "normal"
-                      ? "Normal uses the network quote. Want it mined sooner? Pick Faster — that raises the priority tip validators earn."
-                      : gasSpeed === "faster"
-                        ? `Priority tip raised (~1.5×). You’re paying validators more to pick you sooner.${
-                            tipGwei
-                              ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.`
-                              : ""
-                          }`
-                        : `Highest tip (~2×). Use when a tx is urgent or the mempool is busy.${
-                            tipGwei
-                              ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.`
-                              : ""
-                          }`}
-                  </p>
-                  <details className="gas-details">
-                    <summary>Advanced ({gasUnitLabel(chainId)})</summary>
-                    <div className="gas-grid">
-                      <label className="field">
-                        Priority tip
-                        <input
-                          value={tipGwei}
-                          onChange={(e) => {
-                            setTipGwei(e.target.value);
-                            setGasSpeed(
-                              e.target.value.trim() ? "faster" : "normal",
-                            );
-                          }}
-                          placeholder="auto"
-                          inputMode="decimal"
-                          autoComplete="off"
-                          aria-label={`Priority tip in ${gasUnitLabel(chainId)}`}
-                        />
-                      </label>
-                      <label className="field">
-                        Max fee ceiling
-                        <input
-                          value={maxFeeGwei}
-                          onChange={(e) => {
-                            setMaxFeeGwei(e.target.value);
-                            if (e.target.value.trim()) setGasSpeed("faster");
-                          }}
-                          placeholder="auto"
-                          inputMode="decimal"
-                          autoComplete="off"
-                          aria-label={`Max fee ceiling in ${gasUnitLabel(chainId)}`}
-                        />
-                      </label>
-                    </div>
-                    <p className="muted fee">
-                      Tip = what validators get to include you. Max fee = hard
-                      ceiling (base fee + tip). Blank = network estimate.
-                      {chainId === 369 || chainId === 943
-                        ? " Pulse gas is in beats — not gwei."
-                        : ""}
-                    </p>
-                  </details>
-                  {to && isAddress(to) ? (
-                    <TxExplain
-                      chainId={chainId}
-                      account={session?.address ?? null}
-                      to={
-                        asset === "PLS"
-                          ? to
-                          : (selectedToken?.address as string) || to
-                      }
-                      data={
-                        asset === "PLS"
-                          ? "0x"
-                          : selectedToken
-                            ? encodeErc20Transfer(
-                                to as Address,
-                                parseTokenAmount(
-                                  amount || "0",
-                                  selectedToken.decimals,
-                                ),
-                              )
-                            : "0x"
-                      }
-                      valueWei={
-                        asset === "PLS" && amount.trim()
-                          ? (() => {
-                              try {
-                                return parseEther(amount.trim());
-                              } catch {
-                                return 0n;
-                              }
-                            })()
-                          : 0n
-                      }
-                      rpc={effectiveRpc}
-                    />
-                  ) : null}
-                  <button
-                    type="button"
-                    className="btn"
-                    disabled={
-                      busy ||
-                      !to ||
-                      !amount ||
-                      (chainId === 369 &&
-                        !mainnetSendAcked &&
-                        !mainnetSendAck) ||
-                      (isAddress(to) &&
-                        !!(asset === "PLS"
-                          ? deadEndNativeSend(to, "0x")
-                          : selectedToken
-                            ? deadEndTokenTransfer(selectedToken.address, to)
-                            : null)) ||
-                      (() => {
-                        try {
-                          if (asset === "PLS" && balance != null) {
-                            return parseEther(amount.trim()) > balance;
-                          }
-                          if (selectedToken) {
-                            const raw = parseTokenAmount(
-                              amount.trim(),
-                              selectedToken.decimals,
-                            );
-                            const have =
-                              tokenRows.find(
-                                (r) =>
-                                  r.token.address.toLowerCase() ===
-                                  selectedToken.address.toLowerCase(),
-                              )?.raw ??
-                              customRows.find(
-                                (r) =>
-                                  r.token.address.toLowerCase() ===
-                                  selectedToken.address.toLowerCase(),
-                              )?.raw ??
-                              fullBag?.tokens.find(
-                                (t) =>
-                                  t.address.toLowerCase() ===
-                                  selectedToken.address.toLowerCase(),
-                              )?.raw;
-                            return have != null && raw > have;
-                          }
-                          return false;
-                        } catch {
-                          return false;
-                        }
-                      })()
-                    }
-                    onClick={onSend}
-                  >
-                    {busy ? "Signing…" : "Sign & send"}
-                  </button>
-                  {chainId === 369 && !mainnetSendAcked ? (
-                    <label className="blind-ack">
-                      <input
-                        type="checkbox"
-                        checked={mainnetSendAck}
-                        onChange={(e) => setMainnetSendAck(e.target.checked)}
-                      />
-                      <span>
-                        First mainnet send — real PLS/tokens leave this wallet.
-                        I will read the recipient and amount on Trezor.
-                      </span>
-                    </label>
-                  ) : null}
-                  <details
-                    className="gas-details"
-                    open={customCallOpen}
-                    onToggle={(e) =>
-                      setCustomCallOpen((e.target as HTMLDetailsElement).open)
-                    }
-                  >
-                    <summary>Custom contract call (power tool)</summary>
-                    <label className="field">
-                      Contract
-                      <input
-                        value={callTo}
-                        onChange={(e) => setCallTo(e.target.value.trim())}
-                        placeholder="0x…"
-                        spellCheck={false}
-                      />
-                    </label>
-                    <label className="field">
-                      Calldata (hex)
-                      <input
-                        value={callData}
-                        onChange={(e) => setCallData(e.target.value.trim())}
-                        placeholder="0x…"
-                        spellCheck={false}
-                      />
-                    </label>
-                    <p className="muted">
-                      Payable value uses Amount above (e.g. WPLS{" "}
-                      <code>deposit()</code> = <code>0xd0e30db0</code>).
-                    </p>
-                    <p className="warn-line">
-                      Power / rescue only — read every byte on Trezor. Blind
-                      selectors need extra care.
-                    </p>
-                    {callTo && isAddress(callTo) ? (
-                      <TxExplain
-                        chainId={chainId}
-                        account={session?.address ?? null}
-                        to={callTo}
-                        data={callData.trim() || "0x"}
-                        rpc={effectiveRpc}
-                      />
-                    ) : null}
-                    <button
-                      type="button"
-                      className="btn ghost"
-                      disabled={busy || !callTo}
-                      onClick={onCustomCall}
-                    >
-                      Sign call
-                    </button>
-                  </details>
-                  {chainId === 369 && mainnetSendAcked ? (
-                    <p className="warn-line">Mainnet — real funds.</p>
-                  ) : null}
-                  {lastTx ? (
-                    <div className="stuck-box">
-                      <p>
-                        Tx{" "}
-                        <a
-                          className="link"
-                          href={explorerTxUrl(chainId, lastTx)}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {shortAddr(lastTx)}
-                        </a>
-                        {txStatus ? (
-                          <span className="muted"> · {txStatus}</span>
-                        ) : null}
-                      </p>
-                      <div className="row">
-                        <button
-                          type="button"
-                          className="btn ghost"
-                          onClick={() => {
-                            void navigator.clipboard.writeText(lastTx).then(
-                              () => {
-                                setHashCopied(true);
-                                window.setTimeout(
-                                  () => setHashCopied(false),
-                                  1500,
-                                );
-                              },
-                            );
-                          }}
-                        >
-                          {hashCopied ? "Copied" : "Copy hash"}
-                        </button>
-                        {txStatus === "confirmed" ||
-                        txStatus === "reverted" ? (
-                          <button
-                            type="button"
-                            className="btn ghost"
-                            onClick={() => {
-                              setLastTx(null);
-                              setTxStatus(null);
-                            }}
-                          >
-                            Clear
-                          </button>
-                        ) : null}
-                      </div>
-                      {txStatus === "pending" || txStatus === "timeout" ? (
-                        <>
-                          <p className="muted fee">
-                            Still pending? Speed up = same transfer, +25% tip —
-                            like bumping priority after you already sent. Cancel
-                            = replace it with a 0-value self-send so the nonce
-                            clears.
-                          </p>
-                          <div className="row">
-                            <button
-                              type="button"
-                              className="btn ghost"
-                              disabled={busy}
-                              onClick={onSpeedUp}
-                            >
-                              Speed up (+25%)
-                            </button>
-                            <button
-                              type="button"
-                              className="btn ghost"
-                              disabled={busy}
-                              onClick={onCancelStuck}
-                            >
-                              Cancel stuck
-                            </button>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </>
-              )
+              <SendPanel
+                canSign={canSign}
+                chainId={chainId}
+                sessionAddress={session?.address ?? null}
+                balance={balance}
+                asset={asset}
+                to={to}
+                setTo={setTo}
+                setErr={setErr}
+                addressBook={addressBook}
+                setAddressBook={setAddressBook}
+                bookLabelDraft={bookLabelDraft}
+                setBookLabelDraft={setBookLabelDraft}
+                activity={activity}
+                amount={amount}
+                setAmount={setAmount}
+                selectedToken={selectedToken}
+                tokenRows={tokenRows}
+                customRows={customRows}
+                fullBag={fullBag}
+                onMaxSend={onMaxSend}
+                nonceHint={nonceHint}
+                nonceOverride={nonceOverride}
+                setNonceOverride={setNonceOverride}
+                feeHint={feeHint}
+                feePreview={feePreview}
+                gasSpeed={gasSpeed}
+                setGasSpeed={setGasSpeed}
+                tipGwei={tipGwei}
+                setTipGwei={setTipGwei}
+                maxFeeGwei={maxFeeGwei}
+                setMaxFeeGwei={setMaxFeeGwei}
+                applyGasSpeed={applyGasSpeed}
+                effectiveRpc={effectiveRpc}
+                busy={busy}
+                mainnetSendAcked={mainnetSendAcked}
+                mainnetSendAck={mainnetSendAck}
+                setMainnetSendAck={setMainnetSendAck}
+                onSend={onSend}
+                customCallOpen={customCallOpen}
+                setCustomCallOpen={setCustomCallOpen}
+                callTo={callTo}
+                setCallTo={setCallTo}
+                callData={callData}
+                setCallData={setCallData}
+                onCustomCall={onCustomCall}
+                lastTx={lastTx}
+                setLastTx={setLastTx}
+                txStatus={txStatus}
+                setTxStatus={setTxStatus}
+                hashCopied={hashCopied}
+                setHashCopied={setHashCopied}
+                onSpeedUp={onSpeedUp}
+                onCancelStuck={onCancelStuck}
+              />
             ) : null}
           </div>
 
@@ -4135,151 +3417,28 @@ export function PulseTrezor({
             hidden={actionTab !== "swap"}
           >
             {actionTab === "swap" ? (
-              chainId !== 369 ? (
-                <p className="muted">PulseX swap is mainnet only.</p>
-              ) : !canSign ? (
-                <p className="muted">Connect Trezor to swap.</p>
-              ) : (
-                <>
-                  <div className="swap-grid">
-                    <label className="field">
-                      From
-                      <select
-                        value={String(swapIn)}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          setSwapIn(v === "PLS" ? "PLS" : (v as Address));
-                          setSwapQuote(null);
-                        }}
-                      >
-                        {SWAP_FACE.map((o) => (
-                          <option key={String(o.id)} value={String(o.id)}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="field">
-                      To
-                      <select
-                        value={String(swapOut)}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          setSwapOut(v === "PLS" ? "PLS" : (v as Address));
-                          setSwapQuote(null);
-                        }}
-                      >
-                        {SWAP_FACE.map((o) => (
-                          <option key={`out-${String(o.id)}`} value={String(o.id)}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="field">
-                      Amount in
-                      <input
-                        value={swapAmt}
-                        onChange={(e) => {
-                          setSwapAmt(e.target.value);
-                          setSwapQuote(null);
-                        }}
-                        placeholder="0.0"
-                        inputMode="decimal"
-                      />
-                    </label>
-                  </div>
-                  <div className="gas-grid swap-controls">
-                    <label className="field">
-                      Slippage %
-                      <input
-                        value={(slipBps / 100).toFixed(2)}
-                        onChange={(e) => {
-                          const n = Number(e.target.value);
-                          if (!Number.isFinite(n) || n < 0) return;
-                          setSlipBps(Math.round(n * 100));
-                          setSwapQuote(null);
-                        }}
-                        inputMode="decimal"
-                      />
-                    </label>
-                    <label className="field">
-                      Deadline (min)
-                      <input
-                        value={String(deadlineMin)}
-                        onChange={(e) => {
-                          const n = Number(e.target.value);
-                          if (!Number.isFinite(n) || n < 1) return;
-                          setDeadlineMin(Math.floor(n));
-                        }}
-                        inputMode="numeric"
-                      />
-                    </label>
-                  </div>
-                  <div className="row">
-                    <button
-                      type="button"
-                      className="btn ghost"
-                      disabled={swapQuoteBusy || !swapAmt.trim()}
-                      onClick={refreshSwapQuote}
-                    >
-                      {swapQuoteBusy ? "Quoting…" : "Quote"}
-                    </button>
-                    {swapNeedApprove ? (
-                      <button
-                        type="button"
-                        className="btn ghost"
-                        disabled={busy}
-                        onClick={onSwapApproveRouter}
-                      >
-                        Approve PulseX
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="btn"
-                      disabled={
-                        busy || !swapQuote || swapNeedApprove || swapQuoteBusy
-                      }
-                      onClick={onSwap}
-                    >
-                      {busy ? "Signing…" : "Sign swap"}
-                    </button>
-                  </div>
-                  {swapQuote ? (
-                    <p className="muted fee">
-                      ~{formatUnits(
-                        swapQuote.amountOut,
-                        swapTokenMeta(369, swapOut)?.decimals ?? 18,
-                      )}{" "}
-                      {swapAssetLabel(swapOut)} out · min{" "}
-                      {formatUnits(
-                        swapQuote.amountOutMin,
-                        swapTokenMeta(369, swapOut)?.decimals ?? 18,
-                      )}{" "}
-                      (slip {(slipBps / 100).toFixed(2)}%) · PulseX V2 · ends
-                      in {deadlineMin}m
-                    </p>
-                  ) : (
-                    <p className="muted fee">
-                      Quote uses PulseX V2. Token→token hops via WPLS. Confirm
-                      path on Trezor. Prefer Sites for the full PulseX UI:{" "}
-                      <a
-                        className="link"
-                        href="https://ipfs.app.pulsex.com"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        ipfs.app.pulsex.com
-                      </a>
-                      .
-                    </p>
-                  )}
-                  {chainId === 369 ? (
-                    <p className="warn-line">Mainnet — real funds.</p>
-                  ) : null}
-                </>
-              )
+              <SwapPanel
+                canSign={canSign}
+                chainId={chainId}
+                busy={busy}
+                swapIn={swapIn}
+                setSwapIn={setSwapIn}
+                swapOut={swapOut}
+                setSwapOut={setSwapOut}
+                swapAmt={swapAmt}
+                setSwapAmt={setSwapAmt}
+                slipBps={slipBps}
+                setSlipBps={setSlipBps}
+                deadlineMin={deadlineMin}
+                setDeadlineMin={setDeadlineMin}
+                swapQuote={swapQuote}
+                setSwapQuote={setSwapQuote}
+                swapQuoteBusy={swapQuoteBusy}
+                swapNeedApprove={swapNeedApprove}
+                refreshSwapQuote={refreshSwapQuote}
+                onSwapApproveRouter={onSwapApproveRouter}
+                onSwap={onSwap}
+              />
             ) : null}
           </div>
 
