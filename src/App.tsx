@@ -16,14 +16,6 @@ export function App() {
         </div>
       </header>
       <PulseTrezor defaultChainId={943} showTestnet />
-      <img
-        className="mascot"
-        src="/mascot-perch.png?v=5"
-        alt=""
-        width={512}
-        height={768}
-        decoding="async"
-      />
     </div>
   );
 }

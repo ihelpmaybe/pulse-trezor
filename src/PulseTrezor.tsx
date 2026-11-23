@@ -136,7 +136,12 @@ import {
 import { decodeSyncPayload } from "./chain/syncPair";
 import { SyncPair } from "./ui/SyncPair";
 import { InstallPwa } from "./ui/InstallPwa";
-import { loadHexModule, saveHexModule } from "./ui/modules";
+import {
+  loadHexModule,
+  loadMascot,
+  saveHexModule,
+  saveMascot,
+} from "./ui/modules";
 import { t } from "./i18n/en";
 import {
   PULSEX_V2_ROUTER,
@@ -568,6 +573,8 @@ export function PulseTrezor({
   const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
   /** Optional HEX stakes UI (Stakes tab / marks) — Settings modules. */
   const [hexModule, setHexModule] = useState(() => loadHexModule());
+  /** Corner anime mascot — Settings → Display; off by default. */
+  const [mascotOn, setMascotOn] = useState(() => loadMascot());
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
   const [callData, setCallData] = useState("");
   const [callTo, setCallTo] = useState("");
@@ -2967,6 +2974,21 @@ export function PulseTrezor({
               />
               {t("lightTheme")}
             </label>
+            <label className="hide-zero">
+              <input
+                type="checkbox"
+                checked={mascotOn}
+                onChange={(e) => {
+                  const on = e.target.checked;
+                  setMascotOn(on);
+                  saveMascot(on);
+                }}
+              />
+              Show mascot
+            </label>
+            <p className="muted fee">
+              Corner anime perch art. Off by default — turn on if you want her.
+            </p>
 
             <h4 className="settings-section">Modules</h4>
             <label className="hide-zero">
@@ -5414,6 +5436,16 @@ export function PulseTrezor({
           {t("noCollect")}
         </p>
       </footer>
+      {mascotOn ? (
+        <img
+          className="mascot"
+          src="/mascot-perch.png?v=5"
+          alt=""
+          width={512}
+          height={768}
+          decoding="async"
+        />
+      ) : null}
     </div>
   );
 }
