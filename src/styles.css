@@ -213,6 +213,7 @@ body {
 .pulse-trezor[data-privacy-hide] .acct-bal,
 .pulse-trezor[data-privacy-hide] .bal,
 .pulse-trezor[data-privacy-hide] .activity-amt,
+.pulse-trezor[data-privacy-hide] .activity-peer,
 .pulse-trezor[data-privacy-hide] .token-grid .muted,
 .pulse-trezor[data-privacy-hide] .token-grid code,
 .pulse-trezor[data-privacy-hide] .receive-uri code,
@@ -401,11 +402,10 @@ body {
 }
 
 .card.activity {
-  /* Width tracks the header (title + filter pills), not a stretched grid cell */
-  justify-self: start;
-  width: max-content;
+  /* Fill lane width — tile rows across the desk (ui-real-estate) */
+  width: 100%;
   max-width: 100%;
-  min-width: 14.5rem;
+  min-width: 0;
   padding: 0.55rem 0.65rem;
 }
 
@@ -420,7 +420,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem 0.55rem;
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.25rem;
 }
 
 .activity-tools {
@@ -433,21 +433,35 @@ body {
   gap: 0.2rem;
 }
 
+.activity-summary {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.activity-summary-meta {
+  opacity: 0.9;
+}
+
 .activity-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.25rem 0.55rem;
 }
 
 .activity-row {
   display: grid;
-  grid-template-columns: 2.4rem minmax(0, 1fr) 0.7rem auto;
-  column-gap: 0.35rem;
+  grid-template-columns: 2.2rem minmax(3.5rem, 1fr) minmax(3.2rem, 0.85fr) 0.65rem auto;
+  column-gap: 0.3rem;
   align-items: baseline;
-  font-size: 0.72rem;
-  line-height: 1.25;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  padding: 0.12rem 0.2rem;
+  border-radius: 3px;
 }
 
 .activity-row.pending {
@@ -535,10 +549,25 @@ body {
   color: var(--fg, inherit);
 }
 
+.activity-peer {
+  font-size: 0.62rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+  min-width: 0;
+}
+
 .activity-when {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   white-space: nowrap;
   color: var(--muted);
+}
+
+.activity-more {
+  margin-top: 0.4rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.68rem;
 }
 
 .blind-ack {

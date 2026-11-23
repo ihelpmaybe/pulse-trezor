@@ -8,7 +8,9 @@ import {
   readFileSync,
   readdirSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
@@ -78,5 +80,11 @@ if (Archiver) {
 }
 
 const size = statSync(zipPath).size;
-console.log(JSON.stringify({ ok: true, zip: zipPath, bytes: size, version }));
+const hash = createHash("sha256")
+  .update(readFileSync(zipPath))
+  .digest("hex");
+writeFileSync(join(OUT_DIR, `${zipName}.sha256`), `${hash}  ${zipName}\n`);
+console.log(
+  JSON.stringify({ ok: true, zip: zipPath, bytes: size, version, sha256: hash }),
+);
 console.log("EXT_PACK_OK");

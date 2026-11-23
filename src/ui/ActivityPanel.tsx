@@ -1,5 +1,6 @@
 /**
  * Activity card — PulseScan feed, poison flags, stuck-tx shortcuts.
+ * Dense grid on wide panels (ui-real-estate).
  */
 import type { Address, Hash } from "viem";
 import {
@@ -42,6 +43,13 @@ type Props = {
   onCancelStuck: () => void;
 };
 
+function shortPeer(addr: string | null | undefined): string | null {
+  if (!addr) return null;
+  const label = bookLabel(addr);
+  if (label) return label;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
 export function ActivityPanel({
   active,
   session,
@@ -61,6 +69,37 @@ export function ActivityPanel({
   onSpeedUp,
   onCancelStuck,
 }: Props) {
+  const poisonPeers: { address: string; label: string }[] = [
+    ...addressBook.map((b) => ({
+      address: b.address,
+      label: b.label,
+    })),
+  ];
+  const seen = new Set(poisonPeers.map((p) => p.address.toLowerCase()));
+  for (const a of activity) {
+    if (a.direction !== "out" || !a.counterparty) continue;
+    const k = a.counterparty.toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    poisonPeers.push({
+      address: a.counterparty,
+      label:
+        bookLabel(a.counterparty) ||
+        `${a.counterparty.slice(0, 6)}…${a.counterparty.slice(-4)}`,
+    });
+  }
+
+  const filtered = activity.filter((row) =>
+    actFilter === "all" ? true : row.direction === actFilter,
+  );
+  const inN = activity.filter((r) => r.direction === "in").length;
+  const outN = activity.filter((r) => r.direction === "out").length;
+  const poisonN = activity.filter((r) => activityPoison(r, poisonPeers)).length;
+  const showPending =
+    !!lastTx &&
+    txStatus === "pending" &&
+    !activity.some((a) => a.hash.toLowerCase() === lastTx.toLowerCase());
+
   return (
     <section className="card activity">
       <div className="device-head activity-head">
@@ -106,171 +145,160 @@ export function ActivityPanel({
         <p className="muted">{actErr}</p>
       ) : actBusy && !activity.length ? (
         <p className="muted">…</p>
-      ) : !activity.length ? (
+      ) : !activity.length && !showPending ? (
         <p className="muted">No recent txs on this chain.</p>
       ) : (
-        <ul className="activity-list">
-          {lastTx &&
-          txStatus === "pending" &&
-          !activity.some(
-            (a) => a.hash.toLowerCase() === lastTx.toLowerCase(),
-          ) ? (
-            <li className="activity-row pending">
-              <button
-                type="button"
-                className="activity-dir"
-                title={`Copy ${lastTx}`}
-                onClick={() => {
-                  void navigator.clipboard.writeText(lastTx);
-                }}
-              >
-                …
-              </button>
-              <span className="activity-amt">
-                <span className="activity-int">…</span>
-                <span className="activity-frac" />
+        <>
+          {activity.length > 0 ? (
+            <p className="activity-summary" role="status">
+              {activity.length} tx
+              {activity.length === 1 ? "" : "s"}
+              <span className="activity-summary-meta">
+                {" "}
+                · {inN} in · {outN} out
+                {poisonN ? ` · ${poisonN} flag` : ""}
+                {actFilter !== "all" ? ` · showing ${filtered.length}` : ""}
               </span>
-              <span className="activity-when">mining</span>
-              {(txStatus === "pending" || txStatus === "timeout") && session ? (
-                <span className="row activity-stuck">
-                  <button
-                    type="button"
-                    className="btn ghost gas-pill"
-                    disabled={busy}
-                    onClick={onSpeedUp}
-                  >
-                    Speed up
-                  </button>
-                  <button
-                    type="button"
-                    className="btn ghost gas-pill"
-                    disabled={busy}
-                    onClick={onCancelStuck}
-                  >
-                    Cancel
-                  </button>
-                </span>
-              ) : null}
-            </li>
+            </p>
           ) : null}
-          {(() => {
-            const poisonPeers: { address: string; label: string }[] = [
-              ...addressBook.map((b) => ({
-                address: b.address,
-                label: b.label,
-              })),
-            ];
-            const seen = new Set(
-              poisonPeers.map((p) => p.address.toLowerCase()),
-            );
-            for (const a of activity) {
-              if (a.direction !== "out" || !a.counterparty) continue;
-              const k = a.counterparty.toLowerCase();
-              if (seen.has(k)) continue;
-              seen.add(k);
-              poisonPeers.push({
-                address: a.counterparty,
-                label:
-                  bookLabel(a.counterparty) ||
-                  `${a.counterparty.slice(0, 6)}…${a.counterparty.slice(-4)}`,
-              });
-            }
-            return activity
-              .filter((row) =>
-                actFilter === "all" ? true : row.direction === actFilter,
-              )
-              .map((row) => {
-                const parts =
-                  !row.method && Number(row.valueEth) !== 0
-                    ? fmtActivityAmtParts(row.valueEth)
-                    : null;
-                const dirLabel =
-                  row.direction === "in"
-                    ? "In"
-                    : row.direction === "out"
-                      ? "Out"
-                      : row.direction === "self"
-                        ? "Self"
-                        : row.direction;
-                const poison = activityPoison(row, poisonPeers);
-                const poisonTitle = poison
-                  ? poison.direction === "in"
-                    ? `Possible poison${poison.dust ? " dust" : ""} — lookalike of “${poison.label}”. Don’t copy this sender as a recipient.`
-                    : `Lookalike of “${poison.label}” — confirm full address before trusting this Out.`
-                  : undefined;
-                return (
-                  <li
-                    key={row.hash}
-                    className={
-                      poison
-                        ? poison.dust
-                          ? "activity-row poison dust"
-                          : "activity-row poison"
-                        : "activity-row"
-                    }
-                  >
+          <ul className="activity-list">
+            {showPending ? (
+              <li className="activity-row pending">
+                <button
+                  type="button"
+                  className="activity-dir"
+                  title={`Copy ${lastTx}`}
+                  onClick={() => {
+                    void navigator.clipboard.writeText(lastTx!);
+                  }}
+                >
+                  …
+                </button>
+                <span className="activity-amt">
+                  <span className="activity-int">…</span>
+                  <span className="activity-frac" />
+                </span>
+                <span className="activity-peer muted">pending</span>
+                <span className="activity-poison" />
+                <span className="activity-when">mining</span>
+                {session ? (
+                  <span className="row activity-stuck">
                     <button
                       type="button"
-                      className={`activity-dir ${row.direction}`}
-                      title={`Copy ${row.hash}`}
-                      onClick={() => {
-                        void navigator.clipboard.writeText(row.hash);
-                      }}
+                      className="btn ghost gas-pill"
+                      disabled={busy}
+                      onClick={onSpeedUp}
                     >
-                      {dirLabel}
+                      Speed up
                     </button>
-                    <span
-                      className="activity-amt"
-                      title={
-                        row.asset || row.method
-                          ? `${row.asset || row.method} · ${row.valueEth}`
-                          : row.valueEth
-                      }
+                    <button
+                      type="button"
+                      className="btn ghost gas-pill"
+                      disabled={busy}
+                      onClick={onCancelStuck}
                     >
-                      {parts ? (
-                        <>
-                          <span className="activity-int">{parts.int}</span>
-                          <span className="activity-frac">
-                            {parts.frac != null ? `.${parts.frac}` : ""}
-                          </span>
-                          {row.asset && row.asset !== "PLS" ? (
-                            <span className="activity-asset">
-                              {" "}
-                              {row.asset}
-                            </span>
-                          ) : null}
-                        </>
-                      ) : (
-                        <span className="activity-int method">
-                          {row.method || "—"}
+                      Cancel
+                    </button>
+                  </span>
+                ) : null}
+              </li>
+            ) : null}
+            {filtered.map((row) => {
+              const parts =
+                !row.method && Number(row.valueEth) !== 0
+                  ? fmtActivityAmtParts(row.valueEth)
+                  : null;
+              const dirLabel =
+                row.direction === "in"
+                  ? "In"
+                  : row.direction === "out"
+                    ? "Out"
+                    : row.direction === "self"
+                      ? "Self"
+                      : row.direction;
+              const poison = activityPoison(row, poisonPeers);
+              const poisonTitle = poison
+                ? poison.direction === "in"
+                  ? `Possible poison${poison.dust ? " dust" : ""} — lookalike of “${poison.label}”. Don’t copy this sender as a recipient.`
+                  : `Lookalike of “${poison.label}” — confirm full address before trusting this Out.`
+                : undefined;
+              const peer = shortPeer(row.counterparty);
+              return (
+                <li
+                  key={row.hash}
+                  className={
+                    poison
+                      ? poison.dust
+                        ? "activity-row poison dust"
+                        : "activity-row poison"
+                      : "activity-row"
+                  }
+                >
+                  <button
+                    type="button"
+                    className={`activity-dir ${row.direction}`}
+                    title={`Copy ${row.hash}`}
+                    onClick={() => {
+                      void navigator.clipboard.writeText(row.hash);
+                    }}
+                  >
+                    {dirLabel}
+                  </button>
+                  <span
+                    className="activity-amt"
+                    title={
+                      row.asset || row.method
+                        ? `${row.asset || row.method} · ${row.valueEth}`
+                        : row.valueEth
+                    }
+                  >
+                    {parts ? (
+                      <>
+                        <span className="activity-int">{parts.int}</span>
+                        <span className="activity-frac">
+                          {parts.frac != null ? `.${parts.frac}` : ""}
                         </span>
-                      )}
-                    </span>
-                    <span
-                      className={
-                        poison ? "activity-poison on" : "activity-poison"
-                      }
-                      title={poisonTitle}
-                      aria-label={poisonTitle}
-                    >
-                      {poison ? "!" : ""}
-                    </span>
-                    <span
-                      className="activity-when"
-                      title={fullWhen(row.timestamp) || undefined}
-                    >
-                      {shortWhen(row.timestamp)}
-                    </span>
-                  </li>
-                );
-              });
-          })()}
-        </ul>
+                        {row.asset && row.asset !== "PLS" ? (
+                          <span className="activity-asset"> {row.asset}</span>
+                        ) : null}
+                      </>
+                    ) : (
+                      <span className="activity-int method">
+                        {row.method || "—"}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className="activity-peer"
+                    title={row.counterparty || undefined}
+                  >
+                    {peer || "—"}
+                  </span>
+                  <span
+                    className={
+                      poison ? "activity-poison on" : "activity-poison"
+                    }
+                    title={poisonTitle}
+                    aria-label={poisonTitle}
+                  >
+                    {poison ? "!" : ""}
+                  </span>
+                  <span
+                    className="activity-when"
+                    title={fullWhen(row.timestamp) || undefined}
+                  >
+                    {shortWhen(row.timestamp)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
       {active && activity.length > 0 ? (
         <button
           type="button"
-          className="btn ghost"
+          className="btn ghost activity-more"
           disabled={actBusy}
           onClick={() => {
             const next = actLimit + 24;
@@ -278,7 +306,7 @@ export function ActivityPanel({
             void refreshActivity(active.address, chainId, next);
           }}
         >
-          {actBusy ? "…" : "Load more history"}
+          {actBusy ? "…" : "More"}
         </button>
       ) : null}
     </section>
