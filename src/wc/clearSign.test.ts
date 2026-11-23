@@ -45,6 +45,11 @@ describe("blind calldata", () => {
     );
     expect(phishingWarn("https://pulsex.xyz")?.tone).toBe("danger");
     expect(phishingWarn("https://app.pulsex.com")).toBeNull();
+    // Official ProveX must not trip lookalike (regression 2026-11-22)
+    expect(phishingWarn("https://app.provex.com")).toBeNull();
+    expect(phishingWarn("https://provex.com")).toBeNull();
+    expect(phishingWarn("https://proverx.evil")?.tone).toBe("danger");
+    expect(phishingWarn("https://prove-x.scam")?.tone).toBe("danger");
   });
 
   it("always surfaces Origin line", () => {

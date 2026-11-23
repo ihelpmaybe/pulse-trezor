@@ -24,7 +24,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 8 | TIP1 consume SYNC4 pack + RPC align | `Tip-wallet` | TIP1 | After #2+#7 |
 | 9 | ~~Desk A2 tokens HEX/PLSX + approve (use SYNC4)~~ **DONE** | `pulse-trezor` | A2 | balances · ERC-20 send · approve |
 | 10 | Guides: Bridge install + Desk receive thin | `pulse-trezor-guides` | G1/G5 | Parallel w/ #5–9 |
-| 11 | Gate T: Desk smoke green + pen draft | `pulse-trezor` | TEST | Blocks Gate 1 claim |
+| 11 | ~~Gate T: Desk smoke green + pen draft~~ **DONE** (pen Suite-quit 2026-11-23) | `pulse-trezor` | TEST | — |
 
 **Stop claiming Gate 1 until #5+#9+#11 done.**
 
@@ -34,16 +34,16 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 | # | Task | Repo | TODO id | Parallel |
 |---|------|------|---------|----------|
-| 12 | SYNC1 registry import/export schema | `pulse-trezor-platform` | SYNC1 | Solo first |
-| 13 | Desk A3 watch-only + registry import | `pulse-trezor` | A3 | After #12 |
-| 14 | Tip SYNC import/export + QR pair | `Tip-wallet` | TIP3 | After #12 |
-| 15 | SYNC2 QR/deep-link pair | `pulse-trezor-platform` | SYNC2 | With #13–14 |
+| 12 | ~~SYNC1 registry import/export schema~~ **DONE** (Desk aligned; Tip TIP3 next) | `pulse-trezor-platform` | SYNC1 | — |
+| 13 | ~~Desk A3 watch-only + registry import~~ **DONE** (SYNC1 export/import) | `pulse-trezor` | A3 | — |
+| 14 | Tip SYNC import/export + QR pair | `Tip-wallet` | TIP3 | **Blocked TIP0** (no app tree) |
+| 15 | ~~SYNC2 QR/deep-link pair~~ **DONE** (Desk Pair QR; Tip later) | `pulse-trezor-platform` | SYNC2 | — |
 | 16 | Graphene Tip install guide + checksum notes | `pulse-trezor-guides` + Tip | G1/TIP4 | Parallel OK |
-| 17 | “Trezor on Pulse” landing (Suite gap → Desk) | `pulse-trezor-guides` | G6 | Parallel OK |
-| 18 | FW0 mirror + build notes | `pulse-trezor-firmware` | FW0 | Parallel OK |
-| 19 | FW1 Pulse 369 audit | `pulse-trezor-firmware` | FW1 | After #18 |
-| 20 | Suite SU0–SU2 gap map + backend notes | `pulse-trezor-suite` | SU0–SU2 | Parallel OK |
-| 21 | Rescue R0 copy contract + forge CI | `hexican-rescue` | R0 | Parallel OK |
+| 17 | ~~“Trezor on Pulse” landing (Suite gap → Desk)~~ **DONE** | `pulse-trezor-guides` | G6 | — |
+| 18 | ~~FW0 mirror + build notes~~ **DONE** | `pulse-trezor-firmware` | FW0 | — |
+| 19 | ~~FW1 Pulse 369 audit~~ **DONE** | `pulse-trezor-firmware` | FW1 | — |
+| 20 | ~~Suite SU0–SU2 gap map + backend notes~~ **DONE** (public fill 2026-11-23; SU3 lab optional) | `pulse-trezor-suite` | SU0–SU2 | — |
+| 21 | ~~Rescue R0 copy contract + forge CI~~ **DONE** 2026-11-23 | `hexican-rescue` | R0 | — |
 | 22 | Desk Lin + Mac + Web targets | `pulse-trezor` | PLAT | After Gate 1 |
 | 23 | Tip+Desk Gate T SYNC smoke | platform + both | TEST | Blocks Gate 2 |
 
@@ -53,9 +53,9 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 | # | Task | Repo | TODO id | Parallel |
 |---|------|------|---------|----------|
-| 24 | Desk C HEX companion thin | `pulse-trezor` | C | After A2 |
+| 24 | ~~Desk C HEX companion thin~~ **DONE** (modular stakes; possession nudge) | `pulse-trezor` | C | — |
 | 25 | Desk B **PulseX** swap (quote → Trezor sign) | `pulse-trezor` | B | After A2 |
-| 25b | ProveX deep link / USDC flow (guide + Desk entry) | guides + Desk | G6/ProveX | After A2 |
+| 25b | ~~ProveX deep link / USDC flow (guide + Desk entry)~~ **DONE** (guide; Desk Apps already) | guides + Desk | G6/ProveX | — |
 | 26 | ~~PLAT-WC WalletConnect → Desk~~ **DONE v0** (EIP-712 still open) | `pulse-trezor` | PLAT-WC | After A1 |
 | 27 | Rescue R1 deploy + R2 thin UI | `hexican-rescue` | R1–R2 | After R0 |
 | 28 | SYNC3 bunker deeplink | `pulse-trezor-platform` | SYNC3 | After R1 |
@@ -63,9 +63,9 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 30 | FW2 token pack + FW3 emu e2e | `pulse-trezor-firmware` | FW2–FW3 | After FW1 |
 | 31 | Suite SU4 upstream ask | `pulse-trezor-suite` | SU4 | After SU2 |
 | 32 | AI0–AI1 explain/prepare (Desk) | platform + Desk | AI0–AI1 | After A1 |
-| 33 | Growth: Works-on-Pulse badge + tip kit | platform + guides | GR0/GR3/G6 | After Gate 1 |
+| 33 | ~~Growth: Works-on-Pulse badge~~ **DONE** · tip kit later | platform + guides | GR0/G6 | — |
 | 34 | PLAT-Ext wire Internetmoney681 | `pulse-trezor-platform` | PLAT-Ext | Parallel OK |
-| 35 | Guides status page + migrate-ETH | `pulse-trezor-guides` | G6 | Parallel OK |
+| 35 | ~~Guides status + migrate-ETH~~ **DONE** | `pulse-trezor-guides` | G6 | — |
 
 ---
 

@@ -9,26 +9,62 @@ const PERCH_MATCH = [
 ];
 
 async function findPerchTab() {
+  /** Prefer active / most-recent desk tab — stale tabs lack a live inject host. */
+  let best = null;
   for (const pattern of PERCH_MATCH) {
     const tabs = await chrome.tabs.query({ url: pattern });
-    if (tabs[0]?.id != null) return tabs[0];
+    for (const tab of tabs) {
+      if (tab?.id == null) continue;
+      if (!best) {
+        best = tab;
+        continue;
+      }
+      if (tab.active && !best.active) {
+        best = tab;
+        continue;
+      }
+      if ((tab.lastAccessed || 0) > (best.lastAccessed || 0)) best = tab;
+    }
   }
-  return null;
+  return best;
+}
+
+async function ensurePerchBridge(tabId) {
+  try {
+    await chrome.tabs.sendMessage(tabId, { kind: "eip1193-ping" });
+    return true;
+  } catch {
+    /* bridge missing — inject */
+  }
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["perch-bridge.js"],
+    });
+    await new Promise((r) => setTimeout(r, 200));
+    return true;
+  } catch (e) {
+    console.warn("ensurePerchBridge", e?.message || e);
+    return false;
+  }
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || msg.kind !== "eip1193") return false;
 
   (async () => {
-    let tab = await findPerchTab();
+    const tab = await findPerchTab();
     if (!tab) {
-      tab = await chrome.tabs.create({
-        url: "http://127.0.0.1:5174/",
-        active: true,
+      sendResponse({
+        error: {
+          code: 4100,
+          message: "Pulse Perch desk is closed — open it and connect Trezor",
+        },
       });
-      await new Promise((r) => setTimeout(r, 1500));
+      return;
     }
     try {
+      await ensurePerchBridge(tab.id);
       const resp = await chrome.tabs.sendMessage(tab.id, {
         kind: "eip1193-forward",
         method: msg.method,

@@ -32,12 +32,22 @@ export const KNOWN_TO: Record<
     tone: "ok",
     note: "Wrapped PLS",
   },
+  "0x70499adebb11efd915e3b69e700c331778628707": {
+    name: "WPLS (testnet)",
+    tone: "ok",
+    note: "Wrapped tPLS · testnet V4",
+  },
 };
 
 const SELECTORS: Record<
   string,
   { name: string; tone: ClearTone; note: string }
 > = {
+  "0xd0e30db0": {
+    name: "deposit()",
+    tone: "ok",
+    note: "Wrap native → WPLS",
+  },
   "0xa9059cbb": {
     name: "transfer(address,uint256)",
     tone: "ok",
@@ -91,7 +101,9 @@ const PHISH_HINTS: { re: RegExp; detail: string }[] = [
     detail: "Classic wallet-drain / fake-support lure — do not sign",
   },
   {
-    re: /pulsex\.(?!com\b)|pulsechain\.(?!com\b)|prover?x[-_.]/i,
+    // Real ProveX is app.provex.com / provex.com — do NOT match that (prover?x did).
+    // Catch typosquats: proverx.*, prove-x.*, pulsex/pulsechain off-TLD.
+    re: /pulsex\.(?!com\b)|pulsechain\.(?!com\b)|proverx[-_.]|prove[-_.]x[-_.]/i,
     detail: "Lookalike Pulse brand domain — verify carefully",
   },
   {

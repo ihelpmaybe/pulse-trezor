@@ -3,6 +3,8 @@
 **Product:** Pulse Perch = bag / send / approve / swap / Sites / sign on PulseChain without MetaMask.  
 **Transport today:** Trezor → Suite → Connect 10 (hardware path; not a software HD costume).
 
+Guides: [What works today](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/status.md) · [Bridge → receive](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/bridge-receive.md) · [ProveX](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/provex.md)
+
 ## When you’re ready
 
 1. Install / open **Trezor Suite** (Desktop or Web).

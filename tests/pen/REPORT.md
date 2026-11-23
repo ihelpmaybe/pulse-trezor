@@ -1,10 +1,11 @@
 # Pen report — Pulse Perch (Gate 1 gate)
 
-**Status:** IN PROGRESS — cancel-on-device row timed; Suite-quit row still open. Not a full Gate 1 PASS.
+**Status:** PASS (desk pen rows) · 2026-11-23 — cancel + Suite-quit honest. FULL matrix / multi-OS still later.
 
 | Date | Tester | Build |
 |---|---|---|
 | 2026-11-22 | desk agent (code + emu lab) | `0.1.0` · `7cd5691` |
+| 2026-11-23 | desk agent (Suite-quit live) | desk Vite · Suite Desktop restarted |
 
 ## Scope
 
@@ -19,7 +20,7 @@ Hardware path only: Connect 10 → Suite → Trezor. Desk bag / send / approve /
 - [x] Blind calldata requires extra ack before Sign — WC checkbox gate
 - [x] Approve / Permit clear-sign shows spender — Approvals + WC strip
 - [x] Custom contract call warns power-user — Send details + TxExplain
-- [~] Suite-down / cancel-on-device honest errors — cancel PASS (“Cancelled on Trezor…”); Suite-quit still open · [SUITE-DOWN-CANCEL-2026-11-22.md](../smoke/SUITE-DOWN-CANCEL-2026-11-22.md)
+- [x] Suite-down / cancel-on-device honest errors — cancel PASS; Suite-quit PASS · [SUITE-DOWN-CANCEL-2026-11-22.md](../smoke/SUITE-DOWN-CANCEL-2026-11-22.md)
 - [x] Extension / inject does not bypass Trezor — signs still host → Connect path
 - [x] WC origin shown before sign — Sites panel
 - [x] Deep link `?uri=` / `web+pulseperch:` lands on Sites (no silent sign)
@@ -28,8 +29,8 @@ Hardware path only: Connect 10 → Suite → Trezor. Desk bag / send / approve /
 
 | ID | Severity | Note | Status |
 |---|---|---|---|
-| — | — | No new ship-blocker from this pass | open for manual Suite-down |
+| P-SD1 | Low | After Suite kill, header can keep “· Suite” until Connect/Load re-probes; action path flips to “open Suite” + honest alert | accepted · not ship-blocker |
 
 ## Sign-off
 
-Gate 1 not cleared until FULL smoke + this report dated &lt; 30 days + manual Suite-down / cancel rows.
+Desk pen checklist green as of 2026-11-23. Gate 1 desk claim holds with smoke + this report (&lt; 30 days). FULL OS×device matrix still open (not required to claim desk Gate 1 slice).

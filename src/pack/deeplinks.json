@@ -3,7 +3,7 @@
   "kind": "deeplinks",
   "version": "1.0.0",
   "doc": "Seamless kit — link to builders; do not rebuild. Sources: official sites + hexikani usable + DefiLlama 2026-11.",
-  "updated": "2026-11-21",
+  "updated": "2026-11-22",
   "core": [
     {
       "id": "pulsechain",
@@ -57,6 +57,15 @@
     }
   ],
   "defi": [
+    {
+      "id": "liberty-swap",
+      "name": "Liberty Swap",
+      "app": "https://libertyswap.finance",
+      "quality": "B",
+      "twitter": "LibertySwapFi",
+      "role": "private-xchain",
+      "notes": "RAILGUN / intent; same crew as ZKX"
+    },
     {
       "id": "piteas",
       "name": "Piteas",
@@ -199,6 +208,26 @@
       "name": "Tip wallet",
       "github": "https://github.com/ihelpmaybe/Tip-wallet",
       "role": "soft-mobile"
+    }
+  ],
+  "softPeers": [
+    {
+      "id": "zkx",
+      "name": "ZKX Wallet",
+      "app": "https://zkxwallet.com",
+      "quality": "B",
+      "twitter": "zkxwallet",
+      "role": "privacy-soft",
+      "notes": "Liberty crew; HW attach docs; shield≠HW; coexist not rebuild"
+    },
+    {
+      "id": "internet-money",
+      "name": "Internet Money",
+      "app": "https://internetmoney.io",
+      "quality": "B",
+      "twitter": "InternetMoneyio",
+      "role": "soft-mobile",
+      "notes": "No real Trezor connect (shop affiliate); Pulse soft daily"
     }
   ],
   "mcpOrder": [

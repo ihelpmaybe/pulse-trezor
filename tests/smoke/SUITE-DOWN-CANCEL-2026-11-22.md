@@ -1,6 +1,6 @@
-# Suite-down / cancel-on-device — lab notes (2026-11-22)
+# Suite-down / cancel-on-device — lab notes
 
-**Status: PARTIAL PASS (timed cancel evidence) · Suite-down quit still open**
+**Status: PASS** (cancel 2026-11-22 · Suite-quit 2026-11-23)
 
 ## What exists
 - `cancelTrezorConnect` + Cancel while Connecting / Signing on face
@@ -11,10 +11,10 @@
 
 | # | Check | Result | Time (local) | Evidence |
 |---|---|---|---|---|
-| 1 | Start Connect → Cancel / device reject before finish | PASS | ~20:02 | Face alert: “Cancelled on Trezor — try again when ready.” · idle Connect button restored |
+| 1 | Start Connect → Cancel / device reject before finish | PASS | 2026-11-22 ~20:02 | Face alert: “Cancelled on Trezor — try again when ready.” · idle Connect button restored |
 | 2 | Suite Confirm open → Cancel on Perch | code-ready | — | Cancel button present while “Connecting…”; not re-timed this pass |
-| 3 | Quit Suite mid-session → honest reconcile | OPEN | — | Needs Suite quit while linked |
+| 3 | Quit Suite mid-session → honest reconcile | **PASS** | 2026-11-23 ~00:58 | Quit Suite → Load accounts → chip **open Suite** + alert “Trezor Suite not reachable…” · **no** green Suite + down contradiction · Suite restarted · `scripts/suite-down-smoke.mjs` → `SUITE_DOWN_OK` · `tmp-suite-down.json` |
 
 ## Notes
-- Suite Grant Permissions dialog for Pulse Perch was live on primary (PQQ-SMOKE) during Connect.
 - Unit coverage: `src/trezor/errors.test.ts` (cancel vs Suite-linked reconcile).
+- Chip can stay stale “Suite” for a while after kill until a Connect/Load path re-probes — on action it flips correctly. Not a ship-blocker.

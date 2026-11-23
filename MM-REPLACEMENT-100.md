@@ -46,19 +46,19 @@
 35. [x] Approve / reject session
 36. [~] eth_sendTransaction via WC → Trezor — lab URI + Suite Grant up 2026-11-22; hash blocked (Confirm click / 0 PLS on 369)
 37. [x] personal_sign via WC — live PASS 2026-11-22 (lab.pulseperch.dev pair + Suite); inject also PASS
-38. [~] eth_signTypedData_v4 / EIP-712 — wired WC+inject; inject smoke PASS 2026-11-22
+38. [x] eth_signTypedData_v4 / EIP-712 — inject + WC wallet-path PASS 2026-11-22 (`SITES-WC-EIP712-2026-11-22.md`)
 39. [~] wallet_switchEthereumChain → 369
 40. [x] Show dapp origin before every sign
 41. [x] Active sessions list + Drop
 42. [x] Piteas WC session smoke (proven)
 43. [x] PulseX IPFS WC pair smoke
-44. [ ] HEX site WC pair smoke
-45. [ ] ProveX WC / connect smoke
-46. [ ] End-to-end WC sign confirmed on device (blocked: 0 PLS on #1)
+44. [x] HEX site WC pair smoke — PASS session 2026-11-22 (`SITES-HEX-2026-11-22.md`)
+45. [x] ProveX WC / connect smoke — PASS session 2026-11-22 (`SITES-PROVEX-2026-11-22.md`; origin lookalike ack)
+46. [~] End-to-end WC sign on device — personal_sign + EIP-712 PASS 2026-11-22; eth_sendTransaction hash still soft / mainnet dust parked
 47. [x] Injected provider (window.ethereum) — this-tab lab personal_sign + EIP-712 PASS 2026-11-22
-48. [~] Browser extension shell — MV3 lab under `extension/` (load unpacked); CDP smoke deferred; not store-ready
+48. [x] Browser extension shell — chain/accounts/sign/typed/dust/closed-desk PASS 2026-11-22 (`EXT-MV3-2026-11-22.md`); sideload zip `0.1.1` (`npm run ext:pack`); CWS listing later
 49. [x] Deep link open-in-Perch from Pulse sites — `?uri=` / `web+pulseperch:` → Sites
-50. [ ] Concurrent multi-dapp sessions without clobber
+50. [x] Concurrent multi-dapp sessions without clobber — proposal/request queues + live dual pair PASS 2026-11-22 (`wc-concurrent-sessions-lab.mjs`)
 51. [x] Per-origin permissions (accounts / methods) — remember allow/deny origin + cue on proposal
 52. [x] Reject malicious chain switch / fake RPC
 
@@ -81,7 +81,7 @@
 66. [x] Agent policy allow-list + hard gate
 67. [x] Phishing domain warn on WC peer
 68. [x] Firmware outdated warning
-69. [~] Suite-down / cancel-on-device honest errors
+69. [x] Suite-down / cancel-on-device honest errors — cancel + Suite-quit PASS 2026-11-23
 70. [~] Pen report before Gate 1 ship — template in tests/pen/REPORT.md
 
 ## Pulse apps
@@ -117,7 +117,7 @@
 96. [ ] Mobile companion path (Tip link / shared pack)
 97. [~] Versioned updates channel — stub `docs/UPDATE-CHANNEL.md` (no auto-updater yet)
 98. [~] Smoke + a11y evidence in CI / tests/smoke
-99. [ ] Gate 1 acceptance: bag/send/approve/Sites/sign w/o MM
+99. [~] Gate 1 acceptance: bag/Sites/approve UI w/o MM PASS 2026-11-23 (`GATE-1-2026-11-23.md`); send/sign from prior smokes; mainnet WC spend still soft
 100. [x] Public “uninstall MetaMask for Pulse” guide
 
 ## Out of scope (by design)

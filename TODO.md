@@ -30,9 +30,10 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Send PLS dust (testnet) → confirmed (`tests/smoke/SIGN-TESTNET-2026-11-22.md` · `0x8bd9…2c6e`)
 - [x] personal_sign via inject bridge (`tests/smoke/SIGN-PERSONAL-INJECT-2026-11-22.md`)
 - [x] EIP-712 inject smoke (`tests/smoke/SIGN-EIP712-INJECT-2026-11-22.md`)
-- [ ] ERC-20 send once (blocked on 943 — no token bag/pack yet)
+- [x] EIP-712 via WC wallet path (`tests/smoke/SITES-WC-EIP712-2026-11-22.md`)
+- [x] ERC-20 send once (`tests/smoke/ERC20-SEND-2026-11-22.md` · WPLS self `0xb35d…07a1`)
 - [x] Disconnect → watch-only still loads (localStorage)
-- [ ] Suite-down and user-cancel-on-device paths
+- [x] Suite-down and user-cancel-on-device — cancel + Suite-quit PASS (`SUITE-DOWN-CANCEL-2026-11-22.md` · 2026-11-23)
 
 ### Fuzz
 - [ ] Bad addresses / amounts / chainId / paths
@@ -49,7 +50,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] No seed/key in logs; AI prepare-only — fuzz + import guards
 - [x] WC origin shown before sign
 - [x] Connect version pin → `@trezor/connect-web@10.0.1` (forward path)
-- [~] Pen report in `tests/pen/REPORT.md` before Gate 1 — code rows filled; Suite-down manual open
+- [x] Pen report in `tests/pen/REPORT.md` before Gate 1 — cancel + Suite-quit PASS 2026-11-23
 
 ### Full bar
 - [ ] Matrix: Win×Lin×Mac×Web × Safe 3/5/7/emu × receive/send/token/approve
@@ -98,9 +99,10 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Other DEXes (Piteas/Switch/9mm) — BONUS only
 
 ## C — HEX companion (core app)
-- [ ] Reuse pqq-wallet derivation + Connect adapter
-- [ ] Portfolio view (stakes + liquid HEX on Pulse)
-- [ ] Stake / end / good-accounting (exact-path sign)
+- [x] Modular HEX stakes UI — Settings → Modules (default off); possession nudge when stakes exist
+- [~] Reuse pqq-wallet derivation + Connect adapter — not required for “has stakes” view
+- [x] Portfolio view (stakes + liquid HEX) — Stakes tab when module on
+- [~] Stake / end clear-sign via Sites — not in-desk stakeStart product
 - [ ] Advanced claim / migrate tools
 
 ## E — Power tools
@@ -111,7 +113,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 ## G — Ecosystem (desk-owned bits)
 - [x] Link Suite gap / upstream status from Desk UI or about page
 - [x] Cross-link Tip (mobile soft) + guides + rescue
-- [ ] Consume SYNC registry / token pack from `pulse-trezor-platform`
+- [~] Consume SYNC registry / token pack from `pulse-trezor-platform` — SYNC1 export/import aligned 2026-11-23; pack tokens still local
 
 ## PLAT — Desk targets (this app)
 - [ ] Windows (primary)

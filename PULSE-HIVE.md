@@ -225,7 +225,7 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H112 | [ ] Migrate-from-ETH same-addr risk guide | guides | |
 | H113 | [ ] Normie “first PLS receive” path (Tip or Desk) | guides | |
 | H114 | [ ] Non-EN locale plan (one language spike) | Tip/Desk/guides | |
-| H115 | [ ] “Works on Pulse” badge + deep-link kit | platform + guides | |
+| H115 | [x] “Works on Pulse” badge + deep-link kit | platform + guides | works-on-pulse.json + guide |
 | H116 | [ ] Glossary: PLS / HEX / PLSX / INC / ProveX / Bridge | guides | |
 | H117 | [ ] Weekly hive SPARE generator run (log below) | this file | |
 

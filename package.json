@@ -12,7 +12,9 @@
     "setup": "npm install --ignore-scripts && node node_modules/esbuild/install.js",
     "test": "vitest run",
     "fuzz": "node scripts/fuzz-watch.mjs",
-    "smoke": "npm run typecheck && npm run build && vitest run && npm run fuzz"
+    "smoke": "npm run typecheck && npm run build && vitest run && npm run fuzz",
+    "ext:icons": "node scripts/ext-make-icons.mjs",
+    "ext:pack": "node scripts/ext-make-icons.mjs && node scripts/ext-pack.mjs"
   },
   "engines": {
     "node": ">=20"

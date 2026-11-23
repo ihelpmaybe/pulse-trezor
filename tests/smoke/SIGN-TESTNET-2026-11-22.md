@@ -6,7 +6,7 @@
 - **Tx:** `0x8bd91180123fdb2d8d5d6d5c7f44810d1fe944aab7c17e97f7bb7a1b6ac22c6e`
 - **Explorer:** https://scan.v4.testnet.pulsechain.com/tx/0x8bd91180123fdb2d8d5d6d5c7f44810d1fe944aab7c17e97f7bb7a1b6ac22c6e
 - **From/to:** `0x73d0385F4d8E00C5e6504C6030F47BF6212736A8` (self)
-- **Amount:** `0.001` tPLS · fee ~`1.18125` tPLS (~39k gwei — network, not Perch)
+- **Amount:** `0.001` tPLS · fee ~`1.18125` tPLS (~39k beats — network, not Perch)
 - **Path:** Connect 10 → Suite Confirm → trezor-user-env emu YES (`ws://127.0.0.1:9001` `emulator-press-yes`)
 
 ## Steps

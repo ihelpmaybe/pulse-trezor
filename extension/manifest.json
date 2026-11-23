@@ -1,16 +1,31 @@
 {
   "manifest_version": 3,
   "name": "Pulse Perch",
-  "version": "0.1.0",
-  "description": "Inject window.ethereum → Pulse Perch (Trezor). Load unpacked for lab.",
-  "permissions": ["tabs", "storage"],
-  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*", "https://*/*"],
+  "version": "0.1.1",
+  "description": "PulseChain wallet inject for Pulse Perch — Trezor signs via the open desk tab. Lab / sideload.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "permissions": ["tabs", "storage", "scripting"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "https://*/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["http://127.0.0.1:5173/*", "http://127.0.0.1:5174/*", "http://localhost:5173/*", "http://localhost:5174/*"],
+      "matches": [
+        "http://127.0.0.1:5173/*",
+        "http://127.0.0.1:5174/*",
+        "http://localhost:5173/*",
+        "http://localhost:5174/*"
+      ],
       "js": ["perch-bridge.js"],
       "run_at": "document_start"
     },
@@ -28,6 +43,11 @@
     }
   ],
   "action": {
-    "default_title": "Pulse Perch"
+    "default_title": "Pulse Perch",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
   }
 }

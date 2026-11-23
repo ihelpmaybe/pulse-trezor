@@ -129,7 +129,13 @@ import {
   formatUsdHint,
   type PriceHint,
 } from "./chain/prices";
-import { parseWatchImportJson } from "./chain/watchImport";
+import {
+  buildWatchRegistryExport,
+  parseWatchImportJson,
+} from "./chain/watchImport";
+import { decodeSyncPayload } from "./chain/syncPair";
+import { SyncPair } from "./ui/SyncPair";
+import { loadHexModule, saveHexModule } from "./ui/modules";
 import { t } from "./i18n/en";
 import {
   PULSEX_V2_ROUTER,
@@ -557,6 +563,8 @@ export function PulseTrezor({
   const [a11y, setA11y] = useState<A11yPrefs>(() => loadA11y());
   const [privacyHide, setPrivacyHide] = useState(() => loadPrivacyHide());
   const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
+  /** Optional HEX stakes UI (Stakes tab / marks) — Settings modules. */
+  const [hexModule, setHexModule] = useState(() => loadHexModule());
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
   const [callData, setCallData] = useState("");
   const [callTo, setCallTo] = useState("");
@@ -1663,6 +1671,37 @@ export function PulseTrezor({
     bootAiPolicy();
     try {
       const q = new URLSearchParams(window.location.search);
+      const syncParam = q.get("sync");
+      const applySyncBoot = (payload: string) => {
+        const dec = decodeSyncPayload(payload);
+        if (dec.ok && dec.import.accounts[0]) {
+          const a = dec.import.accounts[0];
+          const idx = a.derivationIndex ?? 0;
+          const sess = {
+            address: a.address,
+            derivationIndex: idx,
+            derivationPath: a.derivationPath || `m/44'/60'/0'/0/${idx}`,
+            deviceId: "imported-watch",
+          };
+          setWatch(sess);
+          saveWatch(sess);
+          void refreshBalances(a.address, chainId);
+          return true;
+        }
+        if (!dec.ok) setErr(dec.error);
+        return false;
+      };
+      if (syncParam) {
+        applySyncBoot(
+          syncParam.startsWith("v1.") || syncParam.startsWith("{")
+            ? syncParam
+            : `v1.${syncParam}`,
+        );
+      } else if (/web\+pulseperch:\/\/sync\/v1\//i.test(window.location.href)) {
+        const href = window.location.href;
+        const m = href.match(/web\+pulseperch:\/\/sync\/v1\/[A-Za-z0-9_-]+/i);
+        if (m) applySyncBoot(m[0]);
+      }
       let raw =
         q.get("uri") ||
         q.get("wc") ||
@@ -1755,6 +1794,92 @@ export function PulseTrezor({
     });
     return () => registerAgentHandlers({ sign: null, prepare: null });
   }, [session, chainId, effectiveRpc]);
+
+  /**
+   * Extension content script is isolated — it cannot read `__pulsePerchInject`.
+   * Answer postMessage relays from perch-bridge.js (pulse-perch-ext-bridge).
+   */
+  useEffect(() => {
+    const onBridgeMsg = (ev: MessageEvent) => {
+      const data = ev.data;
+      if (!data || data.source !== "pulse-perch-ext-bridge") return;
+      if (data.type === "ping") {
+        const inject = (
+          window as Window & { __pulsePerchInject?: { request?: unknown } }
+        ).__pulsePerchInject;
+        window.postMessage(
+          {
+            source: "pulse-perch-page-bridge",
+            type: "pong",
+            id: data.id,
+            ready: typeof inject?.request === "function",
+          },
+          "*",
+        );
+        return;
+      }
+      if (data.type !== "request") return;
+      void (async () => {
+        const inject = (
+          window as Window & {
+            __pulsePerchInject?: {
+              request: (args: {
+                method: string;
+                params?: unknown;
+              }) => Promise<unknown>;
+            };
+          }
+        ).__pulsePerchInject;
+        if (!inject?.request) {
+          window.postMessage(
+            {
+              source: "pulse-perch-page-bridge",
+              type: "response",
+              id: data.id,
+              error: {
+                code: 4100,
+                message:
+                  "Pulse Perch tab open but inject bridge not ready — connect Trezor",
+              },
+            },
+            "*",
+          );
+          return;
+        }
+        try {
+          const result = await inject.request({
+            method: data.method,
+            params: data.params,
+          });
+          window.postMessage(
+            {
+              source: "pulse-perch-page-bridge",
+              type: "response",
+              id: data.id,
+              result,
+            },
+            "*",
+          );
+        } catch (e) {
+          const err = e as { code?: number; message?: string };
+          window.postMessage(
+            {
+              source: "pulse-perch-page-bridge",
+              type: "response",
+              id: data.id,
+              error: {
+                code: err?.code ?? 4200,
+                message: err?.message || String(e),
+              },
+            },
+            "*",
+          );
+        }
+      })();
+    };
+    window.addEventListener("message", onBridgeMsg);
+    return () => window.removeEventListener("message", onBridgeMsg);
+  }, []);
 
   /** Host for this-tab inject + extension bridge (`window.__pulsePerchInject`). */
   useEffect(() => {
@@ -1964,26 +2089,35 @@ export function PulseTrezor({
   }
 
   function exportWatchJson() {
-    const payload = {
-      kind: "pulse-perch-watch",
-      exportedAt: new Date().toISOString(),
+    const payload = buildWatchRegistryExport({
       accounts: accountList.map((a) => ({
         address: a.address,
         derivationIndex: a.derivationIndex,
-        path: a.derivationPath,
+        derivationPath: a.derivationPath,
       })),
       watch: watch
         ? { address: watch.address, derivationIndex: watch.derivationIndex }
-        : null,
+        : session
+          ? {
+              address: session.address,
+              derivationIndex: session.derivationIndex,
+            }
+          : null,
       addressBook: loadAddressBook(),
-    };
+      chainId,
+      walletFingerprint: deviceId
+        ? `trezor:${deviceId}`
+        : watch
+          ? "watch"
+          : "perch",
+    });
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pulse-perch-watch-${Date.now()}.json`;
+    a.download = `pulse-watch-registry-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -2033,36 +2167,45 @@ export function PulseTrezor({
     URL.revokeObjectURL(url);
   }
 
+  function applyWatchImportText(text: string) {
+    const sync = decodeSyncPayload(text);
+    const result = sync.ok ? sync.import : parseWatchImportJson(text);
+    if (!result.ok) {
+      setErr(
+        result.error ||
+          (!sync.ok ? sync.error : undefined) ||
+          "Import failed.",
+      );
+      return false;
+    }
+    setAddressBook(loadAddressBook());
+    if (result.accounts[0]) {
+      const a = result.accounts[0];
+      const idx = a.derivationIndex ?? 0;
+      const sess = {
+        address: a.address,
+        derivationIndex: idx,
+        derivationPath: a.derivationPath || `m/44'/60'/0'/0/${idx}`,
+        deviceId: "imported-watch",
+      };
+      setWatch(sess);
+      saveWatch(sess);
+      if (typeof a.derivationIndex === "number") {
+        setAccountIndex(a.derivationIndex);
+      }
+      void refreshBalances(result.accounts[0].address, chainId);
+    }
+    setErr(null);
+    return true;
+  }
+
   function onImportWatchFile(file: File) {
     setWatchImportBusy(true);
     setErr(null);
     void file
       .text()
       .then((text) => {
-        const result = parseWatchImportJson(text);
-        if (!result.ok) {
-          setErr(result.error || "Import failed.");
-          return;
-        }
-        setAddressBook(loadAddressBook());
-        if (result.accounts[0]) {
-          const a = result.accounts[0];
-          const sess = {
-            address: a.address,
-            derivationIndex: a.derivationIndex ?? 0,
-            derivationPath: `m/44'/60'/0'/0/${a.derivationIndex ?? 0}`,
-            deviceId: "imported-watch",
-          };
-          setWatch(sess);
-          saveWatch(sess);
-          if (typeof a.derivationIndex === "number") {
-            setAccountIndex(a.derivationIndex);
-          }
-        }
-        setErr(null);
-        if (result.accounts[0]) {
-          void refreshBalances(result.accounts[0].address, chainId);
-        }
+        applyWatchImportText(text);
       })
       .catch((e) => {
         setErr(e instanceof Error ? e.message : String(e));
@@ -2131,13 +2274,22 @@ export function PulseTrezor({
       setErr("Calldata must be 0x-hex.");
       return;
     }
+    let value = 0n;
+    if (amount.trim()) {
+      try {
+        value = parseEther(amount.trim());
+      } catch {
+        setErr("Amount invalid for payable call.");
+        return;
+      }
+    }
     setErr(null);
     setBusy(true);
     void sendPlsWithTrezor({
       chainId,
       account: session.address,
       to: callTo as Address,
-      value: 0n,
+      value,
       data: data as Hex,
       derivationIndex: session.derivationIndex,
       rpc: effectiveRpc,
@@ -2575,6 +2727,61 @@ export function PulseTrezor({
             <p className="muted fee">
               <a
                 className="link"
+                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/status.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                What works today
+              </a>
+              {" · "}
+              <a
+                className="link"
+                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/trezor-on-pulse.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Trezor on Pulse
+              </a>
+              {" · "}
+              <a
+                className="link"
+                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/bridge-receive.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Bridge → receive
+              </a>
+              {" · "}
+              <a
+                className="link"
+                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/provex.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                ProveX
+              </a>
+            </p>
+            <p className="muted fee">
+              <a
+                className="link"
+                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/migrate-from-eth.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Migrate from ETH
+              </a>
+              {" · "}
+              <a
+                className="link"
+                href="https://github.com/ihelpmaybe/pulse-trezor/blob/main/docs/UNINSTALL-METAMASK-FOR-PULSE.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Uninstall MetaMask
+              </a>
+              {" · "}
+              <a
+                className="link"
                 href="https://suite.trezor.io"
                 target="_blank"
                 rel="noreferrer"
@@ -2584,26 +2791,16 @@ export function PulseTrezor({
               {" · "}
               <a
                 className="link"
-                href="https://github.com/ihelpmaybe/Tip-wallet"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Tip (mobile)
-              </a>
-              {" · "}
-              <a
-                className="link"
                 href="https://bridge.pulsechain.com"
                 target="_blank"
                 rel="noreferrer"
               >
-                Bridge rescue
+                Pulse Bridge
               </a>
             </p>
             <p className="muted fee">
               Channel: desk-web · rebuild to update (
-              <code>docs/UPDATE-CHANNEL.md</code>). Uninstall MM:{" "}
-              <code>docs/UNINSTALL-METAMASK-FOR-PULSE.md</code>
+              <code>docs/UPDATE-CHANNEL.md</code>).
             </p>
 
             <h4 className="settings-section">Device</h4>
@@ -2650,6 +2847,39 @@ export function PulseTrezor({
                 }}
               />
             </label>
+            <SyncPair
+              accounts={accountList.map((a) => ({
+                address: a.address,
+                derivationIndex: a.derivationIndex,
+                derivationPath: a.derivationPath,
+              })}
+              watch={
+                watch
+                  ? {
+                      address: watch.address,
+                      derivationIndex: watch.derivationIndex,
+                    }
+                  : session
+                    ? {
+                        address: session.address,
+                        derivationIndex: session.derivationIndex,
+                      }
+                    : null
+              }
+              chainId={chainId}
+              walletFingerprint={
+                deviceId ? `trezor:${deviceId}` : watch ? "watch" : "perch"
+              }
+              busy={watchImportBusy}
+              onImportText={(text) => {
+                setWatchImportBusy(true);
+                try {
+                  applyWatchImportText(text);
+                } finally {
+                  setWatchImportBusy(false);
+                }
+              }}
+            />
 
             <h4 className="settings-section">RPC</h4>
             <label className="field">
@@ -2726,6 +2956,25 @@ export function PulseTrezor({
               />
               {t("lightTheme")}
             </label>
+
+            <h4 className="settings-section">Modules</h4>
+            <label className="hide-zero">
+              <input
+                type="checkbox"
+                checked={hexModule}
+                onChange={(e) => {
+                  const on = e.target.checked;
+                  setHexModule(on);
+                  saveHexModule(on);
+                  if (!on && bagTab === "stakes") setBagTab("tokens");
+                }}
+              />
+              HEX stakes
+            </label>
+            <p className="muted fee">
+              Shows Stakes tab and “has stakes” marks. Liquid HEX in Tokens
+              stays either way. Off by default — lean face.
+            </p>
 
             <h4 className="settings-section">Privacy</h4>
             <button
@@ -3043,7 +3292,9 @@ export function PulseTrezor({
                       privacyHide
                         ? `Account #${a.derivationIndex + 1}${on ? ", selected" : ""}, values hidden`
                         : `Account #${a.derivationIndex + 1}, ${a.address}, ${balText}${
-                            hexN > 0 ? `, ${hexN} HEX stakes` : ""
+                            hexModule && hexN > 0
+                              ? `, ${hexN} HEX stakes`
+                              : ""
                           }${on ? ", selected" : ""}`
                     }
                     aria-current={on ? "true" : undefined}
@@ -3053,7 +3304,7 @@ export function PulseTrezor({
                     </span>
                     <code className="acct-addr">{shortAddr(a.address)}</code>
                     <span className="acct-bal">{balText}</span>
-                    {hexN > 0 ? (
+                    {hexModule && hexN > 0 ? (
                       <HexStakeMark
                         count={hexN}
                         onOpen={() => {
@@ -3121,7 +3372,7 @@ export function PulseTrezor({
               >
                 NFTs
               </button>
-              {chainId === 369 ? (
+              {hexModule && chainId === 369 ? (
                 <button
                   type="button"
                   id="bag-tab-stakes"
@@ -3159,7 +3410,7 @@ export function PulseTrezor({
                     {formatEther(balance)} {pack.currency.symbol}
                   </p>
                 ) : null}
-                {chainId === 369 && active ? (
+                {chainId === 369 && active && hexModule ? (
                   <p className="hex-strip muted fee" aria-label="HEX liquid vs staked">
                     {(() => {
                       const hexRow = tokenRows.find(
@@ -3197,6 +3448,16 @@ export function PulseTrezor({
                         </>
                       );
                     })()}
+                  </p>
+                ) : null}
+                {chainId === 369 &&
+                active &&
+                !hexModule &&
+                (acctHexStakes[active.address.toLowerCase()] ?? 0) > 0 ? (
+                  <p className="muted fee">
+                    This bag has HEX stakes — turn on{" "}
+                    <strong>HEX stakes</strong> under Settings → Modules to
+                    see them.
                   </p>
                 ) : null}
                 <label className="hide-zero">
@@ -3559,9 +3820,9 @@ export function PulseTrezor({
             id="bag-panel-stakes"
             role="tabpanel"
             aria-labelledby="bag-tab-stakes"
-            hidden={bagTab !== "stakes"}
+            hidden={!hexModule || bagTab !== "stakes"}
           >
-            {!active ? (
+            {!hexModule ? null : !active ? (
               <p className="muted">Connect to load HEX stakes.</p>
             ) : chainId !== 369 ? (
               <p className="muted">HEX stakes are mainnet (369) only.</p>
@@ -4314,6 +4575,10 @@ export function PulseTrezor({
                         spellCheck={false}
                       />
                     </label>
+                    <p className="muted">
+                      Payable value uses Amount above (e.g. WPLS{" "}
+                      <code>deposit()</code> = <code>0xd0e30db0</code>).
+                    </p>
                     <p className="warn-line">
                       Power / rescue only — read every byte on Trezor. Blind
                       selectors need extra care.
@@ -4953,6 +5218,36 @@ export function PulseTrezor({
                   </button>
                 </div>
                 <div className="apps-card">
+                  <h3>ZKX Wallet</h3>
+                  <p className="muted fee">
+                    Soft + privacy (RAILGUN). Optional HW attach — shield is
+                    soft-only. HWW Pulse bag stays Perch + Trezor.
+                  </p>
+                  <a
+                    className="btn ghost"
+                    href="https://zkxwallet.com"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open ZKX
+                  </a>
+                </div>
+                <div className="apps-card">
+                  <h3>Internet Money</h3>
+                  <p className="muted fee">
+                    Soft Pulse mobile / Chrome. Not a Trezor path — use for
+                    phone daily, not serious HWW.
+                  </p>
+                  <a
+                    className="btn ghost"
+                    href="https://internetmoney.io"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open Internet Money
+                  </a>
+                </div>
+                <div className="apps-card">
                   <h3>Tip (mobile soft)</h3>
                   <p className="muted fee">
                     Soft wallet companion for on-the-go. HWW stays Perch +
@@ -4975,6 +5270,7 @@ export function PulseTrezor({
                       "phiat",
                       "9mm",
                       "phux",
+                      "liberty-swap",
                     ].includes(d.id),
                   )
                   .map((d) => (

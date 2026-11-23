@@ -10,6 +10,9 @@ const projectId =
   process.env.REOWN_PROJECT_ID || "eb3cea87fdb235c24fbdf42761c00e63";
 const chainPref = process.env.WC_CHAIN || "eip155:943";
 const valueWei = process.env.WC_VALUE_WEI || "0x38d7ea4c68000"; // 0.001 PLS
+/** Optional: wrap / contract call — e.g. WC_TO=WPLS WC_DATA=0xd0e30db0 */
+const toOverride = process.env.WC_TO || "";
+const dataOverride = process.env.WC_DATA || "0x";
 
 const client = await SignClient.init({
   projectId,
@@ -53,9 +56,9 @@ console.log("SESSION", session.topic, pick);
 
 const tx = {
   from: address,
-  to: address,
+  to: toOverride || address,
   value: valueWei,
-  data: "0x",
+  data: dataOverride || "0x",
 };
 console.log("REQUEST_ETH_SEND", JSON.stringify(tx));
 writeFileSync(

@@ -12,3 +12,7 @@ tmp-wc-*.json
 tmp-wc-*.txt
 tmp-ext-*.json
 tmp-wc-uri.txt
+
+tmp-*.json
+
+dist-ext/

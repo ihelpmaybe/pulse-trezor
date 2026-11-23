@@ -110,9 +110,13 @@ export function WcPanel({
     }
   });
   const [uri, setUri] = useState(() => (initialUri || "").trim());
-  const [proposal, setProposal] =
-    useState<WalletKitTypes.SessionProposal | null>(null);
-  const [pending, setPending] = useState<PendingReq | null>(null);
+  /** Queue — a second proposal/request must not clobber the first. */
+  const [proposalQ, setProposalQ] = useState<
+    WalletKitTypes.SessionProposal[]
+  >([]);
+  const [pendingQ, setPendingQ] = useState<PendingReq[]>([]);
+  const proposal = proposalQ[0] ?? null;
+  const pending = pendingQ[0] ?? null;
   const [blindAck, setBlindAck] = useState(false);
   const [sessionsTick, setSessionsTick] = useState(0);
   const [wired, setWired] = useState(false);
@@ -138,8 +142,9 @@ export function WcPanel({
     if (!kit || wired) return;
 
     kit.on("session_proposal", (p) => {
-      setProposal(p);
+      setProposalQ((q) => [...q, p]);
       setInfo(`Session proposal from ${p.params.proposer.metadata.name}`);
+      setSessionsTick((n) => n + 1);
     });
 
     kit.on("session_request", async (event) => {
@@ -223,15 +228,18 @@ export function WcPanel({
         lines = clearSignMessage({ method, dappUrl, preview });
       }
 
-      setPending({
-        id,
-        topic,
-        method,
-        params: reqParams,
-        dappUrl,
-        lines,
-        chainId: reqChain,
-      });
+      setPendingQ((q) => [
+        ...q,
+        {
+          id,
+          topic,
+          method,
+          params: reqParams,
+          dappUrl,
+          lines,
+          chainId: reqChain,
+        },
+      ]);
     });
 
     kit.on("session_delete", () => setSessionsTick((n) => n + 1));
@@ -277,6 +285,15 @@ export function WcPanel({
     }
   }
 
+  function dropHeadProposal() {
+    setProposalQ((q) => q.slice(1));
+  }
+
+  function isExpiredProposalError(e: unknown): boolean {
+    const msg = e instanceof Error ? e.message : String(e);
+    return /proposal id doesn't exist|No matching key|expired/i.test(msg);
+  }
+
   async function onApproveSession() {
     if (!proposal || !address) return;
     setBusy(true);
@@ -284,11 +301,17 @@ export function WcPanel({
     try {
       await approveProposal(proposal, address);
       rememberOrigin(proposal.params.proposer.metadata.url || "", true);
-      setProposal(null);
+      dropHeadProposal();
       setInfo("Session approved — dApp can request signs");
       setSessionsTick((n) => n + 1);
     } catch (e) {
-      onError(e instanceof Error ? e.message : String(e));
+      dropHeadProposal();
+      if (isExpiredProposalError(e)) {
+        setInfo("That pair request expired — paste a fresh wc: URI");
+        onError(null);
+      } else {
+        onError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setBusy(false);
     }
@@ -300,10 +323,16 @@ export function WcPanel({
     try {
       await rejectProposal(proposal);
       rememberOrigin(proposal.params.proposer.metadata.url || "", false);
-      setProposal(null);
+      dropHeadProposal();
       setInfo("Session rejected");
     } catch (e) {
-      onError(e instanceof Error ? e.message : String(e));
+      dropHeadProposal();
+      if (isExpiredProposalError(e)) {
+        setInfo("Stale pair request cleared");
+        onError(null);
+      } else {
+        onError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setBusy(false);
     }
@@ -355,7 +384,7 @@ export function WcPanel({
         topic,
         response: { id, jsonrpc: "2.0", result },
       });
-      setPending(null);
+      setPendingQ((q) => q.slice(1));
       setInfo(`Signed · ${method}`);
     } catch (e) {
       onError(e instanceof Error ? e.message : String(e));
@@ -371,7 +400,7 @@ export function WcPanel({
       } catch {
         /* ignore */
       }
-      setPending(null);
+      setPendingQ((q) => q.slice(1));
     } finally {
       setBusy(false);
     }
@@ -392,7 +421,7 @@ export function WcPanel({
           },
         });
       }
-      setPending(null);
+      setPendingQ((q) => q.slice(1));
       setInfo("Request rejected");
     } catch (e) {
       onError(e instanceof Error ? e.message : String(e));
@@ -498,12 +527,12 @@ export function WcPanel({
           </button>
 
           {sessions.length > 0 ? (
-            <ul className="meta">
+            <ul className="meta" data-testid="wc-sessions">
               {sessions.map((s) => {
                 const name =
                   s.peer?.metadata?.name || s.topic.slice(0, 12);
                 return (
-                  <li key={s.topic}>
+                  <li key={s.topic} data-wc-session={name}>
                     {name}{" "}
                     <button
                       type="button"
@@ -521,6 +550,21 @@ export function WcPanel({
                 );
               })}
             </ul>
+          ) : null}
+          {sessions.length > 1 ? (
+            <p className="muted">{sessions.length} sites paired</p>
+          ) : null}
+          {proposalQ.length > 1 ? (
+            <p className="muted">
+              {proposalQ.length - 1} more session request
+              {proposalQ.length > 2 ? "s" : ""} waiting
+            </p>
+          ) : null}
+          {pendingQ.length > 1 ? (
+            <p className="muted">
+              {pendingQ.length - 1} more sign request
+              {pendingQ.length > 2 ? "s" : ""} waiting
+            </p>
           ) : null}
 
           {proposal ? (
