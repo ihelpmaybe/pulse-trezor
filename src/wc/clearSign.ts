@@ -647,7 +647,7 @@ export function needsDangerAck(lines: ClearLine[]): boolean {
   return lines.some(
     (l) =>
       l.tone === "danger" &&
-      /blind calldata|Permit|Order|Raw hex|7702|UNLIMITED|Fake Trezor|phishing|Dead-end/i.test(
+      /blind calldata|Permit|Order|Raw hex|7702|UNLIMITED|Fake Trezor|phishing|Dead-end|Verify · SECURITY|Verify · domain mismatch/i.test(
         `${l.title} ${l.detail}`,
       ),
   );

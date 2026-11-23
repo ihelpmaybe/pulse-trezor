@@ -21,12 +21,14 @@ Defensive notes from public reports. Not an exploit guide.
 - Address book lookalike + activity poison
 - Suite-down cancel honesty
 
-## Next harden (not yet)
+## Next harden
 
-- WalletConnect **Verify** domain check on pair
-- Session list + one-click kill all WC sessions
-- Spender age / unknown-contract reputation (optional feed)
-- Focused PEN report before mainnet money claim
+- ~~WalletConnect Verify on pair / request~~ **done 2026-11-23**
+- ~~Kill-all WC sessions~~ **done 2026-11-23**
+- Focused PEN: `tests/pen/REPORT-2026-11-23.md`
+- SHA256 on extension release notes
+- Spender age / Blockaid-style sim (optional)
+- Mainnet dust before money claim
 
 ## Sources (public)
 

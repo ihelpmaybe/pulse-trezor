@@ -27,6 +27,7 @@ import { sendPlsWithTrezor } from "../trezor/signPulseTx";
 import {
   activeSessions,
   approveProposal,
+  disconnectAllSessions,
   disconnectTopic,
   getWalletKit,
   initWalletKit,
@@ -41,6 +42,7 @@ import {
   type DeskChainId,
 } from "../chain/client";
 import { originAllowed, rememberOrigin } from "../chain/wcOrigins";
+import { getVerifyState, verifyFace } from "./verify";
 
 const PROJECT_KEY = "pulse-desk-reown-project-id";
 
@@ -118,6 +120,7 @@ export function WcPanel({
   const proposal = proposalQ[0] ?? null;
   const pending = pendingQ[0] ?? null;
   const [blindAck, setBlindAck] = useState(false);
+  const [verifyAck, setVerifyAck] = useState(false);
   const [sessionsTick, setSessionsTick] = useState(0);
   const [wired, setWired] = useState(false);
 
@@ -137,6 +140,21 @@ export function WcPanel({
     setBlindAck(false);
   }, [pending?.id, pending?.topic]);
 
+  useEffect(() => {
+    setVerifyAck(false);
+    setBlindAck(false);
+  }, [proposal?.id]);
+
+  const proposalVerify = useMemo(() => {
+    if (!proposal) return null;
+    const state = getVerifyState(
+      (proposal as { verifyContext?: unknown }).verifyContext as
+        | Parameters<typeof getVerifyState>[0]
+        | undefined,
+    );
+    return { state, face: verifyFace(state) };
+  }, [proposal]);
+
   const wireKitEvents = useCallback(() => {
     const kit = getWalletKit();
     if (!kit || wired) return;
@@ -155,6 +173,11 @@ export function WcPanel({
       const dappUrl = peer?.url || peer?.name || "";
       const reqChain =
         parseChainRef(params.chainId) ?? activeChainId;
+      const reqVerify = getVerifyState(
+        (event as { verifyContext?: Parameters<typeof getVerifyState>[0] })
+          .verifyContext,
+      );
+      const reqVerifyFace = verifyFace(reqVerify);
 
       if (
         method === "wallet_switchEthereumChain" ||
@@ -227,6 +250,15 @@ export function WcPanel({
         }
         lines = clearSignMessage({ method, dappUrl, preview });
       }
+
+      lines = [
+        {
+          tone: reqVerifyFace.tone,
+          title: reqVerifyFace.title,
+          detail: reqVerifyFace.detail,
+        },
+        ...lines,
+      ];
 
       setPendingQ((q) => [
         ...q,
@@ -527,32 +559,57 @@ export function WcPanel({
           </button>
 
           {sessions.length > 0 ? (
-            <ul className="meta" data-testid="wc-sessions">
-              {sessions.map((s) => {
-                const name =
-                  s.peer?.metadata?.name || s.topic.slice(0, 12);
-                return (
-                  <li key={s.topic} data-wc-session={name}>
-                    {name}{" "}
-                    <button
-                      type="button"
-                      className="btn ghost"
-                      aria-label={`Drop session ${name}`}
-                      onClick={() =>
-                        void disconnectTopic(s.topic).then(() =>
-                          setSessionsTick((n) => n + 1),
-                        )
-                      }
-                    >
-                      Drop
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
-          {sessions.length > 1 ? (
-            <p className="muted">{sessions.length} sites paired</p>
+            <>
+              <ul className="meta" data-testid="wc-sessions">
+                {sessions.map((s) => {
+                  const name =
+                    s.peer?.metadata?.name || s.topic.slice(0, 12);
+                  return (
+                    <li key={s.topic} data-wc-session={name}>
+                      {name}{" "}
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        aria-label={`Drop session ${name}`}
+                        onClick={() =>
+                          void disconnectTopic(s.topic).then(() =>
+                            setSessionsTick((n) => n + 1),
+                          )
+                        }
+                      >
+                        Drop
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="row">
+                <p className="muted fee">
+                  {sessions.length} site{sessions.length === 1 ? "" : "s"} paired
+                </p>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={busy}
+                  data-testid="wc-kill-all"
+                  onClick={() => {
+                    setBusy(true);
+                    void disconnectAllSessions()
+                      .then((n) => {
+                        setSessionsTick((t) => t + 1);
+                        setInfo(
+                          n
+                            ? `Dropped ${n} WalletConnect session${n === 1 ? "" : "s"}`
+                            : "No sessions to drop",
+                        );
+                      })
+                      .finally(() => setBusy(false));
+                  }}
+                >
+                  Kill all sessions
+                </button>
+              </div>
+            </>
           ) : null}
           {proposalQ.length > 1 ? (
             <p className="muted">
@@ -569,7 +626,14 @@ export function WcPanel({
 
           {proposal ? (
             <div
-              className={`clear-box ${phishingWarn(proposal.params.proposer.metadata.url) ? "danger" : "warn"}`}
+              className={`clear-box ${
+                proposalVerify?.face.tone === "danger" ||
+                phishingWarn(proposal.params.proposer.metadata.url)
+                  ? "danger"
+                  : proposalVerify?.face.tone === "ok"
+                    ? "ok"
+                    : "warn"
+              }`}
               role="region"
               aria-label={`Session request from ${proposal.params.proposer.metadata.name}`}
             >
@@ -577,6 +641,19 @@ export function WcPanel({
               <p className="muted">
                 Origin: {proposal.params.proposer.metadata.url || "(missing)"}
               </p>
+              {proposalVerify ? (
+                <p
+                  className={
+                    proposalVerify.face.tone === "danger"
+                      ? "warn-line"
+                      : "muted fee"
+                  }
+                  data-testid="wc-verify"
+                  data-verify={proposalVerify.state}
+                >
+                  {proposalVerify.face.title}: {proposalVerify.face.detail}
+                </p>
+              ) : null}
               {phishingWarn(proposal.params.proposer.metadata.url) ? (
                 <p className="warn-line">
                   {phishingWarn(proposal.params.proposer.metadata.url)!.detail}
@@ -592,6 +669,19 @@ export function WcPanel({
                   proposal.params.proposer.metadata.url || "",
                 ) === true ? (
                 <p className="muted fee">Remembered allow for this origin.</p>
+              ) : null}
+              {proposalVerify?.face.needsAck ? (
+                <label className="hide-zero">
+                  <input
+                    type="checkbox"
+                    checked={verifyAck}
+                    onChange={(e) => setVerifyAck(e.target.checked)}
+                  />
+                  <span>
+                    I understand Verify {proposalVerify.state.toLowerCase()} —
+                    still approve this session
+                  </span>
+                </label>
               ) : null}
               {phishingWarn(proposal.params.proposer.metadata.url) ? (
                 <label className="hide-zero">
@@ -612,13 +702,15 @@ export function WcPanel({
                   disabled={
                     busy ||
                     (!!phishingWarn(proposal.params.proposer.metadata.url) &&
-                      !blindAck)
+                      !blindAck) ||
+                    (!!proposalVerify?.face.needsAck && !verifyAck)
                   }
                   onClick={() => void onApproveSession()}
                   title={
-                    phishingWarn(proposal.params.proposer.metadata.url) &&
-                    !blindAck
-                      ? "Check the origin warn first"
+                    (phishingWarn(proposal.params.proposer.metadata.url) &&
+                      !blindAck) ||
+                    (proposalVerify?.face.needsAck && !verifyAck)
+                      ? "Check the Verify / origin warn first"
                       : undefined
                   }
                 >

@@ -117,3 +117,22 @@ export async function disconnectTopic(topic: string) {
     reason: getSdkError("USER_DISCONNECTED"),
   });
 }
+
+/** Drop every active WC session (phishing / “kill all sites”). */
+export async function disconnectAllSessions(): Promise<number> {
+  if (!kit) return 0;
+  const topics = Object.keys(kit.getActiveSessions());
+  let n = 0;
+  for (const topic of topics) {
+    try {
+      await kit.disconnectSession({
+        topic,
+        reason: getSdkError("USER_DISCONNECTED"),
+      });
+      n += 1;
+    } catch {
+      /* continue others */
+    }
+  }
+  return n;
+}
