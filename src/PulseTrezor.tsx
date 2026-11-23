@@ -156,6 +156,8 @@ export function PulseTrezor({
   } = useDeskConnect({
     setErr,
     setBusy,
+    chainId,
+    rpc,
     onDisconnectExtras: () => {
       sendRef.current?.clearSendDraft();
     },

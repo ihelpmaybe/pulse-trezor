@@ -147,8 +147,94 @@ if (!deskChainOk(369) || !deskChainOk(943)) {
   fail += 1;
 }
 
+/** Malformed token meta / RPC error bodies — must not throw when sanitized. */
+function sanitizeTokenMeta(raw) {
+  const o = raw && typeof raw === "object" ? raw : {};
+  const symbol = String(o.symbol ?? "TOKEN")
+    .replace(/[^\w.\-]/g, "")
+    .slice(0, 32) || "TOKEN";
+  let decimals = Number(o.decimals);
+  if (!Number.isFinite(decimals) || decimals < 0 || decimals > 255) decimals = 18;
+  const address = looksLikeHexAddress(o.address) ? o.address : null;
+  return { symbol, decimals, address };
+}
+function sanitizeRpcError(body) {
+  if (body == null) return { code: -32000, message: "empty" };
+  if (typeof body === "string") return { code: -32000, message: body.slice(0, 200) };
+  const code = Number(body.code ?? body.error?.code ?? -32000);
+  const message = String(
+    body.message ?? body.error?.message ?? body.error ?? "rpc error",
+  ).slice(0, 200);
+  return { code: Number.isFinite(code) ? code : -32000, message };
+}
+const junkTokens = [
+  null,
+  undefined,
+  { symbol: "<script>", decimals: "NaN", address: "nope" },
+  { symbol: "🦄".repeat(40), decimals: 999, address: whale },
+  { decimals: -1 },
+  "not-an-object",
+];
+for (const t of junkTokens) {
+  try {
+    sanitizeTokenMeta(t);
+  } catch (e) {
+    console.error("FAIL token meta threw:", e);
+    fail += 1;
+  }
+}
+const junkRpc = [
+  null,
+  "",
+  { code: "x", message: { nested: true } },
+  { error: { code: 3, message: "execution reverted ".repeat(20) } },
+  Buffer.from("not json"),
+];
+for (const b of junkRpc) {
+  try {
+    sanitizeRpcError(b);
+  } catch (e) {
+    console.error("FAIL rpc sanitize threw:", e);
+    fail += 1;
+  }
+}
+
+/** WC session proposal fuzz — topic/uri shaped junk must stay rejectable. */
+function wcUriOk(uri) {
+  const s = String(uri || "");
+  if (!s.startsWith("wc:")) return false;
+  if (s.length < 20 || s.length > 2048) return false;
+  if (/[\u0000-\u001f]/.test(s)) return false;
+  return true;
+}
+const badWc = [
+  "",
+  "http://evil",
+  "wc:",
+  "wc:" + "a".repeat(3000),
+  "wc:\n@2?relay=x",
+  "WC:upper",
+];
+for (const u of badWc) {
+  try {
+    if (wcUriOk(u)) {
+      console.error("FAIL accepted bad wc uri:", String(u).slice(0, 40));
+      fail += 1;
+    }
+  } catch (e) {
+    console.error("FAIL wc uri threw:", e);
+    fail += 1;
+  }
+}
+if (!wcUriOk("wc:abc123@2?relay-protocol=irn&symKey=" + "ab".repeat(32))) {
+  console.error("FAIL rejected plausible wc uri");
+  fail += 1;
+}
+
 if (fail) {
   console.error(`fuzz-watch: ${fail} failure(s)`);
   process.exit(1);
 }
-console.log("fuzz-watch: OK (seed rejects + 200 junk + extreme + addr/chain)");
+console.log(
+  "fuzz-watch: OK (seed + junk + extreme + addr/chain + token/rpc + wc)",
+);

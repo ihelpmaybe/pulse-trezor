@@ -66,7 +66,7 @@ export function useDeskBag(opts: {
   const [actBusy, setActBusy] = useState(false);
   const [actErr, setActErr] = useState<string | null>(null);
   const [actFilter, setActFilter] = useState<"all" | "in" | "out">("all");
-  const [actLimit, setActLimit] = useState(24);
+  const [actLimit, setActLimit] = useState(48);
   const [nfts, setNfts] = useState<ScanNft[]>([]);
   const [nftsTruncated, setNftsTruncated] = useState(0);
   const [nftBusy, setNftBusy] = useState(false);

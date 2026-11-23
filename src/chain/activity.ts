@@ -144,24 +144,59 @@ function sortRows(rows: ActivityRow[]): ActivityRow[] {
   });
 }
 
+async function fetchScanPages(
+  startUrl: string,
+  maxPages: number,
+): Promise<unknown[]> {
+  const items: unknown[] = [];
+  let url: string | null = startUrl;
+  for (let page = 0; page < maxPages && url; page++) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      if (page === 0) throw new Error(`Activity ${res.status}`);
+      break;
+    }
+    const body = (await res.json()) as {
+      items?: unknown[];
+      next_page_params?: Record<string, string | number> | null;
+    };
+    items.push(...(body.items ?? []));
+    if (body.next_page_params) {
+      const cur: string = url;
+      const parsed = new URL(cur);
+      const q = new URLSearchParams();
+      for (const [k, v] of Object.entries(body.next_page_params)) {
+        q.set(k, String(v));
+      }
+      url = `${parsed.origin}${parsed.pathname}?${q}`;
+    } else {
+      url = null;
+    }
+  }
+  return items;
+}
+
+/**
+ * Deeper Activity: page PulseScan native + token feeds until `max` rows.
+ * Default pages scale with max (≈50 items/page).
+ */
 export async function fetchAddressActivity(
   chainId: DeskChainId,
   owner: Address,
-  max = 24,
+  max = 48,
 ): Promise<ActivityRow[]> {
   const base = scanApiBase(chainId);
   if (!base) return [];
+  const pages = Math.max(1, Math.min(12, Math.ceil(max / 40)));
   const nativeUrl = `${base}/api/v2/addresses/${owner}/transactions?filter=to%20%7C%20from`;
   const tokenUrl = `${base}/api/v2/addresses/${owner}/token-transfers`;
-  const [nativeRes, tokenRes] = await Promise.all([
-    fetch(nativeUrl),
-    fetch(tokenUrl),
+  const [nativeItems, tokenItems] = await Promise.all([
+    fetchScanPages(nativeUrl, pages),
+    fetchScanPages(tokenUrl, pages).catch(() => [] as unknown[]),
   ]);
-  if (!nativeRes.ok) throw new Error(`Activity ${nativeRes.status}`);
-  const nativeBody = (await nativeRes.json()) as { items?: unknown[] };
   const out: ActivityRow[] = [];
   const seen = new Set<string>();
-  for (const raw of nativeBody.items ?? []) {
+  for (const raw of nativeItems) {
     const row = mapScanTx(raw, owner);
     if (!row) continue;
     const k = rowKey(row);
@@ -169,16 +204,13 @@ export async function fetchAddressActivity(
     seen.add(k);
     out.push(row);
   }
-  if (tokenRes.ok) {
-    const tokenBody = (await tokenRes.json()) as { items?: unknown[] };
-    for (const raw of tokenBody.items ?? []) {
-      const row = mapScanTokenTransfer(raw, owner);
-      if (!row) continue;
-      const k = rowKey(row);
-      if (seen.has(k)) continue;
-      seen.add(k);
-      out.push(row);
-    }
+  for (const raw of tokenItems) {
+    const row = mapScanTokenTransfer(raw, owner);
+    if (!row) continue;
+    const k = rowKey(row);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(row);
   }
   return sortRows(out).slice(0, max);
 }

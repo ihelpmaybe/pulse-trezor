@@ -301,7 +301,7 @@ export function ActivityPanel({
           className="btn ghost activity-more"
           disabled={actBusy}
           onClick={() => {
-            const next = actLimit + 24;
+            const next = actLimit + 48;
             setActLimit(next);
             void refreshActivity(active.address, chainId, next);
           }}

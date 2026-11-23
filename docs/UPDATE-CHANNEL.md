@@ -1,11 +1,17 @@
-# Update channel (stub)
+# Update channel
 
-**Channel:** `desk-web` · version from `package.json` (`0.1.0`).
+**Channel:** `desk-web` · app version from `package.json` · extension from `extension/manifest.json`.
 
 ## How updates work today
-- Pull / rebuild the desk (Vite). No auto-updater yet.
-- PWA: hard-refresh or unregister SW if a shell cache sticks.
+- **Desk:** pull git → `npm run build` / `npm run dev`. No auto-updater.
+- **PWA:** Chrome “Install Pulse Perch” from the desk origin; hard-refresh or unregister service worker if a shell cache sticks. Manifest: `public/manifest.webmanifest`.
+- **Extension:** `npm run ext:pack` → `dist-ext/pulse-perch-extension-<ver>.zip` + `.sha256`; reload unpacked / sideload zip. See [EXT-CWS-READY.md](./EXT-CWS-READY.md).
+
+## Check for updates (manual)
+1. Compare local `package.json` / extension version to GitHub `main`.
+2. Optional later: static `latest.json` on a release host (no telemetry).
 
 ## Later
 - Signed Windows pack + versioned feed URL
-- Optional “Check for updates” that GETs a static `latest.json` (no telemetry)
+- Notarized macOS
+- Chrome Web Store auto-update once listed

@@ -36,7 +36,7 @@ type Props = {
   session: SessionLike;
   active: SessionLike;
   canSign: boolean;
-  onLoadAccounts: () => void;
+  onLoadAccounts: (opts?: { gapTrim?: boolean }) => void;
   onConnect: () => void;
   onCancelConnect: () => void;
   onCancelBusy: () => void;
@@ -131,9 +131,18 @@ export function DevicePanel({
           type="button"
           className="btn"
           disabled={connecting}
-          onClick={onLoadAccounts}
+          onClick={() => onLoadAccounts()}
         >
           {listing ? "Loading…" : `Load ${accountCount} accounts`}
+        </button>
+        <button
+          type="button"
+          className="btn ghost"
+          disabled={connecting}
+          title="Pull at least 24 addresses, keep through last with PLS + one spare"
+          onClick={() => onLoadAccounts({ gapTrim: true })}
+        >
+          {listing ? "…" : "Discover used"}
         </button>
         {!session ? (
           <button

@@ -10,8 +10,8 @@ What MetaMask can do that Perch still can’t (or hasn’t proven). Product law:
 
 1. [~] **Sites pair smoke** — Piteas + PulseX session + **live WC personal_sign** (`SITES-WC-PERSONAL-SIGN-2026-11-22.md`) · tx/swap sign still needs 369 dust
 2. [x] **Injected provider** — this-tab + MV3 cross-origin request path PASS (`EXT-MV3-2026-11-22.md`); `0.1.2` fans `accountsChanged` / `chainChanged` to dapp tabs
-3. [~] **Activity / history** — PulseScan feed + poison flags; denser multi-column face + peer line (2026-11-23); deeper history later
-4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF)
+3. [~] **Activity / history** — denser face + paged PulseScan feed (default 48, More +48) 2026-11-23; infinite scroll later
+4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF) — UI live; stuck-tx live proof later
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX (Sites remains MM-replacement path)
 7. [~] **Ship surfaces** — MV3 sideload pack + CWS-ready docs/privacy (`docs/EXT-CWS-READY.md`); Store listing + mobile later
@@ -37,9 +37,9 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 
 ### Fuzz
 - [x] Bad addresses / amounts / chainId / paths — string guards in `npm run fuzz` (2026-11-23)
-- [ ] Malformed token meta + RPC error bodies
+- [x] Malformed token meta + RPC error bodies — sanitize fuzz 2026-11-23
 - [x] Registry JSON import fuzz (no crash; reject seed-like fields) — `npm run fuzz`
-- [ ] EIP-681 / WC session fuzz when those land
+- [x] WC session URI fuzz (shape reject) — `npm run fuzz` 2026-11-23; deeper session object fuzz later
 - [x] Time-boxed fuzz job — `scripts/fuzz-watch.mjs` (+ extreme amounts/lookalike) in smoke
 - [x] Extreme face/poison/clear-sign sim — `src/ui/extreme.sim.test.ts`
 
@@ -53,8 +53,8 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Pen report in `tests/pen/REPORT.md` before Gate 1 — cancel + Suite-quit PASS 2026-11-23
 
 ### Full bar
-- [ ] Matrix: Win×Lin×Mac×Web × Safe 3/5/7/emu × receive/send/token/approve
-- [ ] Main 369 + testnet 943 rows
+- [~] Matrix: Win×Lin×Mac×Web × Safe 3/5/7/emu — template [docs/OS-DEVICE-MATRIX.md](./docs/OS-DEVICE-MATRIX.md); Win lab PASS
+- [~] Main 369 + testnet 943 rows — 943 smokes PASS; 369 Sites tx OPEN
 - [ ] FULL green before ACCEPTANCE Gate 1–2
 - [ ] Re-run pen &lt; 30 days before each release tag
 
@@ -86,7 +86,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] **Address book** (label + warn new recipient)
 
 ## A3 — Accounts
-- [~] BIP44 multi-account discovery — Load Account #1…N one Suite Allow (auto-gap scan later)
+- [x] BIP44 multi-account discovery — Load N + **Discover used** (PLS gap trim + spare) 2026-11-23
 - [x] Passphrase / hidden wallet callouts
 - [x] Watch-only after disconnect (persisted address)
 - [x] Export / import registry JSON — watch export + seed-safe import
@@ -95,7 +95,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] **PulseX** swap (quote → Trezor sign) — Swap tab V2 exact-in on face (PRODUCT-LAW)
 - [x] Slippage / deadline controls
 - [x] **ProveX** entry: deep link / open app + USDC balance awareness
-- [~] Clear-sign ProveX escrow txs when user hits them via WC/Desk
+- [x] Clear-sign ProveX / Permit(2) when user hits them via WC — host + typed-data strips 2026-11-23
 - [ ] Other DEXes (Piteas/Switch/9mm) — BONUS only
 
 ## C — HEX companion (core app)
@@ -103,7 +103,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [~] Reuse pqq-wallet derivation + Connect adapter — not required for “has stakes” view
 - [x] Portfolio view (stakes + liquid HEX) — Stakes tab when module on
 - [~] Stake / end clear-sign via Sites — not in-desk stakeStart product
-- [ ] Advanced claim / migrate tools
+- [x] Advanced claim / migrate tools — Apps card → custom call / Approvals / Sites + migrate guide 2026-11-23
 
 ## E — Power tools
 - [x] Portfolio snapshot helpers — export bag snapshot JSON
@@ -128,9 +128,9 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Explain / simulate pane UI (AI0–AI1) — TxExplain + WC dry-run on face
 
 ## Release
-- [~] Versioned builds + update channel stub — `docs/UPDATE-CHANNEL.md`
+- [x] Versioned builds + update channel — `docs/UPDATE-CHANNEL.md` + Gate 1 checklist
 - [ ] Signed/notarized where OS requires (Mac later)
-- [ ] Smoke checklist vs [ACCEPTANCE.md](./ACCEPTANCE.md) Gate 1
+- [~] Smoke checklist vs [ACCEPTANCE.md](./ACCEPTANCE.md) Gate 1 — `docs/GATE-1-CHECKLIST.md`
 
 ## Growth (Desk surfaces) — see [ADOPTION.md](./ADOPTION.md)
 - [x] First-run: Bridge → receive after Bridge guide

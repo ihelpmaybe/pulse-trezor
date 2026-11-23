@@ -49,7 +49,7 @@ describe("blind calldata", () => {
     );
     expect(phishingWarn("https://pulsex.xyz")?.tone).toBe("danger");
     expect(phishingWarn("https://app.pulsex.com")).toBeNull();
-    // Official ProveX must not trip lookalike (regression 2026-11-22)
+    // Official ProveX must not trip lookalike phishing (regression 2026-11-22)
     expect(phishingWarn("https://app.provex.com")).toBeNull();
     expect(phishingWarn("https://provex.com")).toBeNull();
     expect(phishingWarn("https://proverx.evil")?.tone).toBe("danger");
@@ -95,6 +95,32 @@ describe("blind calldata", () => {
     expect(lines.some((l) => l.title.includes("stakeStart · hearts"))).toBe(
       true,
     );
+  });
+
+  it("clear-signs official ProveX host", () => {
+    const lines = clearSignTx({
+      to: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+      data: "0x",
+      dappUrl: "https://app.provex.com/ramp",
+    });
+    expect(lines.some((l) => l.title === "ProveX (official)")).toBe(true);
+  });
+
+  it("flags Permit2 primaryType", () => {
+    const lines = clearSignMessage({
+      method: "eth_signTypedData_v4",
+      dappUrl: "https://app.pulsex.com",
+      preview: JSON.stringify({
+        primaryType: "PermitSingle",
+        message: {
+          spender: "0x" + "11".repeat(20),
+          amount:
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        },
+      }),
+    });
+    expect(lines.some((l) => l.title === "Permit2")).toBe(true);
+    expect(needsDangerAck(lines)).toBe(true);
   });
 
   it("flags raw hex and Permit for danger ack", () => {

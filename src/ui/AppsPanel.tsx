@@ -121,14 +121,55 @@ export function AppsPanel({
           account → Load full bag on Pulse → revoke old ETH allowances you don’t
           need.
         </p>
-        <button
-          type="button"
-          className="btn ghost"
-          onClick={() => onActionTab("approve")}
-          disabled={chainId !== 369 && chainId !== 943}
-        >
-          Open Approvals
-        </button>
+        <div className="row" style={{ gap: "0.35rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => onActionTab("approve")}
+            disabled={chainId !== 369 && chainId !== 943}
+          >
+            Open Approvals
+          </button>
+          <a
+            className="btn ghost"
+            href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/migrate-from-eth.md"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Migrate guide
+          </a>
+        </div>
+      </div>
+      <div className="apps-card">
+        <h3>Advanced · claim / migrate</h3>
+        <p className="muted fee">
+          Power path: custom call for rescue/claim calldata, Approvals to clean
+          spenders, Sites for HEX stakeEnd / claim UIs. Read every field on the
+          Trezor — Perch does not auto-claim.
+        </p>
+        <div className="row" style={{ gap: "0.35rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={onOpenCustomCall}
+          >
+            Custom call
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => onActionTab("approve")}
+          >
+            Approvals
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => onActionTab("sites")}
+          >
+            Sites
+          </button>
+        </div>
       </div>
       <div className="apps-card">
         <h3>ZKX Wallet</h3>

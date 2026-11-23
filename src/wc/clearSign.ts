@@ -281,10 +281,18 @@ const HOST_HINTS: {
   detail: string;
 }[] = [
   {
-    re: /provex/i,
-    title: "ProveX / fiat corridor",
+    re: /https?:\/\/([a-z0-9-]+\.)*provex\.com([/:?]|$)/i,
+    title: "ProveX (official)",
     tone: "danger",
-    detail: "On-ramp/off-ramp — verify amount, asset, and destination carefully",
+    detail:
+      "Fiat corridor on app.provex.com — verify amount, asset, and destination; bridged USDC only",
+  },
+  {
+    re: /provex|prove[-_.]?x/i,
+    title: "ProveX-shaped host",
+    tone: "danger",
+    detail:
+      "Looks ProveX-related — confirm the real https://app.provex.com URL before signing",
   },
   {
     re: /bridge\.pulsechain|pulsebridge|tokensex|gibs\.finance/i,
@@ -575,11 +583,13 @@ export function clearSignMessage(opts: {
     }
     const blob = `${primary} ${preview}`;
     if (/permit/i.test(blob)) {
+      const permit2 = /permit2|permitsingle|permitbatch/i.test(blob);
       lines.push({
         tone: "danger",
-        title: "Permit",
-        detail:
-          "Looks like Permit / Permit2 — same power as approve; check spender + amount + deadline on device",
+        title: permit2 ? "Permit2" : "Permit",
+        detail: permit2
+          ? "Permit2-style allowance — can unlock many tokens; check every spender + amount + deadline on Trezor"
+          : "EIP-2612 Permit — same power as approve; check spender + amount + deadline on Trezor",
       });
     }
     if (/\b(order|seaport|listing|offer)\b/i.test(blob)) {

@@ -28,6 +28,7 @@ import {
   loadAccountCount,
   loadAccountIndex,
   loadAccountList,
+  loadRpcOverride,
   loadWatch,
   saveAccountCount,
   saveAccountIndex,
@@ -35,6 +36,8 @@ import {
   saveWatch,
   type Session,
 } from "../ui/deskStorage";
+import type { DeskChainId, RpcOverride } from "../chain/client";
+import { trimAccountsByPlsGap } from "../trezor/accountGap";
 
 type SetErr = Dispatch<SetStateAction<string | null>>;
 type SetBusy = Dispatch<SetStateAction<boolean>>;
@@ -42,12 +45,16 @@ type SetBusy = Dispatch<SetStateAction<boolean>>;
 export function useDeskConnect(opts: {
   setErr: SetErr;
   setBusy: SetBusy;
+  chainId: DeskChainId;
+  /** Host RPC prop — gap trim also reads user override from storage. */
+  rpc?: RpcOverride;
   /** Extra cleanup when forgetting watch (bag / send faces). */
   onForgetExtras?: () => void;
   /** Extra cleanup on disconnect (clear draft send). */
   onDisconnectExtras?: () => void;
 }) {
-  const { setErr, setBusy, onForgetExtras, onDisconnectExtras } = opts;
+  const { setErr, setBusy, chainId, rpc, onForgetExtras, onDisconnectExtras } =
+    opts;
 
   const [warm, setWarm] = useState(false);
   const [suite, setSuite] = useState<"ok" | "missing" | "unknown" | "…">("…");
@@ -182,14 +189,42 @@ export function useDeskConnect(opts: {
     );
   }
 
-  function onLoadAccounts() {
+  function finishAccountList(
+    accounts: ListedAccount[],
+    id: string,
+    gen: number,
+  ) {
+    if (connectGen.current !== gen) return;
+    setAccountList(accounts);
+    saveAccountList(accounts);
+    setAccountCount(accounts.length);
+    saveAccountCount(accounts.length);
+    setDeviceId(id);
+    const prefer =
+      accounts.find((a) => a.derivationIndex === accountIndex) ?? accounts[0];
+    if (prefer) {
+      applySession(
+        prefer.address as Address,
+        prefer.derivationIndex,
+        prefer.derivationPath,
+        id,
+      );
+    }
+    void probeSuite().then(setSuite);
+  }
+
+  function onLoadAccounts(opts?: { gapTrim?: boolean }) {
+    const gapTrim = !!opts?.gapTrim;
     setErr(null);
     setBusy(true);
     setListing(true);
     setConnecting(true);
     const gen = ++connectGen.current;
-    saveAccountCount(accountCount);
-    const pending = listTrezorAccountsFromGesture(accountCount);
+    const pull = gapTrim
+      ? Math.max(accountCount, 24)
+      : accountCount;
+    saveAccountCount(pull);
+    const pending = listTrezorAccountsFromGesture(pull);
     const timeout = window.setTimeout(() => {
       if (connectGen.current !== gen) return;
       cancelTrezorConnect("timeout");
@@ -204,23 +239,25 @@ export function useDeskConnect(opts: {
       void probeSuite().then(setSuite);
     }, 90_000);
     void pending
-      .then(({ accounts, deviceId: id }) => {
+      .then(async ({ accounts, deviceId: id }) => {
         if (connectGen.current !== gen) return;
-        setAccountList(accounts);
-        saveAccountList(accounts);
-        setDeviceId(id);
-        const prefer =
-          accounts.find((a) => a.derivationIndex === accountIndex) ??
-          accounts[0];
-        if (prefer) {
-          applySession(
-            prefer.address as Address,
-            prefer.derivationIndex,
-            prefer.derivationPath,
-            id,
+        if (!gapTrim) {
+          finishAccountList(accounts, id, gen);
+          return;
+        }
+        const saved = loadRpcOverride();
+        const rpcEff: RpcOverride | undefined = saved || rpc || undefined;
+        const { trimmed, lastUsed } = await trimAccountsByPlsGap(
+          accounts,
+          chainId,
+          rpcEff,
+        );
+        finishAccountList(trimmed, id, gen);
+        if (lastUsed < 0) {
+          setErr(
+            "No PLS on listed accounts — kept #1. Fund it or raise count and Load again.",
           );
         }
-        void probeSuite().then(setSuite);
       })
       .catch((e) => {
         if (connectGen.current !== gen) return;
