@@ -47,7 +47,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://ihelpmaybe.github.io/hearts-archive/",
     mark: "♥",
     tone: "rose",
-    iconSrc: "/sw-brands/hearts-archive-square.jpg",
+    iconSrc: "/sw-brands/hearts-archive-ha.jpg",
   },
   {
     name: "Just The Tip",
