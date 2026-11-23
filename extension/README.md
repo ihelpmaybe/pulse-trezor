@@ -9,6 +9,10 @@ npm run ext:pack
 ```
 Zip lands at `dist-ext/pulse-perch-extension-<version>.zip` (icons + MV3 shell).
 
+Release `extension-0.1.1` SHA256:
+
+`c36c25d20eb71b816e2a2ee1b24ce8472be1eb16e5eb9e3e92d13c9a30d4b394`
+
 ## Load unpacked
 1. `npm run dev` (desk on `:5174`)
 2. Lab Chrome: `scripts\chrome-ext-lab.ps1` (CDP `:9233`) **or** Chrome → Extensions → Load unpacked → this `extension/` folder
