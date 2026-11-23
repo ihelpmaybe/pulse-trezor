@@ -1,11 +1,13 @@
 /**
- * FAQ / privacy eye / settings gear — top-right desk chrome.
+ * FAQ / other software / privacy eye / settings — top-right desk chrome.
  */
 import type { RefObject } from "react";
 
 type Props = {
   faqOpen: boolean;
   onOpenFaq: () => void;
+  softwareOpen: boolean;
+  onOpenSoftware: () => void;
   privacyHide: boolean;
   togglePrivacyHide: () => void;
   showSettings: boolean;
@@ -17,6 +19,8 @@ type Props = {
 export function DeskTools({
   faqOpen,
   onOpenFaq,
+  softwareOpen,
+  onOpenSoftware,
   privacyHide,
   togglePrivacyHide,
   showSettings,
@@ -37,6 +41,21 @@ export function DeskTools({
       >
         <span className="faq-btn-label" aria-hidden="true">
           ?
+        </span>
+      </button>
+      <button
+        type="button"
+        className={
+          softwareOpen ? "btn ghost rpc-pop-btn on" : "btn ghost rpc-pop-btn"
+        }
+        aria-haspopup="dialog"
+        aria-expanded={softwareOpen}
+        aria-label="Other software"
+        title="Other software — Pulse apps, soft wallets & Suite"
+        onClick={onOpenSoftware}
+      >
+        <span className="faq-btn-label software-btn-label" aria-hidden="true">
+          SW
         </span>
       </button>
       <button

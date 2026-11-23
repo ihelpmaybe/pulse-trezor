@@ -33,6 +33,7 @@ import { loadFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
 import { decodeSyncPayload } from "./chain/syncPair";
 import { FaqModal } from "./ui/FaqModal";
+import { OtherSoftwareModal } from "./ui/OtherSoftwareModal";
 import { CoreFooter } from "./ui/CoreFooter";
 import { AppsPanel } from "./ui/AppsPanel";
 import { ActivityPanel } from "./ui/ActivityPanel";
@@ -92,6 +93,7 @@ export function PulseTrezor({
   const [err, setErr] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
+  const [softwareOpen, setSoftwareOpen] = useState(false);
   const [a11y, setA11y] = useState<A11yPrefs>(() => loadA11y());
   const [privacyHide, setPrivacyHide] = useState(() => loadPrivacyHide());
   const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
@@ -663,13 +665,24 @@ export function PulseTrezor({
         faqOpen={faqOpen}
         onOpenFaq={() => {
           setSettingsOpen(false);
+          setSoftwareOpen(false);
           setFaqOpen(true);
+        }}
+        softwareOpen={softwareOpen}
+        onOpenSoftware={() => {
+          setSettingsOpen(false);
+          setFaqOpen(false);
+          setSoftwareOpen(true);
         }}
         privacyHide={privacyHide}
         togglePrivacyHide={togglePrivacyHide}
         showSettings={showSettings}
         settingsOpen={settingsOpen}
-        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenSettings={() => {
+          setFaqOpen(false);
+          setSoftwareOpen(false);
+          setSettingsOpen(true);
+        }}
         settingsBtnRef={settingsBtnRef}
       />
       {showSettings && settingsOpen ? (
@@ -678,6 +691,7 @@ export function PulseTrezor({
           onClose={() => setSettingsOpen(false)}
           onOpenFaq={() => {
             setSettingsOpen(false);
+            setSoftwareOpen(false);
             setFaqOpen(true);
           }}
           suiteChannel={suiteChannel}
@@ -1089,8 +1103,13 @@ export function PulseTrezor({
         </section>
       </div>
 
-      <CoreFooter activeAddress={active?.address ?? null} />
+      <CoreFooter />
       <FaqModal open={faqOpen} onClose={() => setFaqOpen(false)} />
+      <OtherSoftwareModal
+        open={softwareOpen}
+        onClose={() => setSoftwareOpen(false)}
+        activeAddress={active?.address ?? null}
+      />
       {mascotOn ? (
         <img
           className="mascot"
