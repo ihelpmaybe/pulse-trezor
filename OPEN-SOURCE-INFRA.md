@@ -65,7 +65,7 @@ For AIs and humans. Pair with [PRIORITY.md](./PRIORITY.md) · [BUILD-EFFICIENCY.
 
 | Need | Adopt | Note |
 |------|-------|------|
-| Wallet side | **Reown WalletKit** (WalletConnect) | Desk as wallet peer “Pulse Desk” |
+| Wallet side | **Reown WalletKit** (WalletConnect) | Peer name **Pulse Perch** (Trezor transport today) |
 | Dapp side (if any) | Reown AppKit / wagmi WC connector | Guides/badge only |
 
 ### Swaps + fiat (PRIORITY #25 / #25b) — core apps

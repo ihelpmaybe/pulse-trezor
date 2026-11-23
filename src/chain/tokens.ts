@@ -7,7 +7,11 @@ import {
 } from "viem";
 import { encodeFunctionData } from "viem";
 import tokenlist from "../pack/tokenlist.json";
-import { makePublicClient, type DeskChainId } from "./client";
+import {
+  makePublicClient,
+  type DeskChainId,
+  type RpcOverride,
+} from "./client";
 
 export type PackToken = (typeof tokenlist.tokens)[number];
 
@@ -25,10 +29,11 @@ export function coreErc20Tokens(chainId: DeskChainId): PackToken[] {
 export async function fetchTokenBalances(
   chainId: DeskChainId,
   owner: Address,
+  rpc?: RpcOverride,
 ): Promise<{ token: PackToken; raw: bigint; formatted: string }[]> {
   const tokens = coreErc20Tokens(chainId);
   if (!tokens.length) return [];
-  const client = makePublicClient(chainId);
+  const client = makePublicClient(chainId, rpc);
   const rows = await Promise.all(
     tokens.map(async (token) => {
       try {

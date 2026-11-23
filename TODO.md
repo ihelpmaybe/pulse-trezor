@@ -4,33 +4,51 @@ This repo only. Program-wide map: [ROADMAP.md](./ROADMAP.md) · [END-TO-END.md](
 
 Legend: `[ ]` todo · `[x]` done
 
+## MM gap → Perch (MetaMask replacement punch list)
+
+What MetaMask can do that Perch still can’t (or hasn’t proven). Product law: bag / send / approve / Sites / sign without MetaMask.
+
+1. [~] **Sites pair smoke** — Piteas + **PulseX IPFS session approved** (2026-11-22, `0x73d0…36A8`) · still need live WC **sign** (mainnet bag is 0 PLS — fund dust or message-sign path)
+2. [~] **Injected provider** — EIP-1193 + Settings this-tab + MV3 shell (`extension/`); load unpacked for cross-origin lab
+3. [~] **Activity / history** — PulseScan feed on face (testnet+mainnet API); deeper history later
+4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF)
+5. [x] **Token UX** — custom import + hide zeros + favorites
+6. [x] **Convenience swap** — in-face PulseX (Sites remains MM-replacement path)
+7. [ ] **Ship surfaces** — extension and/or mobile (desktop web + Suite today)
+8. [~] **Softer first-run** — Cancel while signing; signing cue + “other screen”; fee wild-testnet note; reconcile Suite-linked vs err (2026-11-22)
+9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts — not Pulse daily-life blockers. **EVM peers in pack:** ETH / Sepolia / Holesky + Pulse test (same BIP44); Pulse remains product center.
+
+Already covered enough for law path: bag, send, approve, multi-account load, WC methods (tx / personal_sign / typed data / switch 369), Trezor clear-sign, Pulse RPC.
+
 ## TEST — Desk (smoke / fuzz / pen / full)
 
 Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 
 ### Smoke
 - [x] CI `smoke`: typecheck + build + SYNC0 path / error unit tests (no Bridge in CI)
-- [ ] Manual/emu: address matches device screen
-- [ ] Send PLS dust (testnet) → confirmed
-- [ ] ERC-20 send once
-- [ ] Disconnect → watch-only registry loads
-- [ ] Bridge-down and user-cancel-on-device paths
+- [x] Manual/emu: address matches device screen (export + personal_sign account)
+- [x] Send PLS dust (testnet) → confirmed (`tests/smoke/SIGN-TESTNET-2026-11-22.md` · `0x8bd9…2c6e`)
+- [x] personal_sign via inject bridge (`tests/smoke/SIGN-PERSONAL-INJECT-2026-11-22.md`)
+- [x] EIP-712 inject smoke (`tests/smoke/SIGN-EIP712-INJECT-2026-11-22.md`)
+- [ ] ERC-20 send once (blocked on 943 — no token bag/pack yet)
+- [x] Disconnect → watch-only still loads (localStorage)
+- [ ] Suite-down and user-cancel-on-device paths
 
 ### Fuzz
 - [ ] Bad addresses / amounts / chainId / paths
 - [ ] Malformed token meta + RPC error bodies
-- [ ] Registry JSON import fuzz (no crash; reject seed-like fields)
+- [x] Registry JSON import fuzz (no crash; reject seed-like fields) — `npm run fuzz`
 - [ ] EIP-681 / WC session fuzz when those land
-- [ ] Time-boxed fuzz job in CI
+- [~] Time-boxed fuzz job — `scripts/fuzz-watch.mjs` in smoke
 
 ### Pen
-- [ ] Phishing UX: PulseChain labeled; spender clear-sign
-- [ ] Approve/Permit/EIP-712 review
-- [ ] Blind calldata extra confirm
-- [ ] No seed/key in logs; AI prepare-only
-- [ ] WC origin shown before sign
-- [ ] Dependabot/lockfile; Connect version pin
-- [ ] Pen report in `tests/pen/REPORT.md` before Gate 1
+- [x] Phishing UX: PulseChain labeled; spender clear-sign
+- [x] Approve/Permit/EIP-712 review — WC + TxExplain strips
+- [x] Blind calldata extra confirm — WC checkbox before Sign on Trezor
+- [x] No seed/key in logs; AI prepare-only — fuzz + import guards
+- [x] WC origin shown before sign
+- [x] Connect version pin → `@trezor/connect-web@10.0.1` (forward path)
+- [~] Pen report in `tests/pen/REPORT.md` before Gate 1 — code rows filled; Suite-down manual open
 
 ### Full bar
 - [ ] Matrix: Win×Lin×Mac×Web × Safe 3/5/7/emu × receive/send/token/approve
@@ -40,7 +58,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 
 ## A0 — Bootstrap
 - [x] App shell (Vite + Connect patterns)
-- [x] Warm Connect + Bridge; human-readable errors
+- [x] Warm Connect 10 + Suite probe; human-readable errors
 - [x] Connect / disconnect; address matches device screen
 - [x] Pulse RPC + explorer links (chain 369)
 
@@ -48,34 +66,34 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Receive + verify-on-device
 - [x] PLS balance
 - [x] Send PLS (prepare → Trezor sign → broadcast)
-- [x] **Fee / gas UI** (estimate preview; bump / stuck speed-up later)
-- [ ] Tx status + basic history
+- [x] **Fee / gas UI** (estimate preview + RBF speed-up / cancel)
+- [x] Tx status + basic history — face poll + PulseScan Activity
 - [x] **Indexer decision** (scan API vs self-host) — platform SYNC7 (PulseScan public API)
 - [x] **Testnet V4 (943)** toggle for safe e2e
-- [ ] **First-run: detect/install Bridge**
-- [ ] **Firmware outdated warning** (Connect device features)
+- [x] **First-run: detect Suite Desktop / Suite Web** (Connect 10; not legacy Bridge :21325)
+- [x] **Firmware outdated warning** (Connect device features)
 
 ## A2 — Tokens
 - [x] Token list: HEX, PLSX, INC, bridged USDC (SYNC4 pack; custom add later)
 - [x] Token balances
 - [x] Send ERC-20
 - [x] Approve / revoke UI (spender, amount / max clear)
-- [ ] **Approval inventory + bulk revoke**
-- [ ] **EIP-712 / typed data / Permit** clear-sign path
-- [ ] **Custom contract call** (ABI/hex assist) for power/rescue
-- [ ] **Address book** (label + warn new recipient)
+- [x] **Approval inventory + revoke** — Scan + per-row + bulk Revoke
+- [~] **EIP-712 / typed data / Permit** clear-sign path — WC strip + Permit warn
+- [x] **Custom contract call** (hex assist) for power/rescue
+- [x] **Address book** (label + warn new recipient)
 
 ## A3 — Accounts
-- [ ] BIP44 multi-account discovery
-- [ ] Passphrase / hidden wallet callouts
-- [ ] Watch-only after disconnect (persisted registry)
-- [ ] Export / import registry JSON
+- [~] BIP44 multi-account discovery — Load Account #1…N one Suite Allow (auto-gap scan later)
+- [x] Passphrase / hidden wallet callouts
+- [x] Watch-only after disconnect (persisted address)
+- [x] Export / import registry JSON — watch export + seed-safe import
 
 ## B — DeFi (core: PulseX · ProveX)
-- [ ] **PulseX** swap (quote → Trezor sign) — first-class, not “any DEX”
-- [ ] Slippage / deadline controls
-- [ ] **ProveX** entry: deep link / open app + USDC balance awareness
-- [ ] Clear-sign ProveX escrow txs when user hits them via WC/Desk
+- [x] **PulseX** swap (quote → Trezor sign) — Swap tab V2 exact-in on face (PRODUCT-LAW)
+- [x] Slippage / deadline controls
+- [x] **ProveX** entry: deep link / open app + USDC balance awareness
+- [~] Clear-sign ProveX escrow txs when user hits them via WC/Desk
 - [ ] Other DEXes (Piteas/Switch/9mm) — BONUS only
 
 ## C — HEX companion (core app)
@@ -85,36 +103,38 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Advanced claim / migrate tools
 
 ## E — Power tools
-- [ ] Portfolio snapshot helpers
+- [x] Portfolio snapshot helpers — export bag snapshot JSON
 - [ ] Migrate walks → product Advanced mode
 - [ ] Connect e2e harness (fakes + device checklist)
 
 ## G — Ecosystem (desk-owned bits)
-- [ ] Link Suite gap / upstream status from Desk UI or about page
-- [ ] Cross-link Tip (mobile soft) + guides + rescue
+- [x] Link Suite gap / upstream status from Desk UI or about page
+- [x] Cross-link Tip (mobile soft) + guides + rescue
 - [ ] Consume SYNC registry / token pack from `pulse-trezor-platform`
 
 ## PLAT — Desk targets (this app)
 - [ ] Windows (primary)
 - [ ] Linux
 - [ ] macOS (Apple)
-- [ ] Web / PWA (Connect-web)
-- [x] WalletConnect host (dapps → Trezor) — `src/wc/` v0 (eth_sendTransaction + personal_sign; EIP-712 next)
+- [~] Web / PWA (Connect-web) — desk + PWA shell live; packs later
+- [x] WalletConnect host (dapps → Trezor) — `src/wc/` (tx / personal_sign / EIP-712 + clear-sign)
 
 ## AI — desk surface
-- [ ] Explain / simulate pane (AI0–AI1) — agent never signs
+- [x] Settings → Agent policy tiles (`window.__pulsePerchAi`, data-ai-* attrs)
+- [x] Hard gate: `requestSign` / prepare / simulate / explain assert prefs; AGENTS.md rule
+- [x] Explain / simulate pane UI (AI0–AI1) — TxExplain + WC dry-run on face
 
 ## Release
-- [ ] Versioned builds + update channel (Win first)
+- [~] Versioned builds + update channel stub — `docs/UPDATE-CHANNEL.md`
 - [ ] Signed/notarized where OS requires (Mac later)
 - [ ] Smoke checklist vs [ACCEPTANCE.md](./ACCEPTANCE.md) Gate 1
 
 ## Growth (Desk surfaces) — see [ADOPTION.md](./ADOPTION.md)
-- [ ] First-run: Bridge → receive after Bridge guide
-- [ ] Migrate-from-ETH wizard entry
-- [ ] WC peer name “Pulse Desk” + Pulse chain
-- [ ] Deep link / badge target for “Open in Desk”
-- [ ] Watch-only mode pitched for Tip users (SYNC)
+- [x] First-run: Bridge → receive after Bridge guide
+- [x] Migrate-from-ETH wizard entry
+- [x] WC peer name **Pulse Perch** + Pulse chain
+- [x] Deep link / badge target for “Open in Desk” — `?uri=` + `web+pulseperch:`
+- [~] Watch-only mode pitched for Tip users (SYNC) — Tip link on Apps
 
 ## BONUS — after Gate 1–2 (do not start early)
 

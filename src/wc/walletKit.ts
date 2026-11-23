@@ -1,6 +1,7 @@
 /**
- * Reown WalletKit — Pulse Desk as the wallet peer (dapps → Trezor).
+ * Reown WalletKit — Pulse Perch as the wallet peer (dapps → current transport).
  * Free Cloud projectId required (paste in UI / VITE_REOWN_PROJECT_ID).
+ * Namespaces: Pulse + common EVM peers (same eth BIP44 / tx type).
  */
 import { Core } from "@walletconnect/core";
 import {
@@ -9,8 +10,7 @@ import {
   type WalletKitTypes,
 } from "@reown/walletkit";
 import { buildApprovedNamespaces, getSdkError } from "@walletconnect/utils";
-
-const PULSE = "eip155:369";
+import { DESK_CHAIN_IDS } from "../chain/client";
 
 const METHODS = [
   "eth_sendTransaction",
@@ -42,9 +42,9 @@ export async function initWalletKit(projectId: string): Promise<IWalletKit> {
   kit = await WalletKit.init({
     core,
     metadata: {
-      name: "Pulse Desk",
+      name: "Pulse Perch",
       description:
-        "PulseChain Trezor wallet — WalletConnect peer for HEX / PulseX / ProveX",
+        "PulseChain-first wallet — WalletConnect peer (EVM-compatible)",
       url:
         typeof window !== "undefined"
           ? window.location.origin
@@ -56,16 +56,23 @@ export async function initWalletKit(projectId: string): Promise<IWalletKit> {
   return kit;
 }
 
-export function pulseNamespaces(address: string) {
-  const acct = `${PULSE}:${address}`;
+/** Advertise all packed EVM chains for the same address. */
+export function evmNamespaces(address: string) {
+  const chains = DESK_CHAIN_IDS.map((id) => `eip155:${id}`);
+  const accounts = DESK_CHAIN_IDS.map((id) => `eip155:${id}:${address}`);
   return {
     eip155: {
-      chains: [PULSE],
+      chains,
       methods: METHODS,
       events: EVENTS,
-      accounts: [acct],
+      accounts,
     },
   };
+}
+
+/** @deprecated use evmNamespaces — kept name for older callers */
+export function pulseNamespaces(address: string) {
+  return evmNamespaces(address);
 }
 
 export async function approveProposal(
@@ -75,7 +82,7 @@ export async function approveProposal(
   if (!kit) throw new Error("WalletKit not ready");
   const namespaces = buildApprovedNamespaces({
     proposal: proposal.params,
-    supportedNamespaces: pulseNamespaces(address),
+    supportedNamespaces: evmNamespaces(address),
   });
   return kit.approveSession({
     id: proposal.id,

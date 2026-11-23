@@ -14,7 +14,7 @@ Firmware            │         Android · Graphene · (iOS later)
 Bridge/Connect ─────┤         EIP-681 · PulseX
    ↑                │              │
 ┌───┴────┬──────────┴───┬──────────┴────┬────────────┐
-│ Suite  │ Pulse Desk   │ Tip mobile    │ Ext/WC/PWA │
+│ Suite* │ Pulse Perch  │ Tip mobile    │ Ext/WC/PWA │
 │ (gap)  │ Win·Lin·Mac  │ soft + sync   │ EIP-681    │
 └────────┴──────┬───────┴───────┬───────┴────────────┘
                 └──── SYNC ─────┘  watch-only · bunker · tokens
@@ -89,7 +89,7 @@ So this repo is **private study + patch notes + upstream asks**, not a public �
 |----|----------|----------------|
 | S1 | Private map: where Pulse plugs into Suite (coins-eth, networks UI, backends) | No — internal |
 | S2 | Upstream: ask/PR SatoshiLabs to enable Pulse in official Suite | Yes if they merge |
-| S3 | Pulse Desk = “Suite for Pulse” under our license | **Yes — primary** |
+| S3 | Pulse Perch = Pulse MetaMask replacement (Suite transport today) | **Yes — primary** |
 
 S3 is how end users get Suite-like UX without T-RSL violation.  
 S1/S2 still run so we know exact gaps and can push Trezor.
@@ -104,7 +104,7 @@ S1/S2 still run so we know exact gaps and can push Trezor.
 
 ---
 
-## Layer 4 — Pulse Desk (`pulse-trezor`) — shippable Suite replacement (HWW)
+## Layer 4 — Pulse Perch (`pulse-trezor`) — MetaMask replacement (HWW transport today)
 
 Real Connect + Bridge. Desktop/hardware path that makes HWW E2E true **without MetaMask**.
 

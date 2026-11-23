@@ -173,7 +173,7 @@ See [ADOPTION.md](./ADOPTION.md). After Gate 1 smoke — don’t ads-before-prod
 - [ ] Graphene / de-Google Tip story + checksums
 - [ ] Watch-only Desk for Tip users (SYNC)
 - [ ] Bunker narrative (honest quantum-prep)
-- [ ] WalletConnect “Open in Pulse Desk” for dapps
+- [ ] WalletConnect “Open in Pulse Perch” for dapps
 - [ ] “Works on Pulse” badge / deep-link kit
 
 ### P1

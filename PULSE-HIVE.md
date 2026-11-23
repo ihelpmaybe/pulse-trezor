@@ -99,7 +99,7 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H20 | [ ] Desk: Bridge first-run detect | `pulse-trezor` | |
 | H21 | [ ] Desk: PLS + ERC-20 history via PulseScan | `pulse-trezor` | |
 | H22 | [ ] Desk: multi-account / passphrase UX | `pulse-trezor` | |
-| H23 | [ ] Desk: WC “Open in Pulse Desk” | Desk + platform | |
+| H23 | [ ] WC “Open in Pulse Perch” | wallet + platform | |
 | H24 | [ ] Tip: locate Android source → unblock TIP1 | `Tip-wallet` | |
 | H25 | [ ] Tip: SYNC4 pack + Graphene checksums | Tip + guides | |
 | H26 | [ ] Tip↔Desk watch-only SYNC | platform + both | |
@@ -268,7 +268,7 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 | H207 | [ ] Add one free OSS wrap candidate to OPEN-SOURCE-INFRA | pulse-trezor | |
 | H208 | [ ] Price/TVL widget from free public API | Desk/guides | |
 | H209 | [ ] Scam screenshot → warning blurb | guides | |
-| H210 | [ ] Repo hygiene: mark DONE checkboxes that are done | any TODO | |
+| H210 | [x] Repo hygiene: mark DONE checkboxes that are done | any TODO | 2026-11-22 |
 | H211 | [ ] Write “why Pulse for X” 5-line pitch | guides | |
 | H212 | [ ] Testnet dust send evidence for Desk | Desk | device |
 | H213 | [ ] Catalog dead Pulse links / redirects | guides | |

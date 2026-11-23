@@ -1,10 +1,11 @@
-# Pulse Trezor
+# Pulse Perch
 
-End-to-end **PulseChain ↔ Trezor** for core apps: **PulseChain · HEX · PulseX · ProveX**.
+**PulseChain MetaMask replacement** — bag, send, Sites (WalletConnect), sign. Standalone page is a thin shell; embedders import `PulseTrezor`.
 
-- **Desk (this repo):** Trezor Connect wallet for that loop (Suite replacement for Pulse).
-- **Tip:** soft mobile (PulseX + pay links) — sibling.
-- **Suite / firmware / rescue / guides / platform:** supporting tracks.
+**Naming:** product = **Pulse Perch**. Transport today = Trezor Connect → Suite (swappable later). Code ids may still say `pulse-trezor` — internals only.
+
+- Not an app directory. Not a PulseX/HEX clone.
+- Sites / WC host: `src/wc/`.
 
 ## Docs
 
@@ -35,25 +36,29 @@ End-to-end **PulseChain ↔ Trezor** for core apps: **PulseChain · HEX · Pulse
 | [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides |
 | [pulse-trezor-platform](https://github.com/ihelpmaybe/pulse-trezor-platform) | Sync · multi-OS · MPC · AI |
 
-## Desk A0 (local)
+## Local demo shell
 
 ```bash
 npm run setup
 npm run dev
 ```
 
-Opens on `http://127.0.0.1:5174`. Needs **Trezor Bridge** (:21325). Address path = SYNC0 `m/44'/60'/0'/0/0`.
+Opens on `http://127.0.0.1:5174` → mounts `<PulseTrezor />` (mainnet). Lab: pass `showTestnet`.
 
-`setup` = install with scripts off (Windows: Connect’s Stellar `yarn setup || true` breaks cmd) then fetches the esbuild binary.
+## Embed
 
-## WalletConnect → Trezor
+```tsx
+import { PulseTrezor } from "pulse-trezor-desk"; // or relative src
 
-dApps (PulseX, Phiat, ProveX, Bridge…) can pair a `wc:` URI into Desk; clear-sign warnings show before you sign on the device.
+<PulseTrezor />                 // mainnet PulseChain
+<PulseTrezor showTestnet />     // lab: testnet toggle
+<PulseTrezor rpc="https://your-node.example" />  // host-forced RPC
+```
 
-1. Free [Reown Cloud](https://cloud.reown.com) project id → paste in **WalletConnect → Trezor** (or `VITE_REOWN_PROJECT_ID`)
-2. Connect Trezor → Pair URI → Approve session → Sign on Trezor  
-3. PulseChain **369** only · EIP-712 typed-data still next
+Collapsed **Settings** = optional custom RPC URL (or official default). Host apps can hide it with `showSettings={false}`.
+
+Also exported: Connect helpers + `sendPlsWithTrezor` + `RpcOverride` from `src/index.ts`.
 
 ## Status
 
-**A0–A2 + WC v0 + smoke CI:** Connect, balances, send, approve, WalletConnect host (send + personal_sign). Tip TIP1 blocked until Android source path. Device: `tests/smoke/README.md`.
+**Early preview / PRODUCT-LAW** — MetaMask-replacement path: Connect · balances · send · approve · **Sites (WalletConnect → any Pulse dapp)** · RPC. Needs Trezor Suite (Connect 10) + free Reown project id for WC. Not official Trezor Pulse support. Device smoke: `tests/smoke/`.

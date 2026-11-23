@@ -4,10 +4,11 @@ You are helping **ihelpmaybe** and contributor **[@togosh](https://github.com/to
 
 ## Efficiency (read once)
 
-**[PRIORITY.md](./PRIORITY.md)** = Tip↔Desk/Trezor Gate only · **[PULSE-HIVE.md](./PULSE-HIVE.md)** = **all PulseChain** (infra, DeFi, HEX, fiat, creators, security — spare tokens) · **[CORE-APPS.md](./CORE-APPS.md)** · **[OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)**
+**[PRODUCT-LAW.md](./PRODUCT-LAW.md)** = **Pulse Perch** = MetaMask replacement for Pulse (non-negotiable) · transport today = Trezor/Suite (swappable) · **[PRIORITY.md](./PRIORITY.md)** = Tip↔HWW Gate · **[PULSE-HIVE.md](./PULSE-HIVE.md)** = **all PulseChain** · **[CORE-APPS.md](./CORE-APPS.md)** · **[OPEN-SOURCE-INFRA.md](./OPEN-SOURCE-INFRA.md)** · **[BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md)**
 
 ## Load order (minimum tokens)
 
+0. **[PRODUCT-LAW.md](./PRODUCT-LAW.md)** — **Pulse Perch** success = bag/send/approve/Sites/sign **without MetaMask**. Product name ≠ transport (Trezor/Suite today, swappable). Do not redefine as custody-only.  
 1. **[PRIORITY.md](./PRIORITY.md)** — if you can own the lowest unchecked **#**, take it  
 2. Else / **any non-Trezor Pulse work** / **end-of-month spare tokens** / blocked → **[PULSE-HIVE.md](./PULSE-HIVE.md)** lowest free **H#** (or SPARE)  
 3. Open the **repo named in that row** → that repo’s `TODO.md`  
@@ -23,8 +24,21 @@ Do **not** reread END-TO-END / ROADMAP / ADOPTION unless planning.
 - Name the **OSS/vault row** you’re wrapping; feature must serve **PulseChain / HEX / PulseX / ProveX**.  
 - Smallest slice → smoke evidence → tick **repo TODO + PRIORITY or HIVE row** → stop.  
 - Shared packs → `pulse-trezor-platform`. No fake Trezor HD. No Suite redistribute.  
-- SYNC watch-only; AI never signs/holds keys.  
+- SYNC watch-only; AI never holds keys.  
 - BONUS / P4 only after Gate 1–2. Parallel agents = **different # / H#**.  
+
+## Pulse Perch — agent policy (hard rule)
+
+When driving **Pulse Perch** (this app’s wallet face):
+
+1. Read `window.__pulsePerchAi.getPrefs()` (or `may(cap)`) **before** any agent action.  
+2. Use **only** the bridge for agent money paths:
+   - `requestExplain` / `requestSimulate` / `requestPrepare` / `requestSign`
+3. If a call throws `AgentPolicyError` / `AGENT_POLICY_DENIED` — **stop**. Do not retry via Send UI, WC paste, or raw `sendPlsWithTrezor`.  
+4. `allowSign` defaults **off**. Never ask the user to flip it unless they asked for agent signing.  
+5. Human clicks and WalletConnect dapps are separate — do not treat those as a bypass for denied agent caps.  
+6. Device confirm is still required for any allowed sign.  
+
 - **Hive never empty:** if SPARE is thin, run the SPARE generator in PULSE-HIVE.md.
 
 ## Sibling repos

@@ -1,6 +1,6 @@
 {
   "packId": "pulse-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "coreApps": ["PulseChain", "HEX", "PulseX", "ProveX"],
   "chains": [
     {
@@ -9,7 +9,25 @@
       "currency": { "name": "Pulse", "symbol": "PLS", "decimals": 18 },
       "rpc": [
         "https://rpc.pulsechain.com",
-        "https://pulsechain-rpc.publicnode.com"
+        "https://pulsechain-rpc.publicnode.com",
+        "https://rpc-pulsechain.g4mm4.io",
+        "https://rpc.swiftnodes.io/rpc/pulsechain",
+        "https://rpc.hairylabs.io",
+        "https://rpc.degenprotocol.io",
+        "https://rpc.pulsechainrpc.com",
+        "https://rpc.pulseheartbeat.com",
+        "https://rpc.lite.projectpi.xyz"
+      ],
+      "rpcOptions": [
+        { "name": "Official", "url": "https://rpc.pulsechain.com" },
+        { "name": "PublicNode", "url": "https://pulsechain-rpc.publicnode.com" },
+        { "name": "G4mm4", "url": "https://rpc-pulsechain.g4mm4.io" },
+        { "name": "SwiftNodes", "url": "https://rpc.swiftnodes.io/rpc/pulsechain" },
+        { "name": "HairyLabs", "url": "https://rpc.hairylabs.io" },
+        { "name": "DegenProtocol", "url": "https://rpc.degenprotocol.io" },
+        { "name": "PulseChainRPC", "url": "https://rpc.pulsechainrpc.com" },
+        { "name": "PulseHeartbeat", "url": "https://rpc.pulseheartbeat.com" },
+        { "name": "Project Pi", "url": "https://rpc.lite.projectpi.xyz" }
       ],
       "explorers": [
         {
@@ -29,11 +47,70 @@
       "chainId": 943,
       "currency": { "name": "Test Pulse", "symbol": "tPLS", "decimals": 18 },
       "rpc": ["https://rpc.v4.testnet.pulsechain.com"],
+      "rpcOptions": [
+        {
+          "name": "Official testnet",
+          "url": "https://rpc.v4.testnet.pulsechain.com"
+        }
+      ],
       "explorers": [
         {
           "name": "PulseScan Testnet",
-          "url": "https://scan.v4.testnet.pulsechain.com"
+          "url": "https://scan.v4.testnet.pulsechain.com",
+          "apiUrl": "https://api.scan.v4.testnet.pulsechain.com"
         }
+      ]
+    },
+    {
+      "name": "Ethereum",
+      "chainId": 1,
+      "currency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
+      "rpc": [
+        "https://ethereum.publicnode.com",
+        "https://cloudflare-eth.com",
+        "https://rpc.ankr.com/eth"
+      ],
+      "rpcOptions": [
+        { "name": "PublicNode", "url": "https://ethereum.publicnode.com" },
+        { "name": "Cloudflare", "url": "https://cloudflare-eth.com" },
+        { "name": "Ankr", "url": "https://rpc.ankr.com/eth" }
+      ],
+      "explorers": [
+        { "name": "Etherscan", "url": "https://etherscan.io" }
+      ]
+    },
+    {
+      "name": "Sepolia",
+      "chainId": 11155111,
+      "currency": { "name": "Sepolia Ether", "symbol": "ETH", "decimals": 18 },
+      "rpc": [
+        "https://ethereum-sepolia-rpc.publicnode.com",
+        "https://rpc.sepolia.org"
+      ],
+      "rpcOptions": [
+        {
+          "name": "PublicNode",
+          "url": "https://ethereum-sepolia-rpc.publicnode.com"
+        },
+        { "name": "Sepolia.org", "url": "https://rpc.sepolia.org" }
+      ],
+      "explorers": [
+        { "name": "Sepolia Etherscan", "url": "https://sepolia.etherscan.io" }
+      ]
+    },
+    {
+      "name": "Holesky",
+      "chainId": 17000,
+      "currency": { "name": "Holesky Ether", "symbol": "ETH", "decimals": 18 },
+      "rpc": ["https://ethereum-holesky-rpc.publicnode.com"],
+      "rpcOptions": [
+        {
+          "name": "PublicNode",
+          "url": "https://ethereum-holesky-rpc.publicnode.com"
+        }
+      ],
+      "explorers": [
+        { "name": "Holesky Etherscan", "url": "https://holesky.etherscan.io" }
       ]
     }
   ]

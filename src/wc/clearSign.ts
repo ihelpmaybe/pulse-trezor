@@ -58,7 +58,70 @@ const SELECTORS: Record<
     tone: "warn",
     note: "transferFrom — who is spending?",
   },
+  "0xa22cb465": {
+    name: "setApprovalForAll(address,bool)",
+    tone: "danger",
+    note: "NFT operator — can move all tokens in this collection",
+  },
+  "0xd505accf": {
+    name: "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
+    tone: "danger",
+    note: "EIP-2612 Permit — gasless allowance; verify owner/spender/value/deadline",
+  },
+  "0x52a438b8": {
+    name: "stakeStart(uint256,uint256)",
+    tone: "warn",
+    note: "HEX stakeStart — confirm hearts + days on device",
+  },
+  "0x67dcb881": {
+    name: "stakeEnd(uint256,uint256)",
+    tone: "warn",
+    note: "HEX stakeEnd — confirm stake index / id on device",
+  },
 };
+
+/** Domains we treat as high-risk lookalikes / empty origin. Expand carefully. */
+const PHISH_HINTS: { re: RegExp; detail: string }[] = [
+  {
+    re: /metamask\.io\.|pulsechain-?airdrop|claim-?hex|free-?pls|connect-wallet\./i,
+    detail: "Looks like a phishing lure — do not sign",
+  },
+  {
+    re: /^https?:\/\/\d+\.\d+\.\d+\.\d+/i,
+    detail: "Raw IP origin — unusual for real Pulse apps",
+  },
+];
+
+export function phishingWarn(dappUrl?: string | null): ClearLine | null {
+  const u = (dappUrl || "").trim();
+  if (!u) {
+    return {
+      tone: "danger",
+      title: "Origin",
+      detail: "Missing dApp URL — treat as hostile until proven",
+    };
+  }
+  for (const h of PHISH_HINTS) {
+    if (h.re.test(u)) {
+      return { tone: "danger", title: "Phishing warn", detail: `${h.detail} · ${u}` };
+    }
+  }
+  return null;
+}
+
+/** Decode spender from approve / setApprovalForAll calldata. */
+export function decodeSpenderFromCalldata(data?: string | null): string | null {
+  const d = (data || "").toLowerCase();
+  if (d.length < 74) return null;
+  if (
+    !d.startsWith("0x095ea7b3") &&
+    !d.startsWith("0xa22cb465") &&
+    !d.startsWith("0x39509351")
+  ) {
+    return null;
+  }
+  return `0x${d.slice(34, 74)}`;
+}
 
 const HOST_HINTS: {
   re: RegExp;
@@ -111,22 +174,35 @@ export function clearSignTx(opts: {
 
   lines.push({ tone: "ok", title: "Method", detail: method });
 
-  if (opts.dappUrl) {
-    let hit = false;
+  const phish = phishingWarn(opts.dappUrl);
+  if (phish) lines.push(phish);
+  else if (opts.dappUrl) {
+    lines.push({ tone: "ok", title: "Origin", detail: opts.dappUrl });
     for (const h of HOST_HINTS) {
       if (h.re.test(opts.dappUrl)) {
         lines.push({
           tone: h.tone,
           title: h.title,
-          detail: `${h.detail} · ${opts.dappUrl}`,
+          detail: h.detail,
         });
-        hit = true;
         break;
       }
     }
-    if (!hit) {
-      lines.push({ tone: "ok", title: "dApp", detail: opts.dappUrl });
-    }
+  } else {
+    lines.push({
+      tone: "danger",
+      title: "Origin",
+      detail: "No dApp origin on this request",
+    });
+  }
+
+  const spender = decodeSpenderFromCalldata(opts.data);
+  if (spender) {
+    lines.push({
+      tone: "danger",
+      title: "Spender / operator",
+      detail: `${short(spender)} — confirm this address on Trezor`,
+    });
   }
 
   if (to) {
@@ -176,9 +252,10 @@ export function clearSignTx(opts: {
       });
     } else {
       lines.push({
-        tone: "warn",
-        title: `Selector ${sel}`,
-        detail: "Unknown calldata — trust Trezor display, not the dApp UI",
+        tone: "danger",
+        title: `Blind calldata · ${sel}`,
+        detail:
+          "Unknown selector — read the Trezor screen; dApp labels can lie. Extra confirm required.",
       });
     }
   } else if (to) {
@@ -192,7 +269,7 @@ export function clearSignTx(opts: {
   lines.push({
     tone: "ok",
     title: "Chain",
-    detail: "PulseChain (369) for WalletConnect sessions",
+    detail: "EVM session — confirm chain on device / clear-sign strip",
   });
 
   return lines;
@@ -206,8 +283,16 @@ export function clearSignMessage(opts: {
   const lines: ClearLine[] = [
     { tone: "warn", title: "Sign message", detail: opts.method },
   ];
-  if (opts.dappUrl) {
-    lines.push({ tone: "ok", title: "dApp", detail: opts.dappUrl });
+  const phish = phishingWarn(opts.dappUrl);
+  if (phish) lines.push(phish);
+  else if (opts.dappUrl) {
+    lines.push({ tone: "ok", title: "Origin", detail: opts.dappUrl });
+  } else {
+    lines.push({
+      tone: "danger",
+      title: "Origin",
+      detail: "No dApp origin on this request",
+    });
   }
   lines.push({
     tone: "warn",
@@ -220,14 +305,50 @@ export function clearSignMessage(opts: {
       title: "EIP-712",
       detail: "Typed data can authorize spends — read every field on Trezor",
     });
+    if (/permit/i.test(opts.preview)) {
+      lines.push({
+        tone: "danger",
+        title: "Permit",
+        detail:
+          "Looks like EIP-2612 Permit — same power as approve; check spender + amount + deadline",
+      });
+    }
   }
   return lines;
+}
+
+/** One-line plain explain for face / AI stub. */
+export function explainClearLines(lines: ClearLine[]): string {
+  const danger = lines.filter((l) => l.tone === "danger");
+  if (danger.length) {
+    return danger.map((l) => `${l.title}: ${l.detail}`).join(" · ");
+  }
+  const warn = lines.filter((l) => l.tone === "warn");
+  if (warn.length) {
+    return warn.map((l) => `${l.title}: ${l.detail}`).slice(0, 2).join(" · ");
+  }
+  return lines
+    .slice(0, 2)
+    .map((l) => `${l.title}: ${l.detail}`)
+    .join(" · ");
 }
 
 export function worstTone(lines: ClearLine[]): ClearTone {
   if (lines.some((l) => l.tone === "danger")) return "danger";
   if (lines.some((l) => l.tone === "warn")) return "warn";
   return "ok";
+}
+
+/** True when calldata has a selector we don't recognize (needs extra ack). */
+export function isBlindCalldata(data?: string | null): boolean {
+  const d = (data || "0x").toLowerCase();
+  if (d === "0x" || d === "0x0" || d.length < 10) return false;
+  const sel = d.slice(0, 10);
+  return !SELECTORS[sel];
+}
+
+export function needsBlindConfirm(lines: ClearLine[]): boolean {
+  return lines.some((l) => /blind calldata/i.test(l.title));
 }
 
 export type TxLike = {

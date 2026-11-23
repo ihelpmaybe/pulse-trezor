@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Pulse Perch",
+  "version": "0.1.0",
+  "description": "Inject window.ethereum → Pulse Perch (Trezor). Load unpacked for lab.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1:5173/*", "http://127.0.0.1:5174/*", "http://localhost:5173/*", "http://localhost:5174/*"],
+      "js": ["perch-bridge.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inpage.js"],
+      "matches": ["https://*/*", "http://*/*"]
+    }
+  ],
+  "action": {
+    "default_title": "Pulse Perch"
+  }
+}

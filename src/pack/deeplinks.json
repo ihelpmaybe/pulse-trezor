@@ -189,8 +189,8 @@
   ],
   "custodyOurs": [
     {
-      "id": "desk",
-      "name": "Pulse Desk",
+      "id": "pulse-perch",
+      "name": "Pulse Perch",
       "github": "https://github.com/ihelpmaybe/pulse-trezor",
       "role": "hww"
     },

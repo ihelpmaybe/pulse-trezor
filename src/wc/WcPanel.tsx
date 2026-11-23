@@ -10,16 +10,18 @@ import {
 import {
   clearSignMessage,
   clearSignTx,
+  explainClearLines,
+  needsBlindConfirm,
+  phishingWarn,
   worstTone,
   type ClearLine,
   type TxLike,
 } from "./clearSign";
 import {
-  TrezorConnect,
-  ensureTrezorInit,
-  humanTrezorError,
-} from "../trezor/connect";
-import { ethAddressPath } from "../trezor/paths";
+  parseTypedDataParams,
+  signPersonalMessage,
+  signTypedData,
+} from "../trezor/signMessage";
 import { sendPlsWithTrezor } from "../trezor/signPulseTx";
 import {
   activeSessions,
@@ -30,6 +32,14 @@ import {
   pairUri,
   rejectProposal,
 } from "./walletKit";
+import {
+  chainLabel,
+  isDeskChainId,
+  makePublicClient,
+  parseChainRef,
+  type DeskChainId,
+} from "../chain/client";
+import { originAllowed, rememberOrigin } from "../chain/wcOrigins";
 
 const PROJECT_KEY = "pulse-desk-reown-project-id";
 
@@ -40,12 +50,20 @@ type PendingReq = {
   params: unknown;
   dappUrl?: string;
   lines: ClearLine[];
+  chainId: DeskChainId;
 };
 
 type Props = {
   address: Address | null;
   derivationIndex: number;
+  /** Active desk chain — used when dapp request omits eip155 chain. */
+  chainId: DeskChainId;
+  onSwitchChain?: (chainId: DeskChainId) => void;
   onError: (msg: string | null) => void;
+  /** When true, no outer card chrome (for embedding in Sites tab). */
+  embedded?: boolean;
+  /** Pre-fill pair URI from deep link / ?uri= */
+  initialUri?: string | null;
 };
 
 function txFromParams(params: unknown): TxLike | null {
@@ -68,38 +86,15 @@ function valueToHex(v: unknown): string | undefined {
   }
 }
 
-async function signPersonalMessage(
-  message: string,
-  derivationIndex: number,
-): Promise<Hex> {
-  await ensureTrezorInit();
-  const path = ethAddressPath(derivationIndex);
-  const res = await TrezorConnect.ethereumSignMessage({
-    path,
-    message,
-    hex: false,
-  });
-  if (!res.success) {
-    const fail = res as unknown as {
-      payload?: { error?: string };
-      error?: { message?: string } | string;
-    };
-    const err =
-      fail.payload?.error ||
-      (typeof fail.error === "string" ? fail.error : fail.error?.message) ||
-      "Trezor sign failed";
-    throw new Error(humanTrezorError(String(err)));
-  }
-  const payload = res.payload as { signature?: string };
-  if (!payload?.signature) throw new Error("Trezor returned no signature.");
-  return (
-    payload.signature.startsWith("0x")
-      ? payload.signature
-      : `0x${payload.signature}`
-  ) as Hex;
-}
-
-export function WcPanel({ address, derivationIndex, onError }: Props) {
+export function WcPanel({
+  address,
+  derivationIndex,
+  chainId: activeChainId,
+  onSwitchChain,
+  onError,
+  embedded = false,
+  initialUri = null,
+}: Props) {
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [projectId, setProjectId] = useState(() => {
@@ -113,17 +108,29 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
       return (import.meta.env.VITE_REOWN_PROJECT_ID as string) || "";
     }
   });
-  const [uri, setUri] = useState("");
+  const [uri, setUri] = useState(() => (initialUri || "").trim());
   const [proposal, setProposal] =
     useState<WalletKitTypes.SessionProposal | null>(null);
   const [pending, setPending] = useState<PendingReq | null>(null);
+  const [blindAck, setBlindAck] = useState(false);
   const [sessionsTick, setSessionsTick] = useState(0);
   const [wired, setWired] = useState(false);
+
+  useEffect(() => {
+    if (initialUri?.trim()) {
+      setUri(initialUri.trim());
+      setInfo("Deep link URI loaded — Pair site when ready.");
+    }
+  }, [initialUri]);
 
   const sessions = useMemo(() => {
     void sessionsTick;
     return Object.values(activeSessions());
   }, [sessionsTick]);
+
+  useEffect(() => {
+    setBlindAck(false);
+  }, [pending?.id, pending?.topic]);
 
   const wireKitEvents = useCallback(() => {
     const kit = getWalletKit();
@@ -140,17 +147,24 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
       const reqParams = params.request.params;
       const peer = kit.getActiveSessions()[topic]?.peer?.metadata;
       const dappUrl = peer?.url || peer?.name || "";
+      const reqChain =
+        parseChainRef(params.chainId) ?? activeChainId;
 
-      if (method === "wallet_switchEthereumChain") {
-        const chainId = (reqParams as { chainId?: string }[])?.[0]?.chainId;
-        const ok =
-          chainId === "0x171" || chainId === "369" || Number(chainId) === 369;
-        if (ok) {
+      if (
+        method === "wallet_switchEthereumChain" ||
+        method === "wallet_addEthereumChain"
+      ) {
+        const raw =
+          (reqParams as { chainId?: string }[])?.[0]?.chainId ??
+          (reqParams as { chainId?: string })?.chainId;
+        const next = parseChainRef(raw);
+        if (next && isDeskChainId(next) && method === "wallet_switchEthereumChain") {
+          onSwitchChain?.(next);
           await kit.respondSessionRequest({
             topic,
             response: { id, jsonrpc: "2.0", result: null },
           });
-          setInfo("Confirmed PulseChain (369)");
+          setInfo(`Switched to ${chainLabel(next)} (${next})`);
         } else {
           await kit.respondSessionRequest({
             topic,
@@ -160,7 +174,11 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
               error: getSdkError("UNSUPPORTED_CHAINS"),
             },
           });
-          onError("dApp asked for a non-Pulse chain — rejected");
+          onError(
+            method === "wallet_addEthereumChain"
+              ? `Rejected add-chain ${raw ?? "?"} — Perch only uses known Pulse/EVM desk chains`
+              : `dApp asked for unsupported chain ${raw ?? "?"} — rejected`,
+          );
         }
         return;
       }
@@ -178,6 +196,14 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
           dappUrl,
           method,
         });
+        lines = [
+          {
+            tone: "ok",
+            title: "Chain",
+            detail: `${chainLabel(reqChain)} (${reqChain})`,
+          },
+          ...lines,
+        ];
       } else {
         let preview = "";
         try {
@@ -203,12 +229,13 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
         params: reqParams,
         dappUrl,
         lines,
+        chainId: reqChain,
       });
     });
 
     kit.on("session_delete", () => setSessionsTick((n) => n + 1));
     setWired(true);
-  }, [onError, wired]);
+  }, [onError, onSwitchChain, activeChainId, wired]);
 
   useEffect(() => {
     if (address && projectId.trim()) {
@@ -255,6 +282,7 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
     onError(null);
     try {
       await approveProposal(proposal, address);
+      rememberOrigin(proposal.params.proposer.metadata.url || "", true);
       setProposal(null);
       setInfo("Session approved — dApp can request signs");
       setSessionsTick((n) => n + 1);
@@ -270,6 +298,7 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
     setBusy(true);
     try {
       await rejectProposal(proposal);
+      rememberOrigin(proposal.params.proposer.metadata.url || "", false);
       setProposal(null);
       setInfo("Session rejected");
     } catch (e) {
@@ -292,15 +321,15 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
       if (method === "eth_sendTransaction") {
         const tx = txFromParams(params);
         if (!tx?.to) throw new Error("Missing tx.to");
-        const hash = await sendPlsWithTrezor({
-          chainId: 369,
+        const broadcast = await sendPlsWithTrezor({
+          chainId: pending.chainId,
           account: address,
           to: tx.to as Address,
           value: tx.value != null ? BigInt(valueToHex(tx.value) || "0x0") : 0n,
           data: (tx.data as Hex) || "0x",
           derivationIndex,
         });
-        result = hash;
+        result = broadcast.hash;
       } else if (method === "personal_sign" || method === "eth_sign") {
         const arr = params as string[];
         const msgHexOrText =
@@ -315,9 +344,8 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
         }
         result = await signPersonalMessage(message, derivationIndex);
       } else if (/signTypedData/i.test(method)) {
-        throw new Error(
-          "EIP-712 typed-data is next — reject for now or use a simple send/approve",
-        );
+        const { data } = parseTypedDataParams(params);
+        result = await signTypedData(data, derivationIndex);
       } else {
         throw new Error(`Unsupported method: ${method}`);
       }
@@ -373,50 +401,90 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
   }
 
   const pendingTone = pending ? worstTone(pending.lines) : "ok";
+  const [simHint, setSimHint] = useState<string | null>(null);
 
-  return (
-    <section className="card send wc-card">
-      <h2>WalletConnect → Trezor</h2>
+  async function onDryRun() {
+    if (!pending || !address) return;
+    if (
+      pending.method !== "eth_sendTransaction" &&
+      pending.method !== "eth_signTransaction"
+    ) {
+      setSimHint("Dry-run only applies to transactions.");
+      return;
+    }
+    const tx = txFromParams(pending.params);
+    if (!tx?.to) {
+      setSimHint("Missing tx.to — cannot simulate.");
+      return;
+    }
+    setSimHint("Simulating…");
+    try {
+      const client = makePublicClient(pending.chainId);
+      const gas = await client.estimateGas({
+        account: address,
+        to: tx.to as Address,
+        value: tx.value != null ? BigInt(valueToHex(tx.value) || "0x0") : 0n,
+        data: (tx.data as Hex) || "0x",
+      });
+      setSimHint(`Dry-run OK — estimateGas ${gas.toString()} (not a guarantee).`);
+    } catch (e) {
+      setSimHint(
+        `Dry-run failed — ${e instanceof Error ? e.message : String(e)}. Do not sign unless you understand why.`,
+      );
+    }
+  }
+
+  const body = (
+    <>
       <p className="muted">
-        Let PulseX / Phiat / ProveX / Bridge ask this Desk to sign on your
-        device. Needs a free{" "}
-        <a
-          className="link"
-          href="https://cloud.reown.com"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Reown project id
-        </a>
-        . PulseChain (369) only.
+        Pair any Pulse site. Browser PulseX ={" "}
+        <code>ipfs.app.pulsex.com</code> (not the desktop download page). Also
+        Piteas, HEX, ProveX, Phiat, … Paste <code>wc:…</code> — Desk signs on
+        Trezor.
       </p>
-
       {!address ? (
-        <p className="muted">Connect Trezor above first.</p>
+        <p className="muted empty-teach">
+          Next: Connect Trezor above, then come back here to pair a site.
+        </p>
       ) : (
         <>
-          <label className="field">
-            Reown project id
-            <input
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-              placeholder="cloud.reown.com project id"
-              spellCheck={false}
-              autoComplete="off"
-            />
-          </label>
-          <button type="button" className="btn ghost" onClick={saveProjectId}>
-            Save id
-          </button>
+          <details className="settings" open={!projectId.trim()}>
+            <summary>Project id (once)</summary>
+            <label className="field">
+              Reown id
+              <input
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                placeholder="cloud.reown.com"
+                spellCheck={false}
+                autoComplete="off"
+              />
+            </label>
+            <button type="button" className="btn ghost" onClick={saveProjectId}>
+              Save
+            </button>
+            <p className="muted">
+              Free id from{" "}
+              <a
+                className="link"
+                href="https://cloud.reown.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                cloud.reown.com
+              </a>
+              .
+            </p>
+          </details>
 
           <label className="field">
-            Pair wc: URI
+            Pair URI
             <textarea
               value={uri}
               onChange={(e) => setUri(e.target.value)}
               placeholder="wc:…"
               spellCheck={false}
-              rows={3}
+              rows={2}
             />
           </label>
           <button
@@ -425,40 +493,75 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
             disabled={busy || !projectId.trim() || !uri.trim()}
             onClick={() => void onPair()}
           >
-            {busy ? "…" : "Pair"}
+            {busy ? "…" : "Pair site"}
           </button>
 
           {sessions.length > 0 ? (
             <ul className="meta">
-              {sessions.map((s) => (
-                <li key={s.topic}>
-                  {s.peer?.metadata?.name || s.topic.slice(0, 12)}{" "}
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    onClick={() =>
-                      void disconnectTopic(s.topic).then(() =>
-                        setSessionsTick((n) => n + 1),
-                      )
-                    }
-                  >
-                    Drop
-                  </button>
-                </li>
-              ))}
+              {sessions.map((s) => {
+                const name =
+                  s.peer?.metadata?.name || s.topic.slice(0, 12);
+                return (
+                  <li key={s.topic}>
+                    {name}{" "}
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      aria-label={`Drop session ${name}`}
+                      onClick={() =>
+                        void disconnectTopic(s.topic).then(() =>
+                          setSessionsTick((n) => n + 1),
+                        )
+                      }
+                    >
+                      Drop
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           ) : null}
 
           {proposal ? (
-            <div className={`clear-box ${"warn"}`}>
+            <div
+              className={`clear-box ${phishingWarn(proposal.params.proposer.metadata.url) ? "danger" : "warn"}`}
+              role="region"
+              aria-label={`Session request from ${proposal.params.proposer.metadata.name}`}
+            >
               <strong>{proposal.params.proposer.metadata.name}</strong>
-              <p className="muted">{proposal.params.proposer.metadata.url}</p>
+              <p className="muted">
+                Origin: {proposal.params.proposer.metadata.url || "(missing)"}
+              </p>
+              {phishingWarn(proposal.params.proposer.metadata.url) ? (
+                <p className="warn-line">
+                  {phishingWarn(proposal.params.proposer.metadata.url)!.detail}
+                </p>
+              ) : null}
+              {originAllowed(proposal.params.proposer.metadata.url || "") ===
+              false ? (
+                <p className="warn-line">
+                  You rejected this origin before — Approve will clear that
+                  memory.
+                </p>
+              ) : originAllowed(
+                  proposal.params.proposer.metadata.url || "",
+                ) === true ? (
+                <p className="muted fee">Remembered allow for this origin.</p>
+              ) : null}
               <div className="row">
                 <button
                   type="button"
                   className="btn"
-                  disabled={busy}
+                  disabled={
+                    busy ||
+                    !!phishingWarn(proposal.params.proposer.metadata.url)
+                  }
                   onClick={() => void onApproveSession()}
+                  title={
+                    phishingWarn(proposal.params.proposer.metadata.url)
+                      ? "Blocked — phishing warn"
+                      : undefined
+                  }
                 >
                   Approve session
                 </button>
@@ -475,9 +578,27 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
           ) : null}
 
           {pending ? (
-            <div className={`clear-box ${pendingTone}`}>
+            <div
+              className={`clear-box ${pendingTone}`}
+              role="region"
+              aria-label={[
+                `${pending.method} request`,
+                pending.dappUrl ? `from ${pending.dappUrl}` : null,
+                ...pending.lines.map((l) => `${l.title}: ${l.detail}`),
+              ]
+                .filter(Boolean)
+                .join(". ")}
+            >
               <p>
                 <strong>{pending.method}</strong>
+                {pending.dappUrl ? (
+                  <span className="muted"> · {pending.dappUrl}</span>
+                ) : (
+                  <span className="warn-line"> · no origin</span>
+                )}
+              </p>
+              <p className="muted fee">
+                Explain: {explainClearLines(pending.lines)}
               </p>
               <ul className="clear-list">
                 {pending.lines.map((l, i) => (
@@ -487,11 +608,41 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
                   </li>
                 ))}
               </ul>
+              {simHint ? (
+                <p className="muted fee" role="status">
+                  {simHint}
+                </p>
+              ) : null}
+              {needsBlindConfirm(pending.lines) ? (
+                <label className="blind-ack">
+                  <input
+                    type="checkbox"
+                    checked={blindAck}
+                    onChange={(e) => setBlindAck(e.target.checked)}
+                  />
+                  <span>
+                    I will read the Trezor screen for this blind calldata (dApp
+                    labels can lie).
+                  </span>
+                </label>
+              ) : null}
               <div className="row">
                 <button
                   type="button"
-                  className="btn"
+                  className="btn ghost"
                   disabled={busy}
+                  onClick={() => void onDryRun()}
+                >
+                  Dry-run
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={
+                    busy ||
+                    (needsBlindConfirm(pending.lines) && !blindAck) ||
+                    !!phishingWarn(pending.dappUrl)
+                  }
                   onClick={() => void onApproveRequest()}
                 >
                   Sign on Trezor
@@ -508,9 +659,16 @@ export function WcPanel({ address, derivationIndex, onError }: Props) {
             </div>
           ) : null}
 
-          {info ? <p className="muted ok">{info}</p> : null}
+          {info ? (
+            <p className="muted ok" role="status">
+              {info}
+            </p>
+          ) : null}
         </>
       )}
-    </section>
+    </>
   );
+
+  if (embedded) return <div className="wc-embed">{body}</div>;
+  return <section className="card send wc-card">{body}</section>;
 }

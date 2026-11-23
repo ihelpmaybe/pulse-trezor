@@ -28,7 +28,7 @@ Our wedge: **Tip (phone) + Desk (Trezor) + SYNC + honest Suite gap** = Pulse-nat
 | **Tip Graphene / de-Google story** | Privacy cohort underserved | Tip + guides |
 | **Watch-only Desk for Tip users** | Phone daily / Trezor cold without seed drama | SYNC |
 | **Bunker “quantum prep” narrative** | Fear → action without fake PQ claims | rescue + guides |
-| **dApp “Open in Pulse Desk”** (WC) | Sites prefer us over Rabby+hacked MM | Desk WC |
+| **dApp “Open in Pulse Perch”** (WC) | Sites prefer us over Rabby+hacked MM | WC peer |
 | **Shared “Works on Pulse” badge** | Creators embed Tip/Desk deep links | platform + guides |
 
 ---

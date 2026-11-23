@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Pulse Desk — Trezor Connect for PulseChain / HEX / PulseX / ProveX",
+  "description": "Pulse Perch — PulseChain MetaMask replacement (Trezor transport today)",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -11,21 +11,24 @@
     "typecheck": "tsc --noEmit",
     "setup": "npm install --ignore-scripts && node node_modules/esbuild/install.js",
     "test": "vitest run",
-    "smoke": "npm run typecheck && npm run build && vitest run"
+    "fuzz": "node scripts/fuzz-watch.mjs",
+    "smoke": "npm run typecheck && npm run build && vitest run && npm run fuzz"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "@reown/walletkit": "^1.6.0",
-    "@trezor/connect-web": "9.7.3",
+    "@trezor/connect-web": "^10.0.1",
     "@walletconnect/core": "^2.26.0",
     "@walletconnect/utils": "^2.26.0",
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "viem": "^2.58.4"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react-swc": "^3.0.0",
