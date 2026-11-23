@@ -138,15 +138,46 @@ import {
   parseWatchImportJson,
 } from "./chain/watchImport";
 import { decodeSyncPayload } from "./chain/syncPair";
-import { SyncPair } from "./ui/SyncPair";
-import { InstallPwa } from "./ui/InstallPwa";
 import { FaqModal } from "./ui/FaqModal";
 import { CoreFooter } from "./ui/CoreFooter";
+import { AddrParts } from "./ui/AddrParts";
+import { HexStakeMark } from "./ui/HexStakeMark";
+import { AppsPanel } from "./ui/AppsPanel";
+import { SettingsModal } from "./ui/SettingsModal";
+import {
+  SWAP_FACE,
+  swapAssetLabel,
+  trimGwei,
+} from "./ui/swapFace";
+import {
+  type A11yPrefs,
+  type ThemePref,
+  type Session,
+  applyA11y,
+  applyTheme,
+  loadA11y,
+  loadAccountCount,
+  loadAccountIndex,
+  loadAccountList,
+  loadFirstMainnetSendAcked,
+  loadInjectEth,
+  loadPrivacyHide,
+  loadRpcHealthMs,
+  loadRpcOverride,
+  loadTheme,
+  loadWatch,
+  saveA11y,
+  saveAccountCount,
+  saveAccountIndex,
+  saveAccountList,
+  saveFirstMainnetSendAcked,
+  savePrivacyHide,
+  saveRpcOverride,
+  saveWatch,
+} from "./ui/deskStorage";
 import {
   loadHexModule,
   loadMascot,
-  saveHexModule,
-  saveMascot,
 } from "./ui/modules";
 import { t } from "./i18n/en";
 import {
@@ -158,9 +189,6 @@ import {
   type SwapAsset,
   type SwapQuote,
 } from "./chain/pulsex";
-import deeplinks from "./pack/deeplinks.json";
-import { AiPolicyPanel } from "./ai/AiPolicyPanel";
-// deeplinks still used by Apps tab
 import {
   bootAiPolicy,
   registerAgentHandlers,
@@ -174,206 +202,6 @@ import {
   getInjectedProvider,
   type InjectedHost,
 } from "./provider/eip1193";
-/** Drop trailing zeros from formatGwei for input fields. */
-function trimGwei(s: string): string {
-  if (!s.includes(".")) return s;
-  return s.replace(/\.?0+$/, "");
-}
-
-const SWAP_FACE: { id: SwapAsset; label: string }[] = [
-  { id: "PLS", label: "PLS" },
-  {
-    id: "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" as Address,
-    label: "HEX",
-  },
-  {
-    id: "0x95B303987A60C71504D99Aa1b13B4DA07b0790ab" as Address,
-    label: "PLSX",
-  },
-  {
-    id: "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d" as Address,
-    label: "INC",
-  },
-  {
-    id: "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07" as Address,
-    label: "USDC",
-  },
-];
-
-function swapAssetLabel(a: SwapAsset): string {
-  if (a === "PLS") return "PLS";
-  const hit = SWAP_FACE.find(
-    (x) => typeof x.id === "string" && x.id.toLowerCase() === a.toLowerCase(),
-  );
-  return hit?.label ?? `${String(a).slice(0, 6)}…`;
-}
-
-const WATCH_KEY = "pulse-trezor-watch-v1";
-const RPC_KEY = "pulse-trezor-rpc-v1";
-const RPC_HEALTH_MS_KEY = "pulse-perch-rpc-health-ms-v1";
-/** Default 60s — public RPCs; user can slow/stop in Settings. */
-const RPC_HEALTH_MS_DEFAULT = 60_000;
-const RPC_HEALTH_MS_OPTIONS = [
-  { ms: 30_000, label: "30 seconds" },
-  { ms: 60_000, label: "1 minute" },
-  { ms: 120_000, label: "2 minutes" },
-  { ms: 300_000, label: "5 minutes" },
-  { ms: 0, label: "Off (check once)" },
-] as const;
-const ACCOUNT_KEY = "pulse-trezor-account-v1";
-const ACCOUNTS_KEY = "pulse-trezor-accounts-v1";
-const ACCOUNT_COUNT_KEY = "pulse-trezor-account-count-v1";
-const A11Y_KEY = "pulse-perch-a11y-v1";
-const PRIVACY_KEY = "pulse-perch-privacy-hide-v1";
-const INJECT_KEY = "pulse-perch-inject-v1";
-const THEME_KEY = "pulse-perch-theme-v1";
-/** One-time stronger mainnet send cue — then soft “Mainnet” line only. */
-const FIRST_MAINNET_SEND_KEY = "pulse-perch-first-mainnet-send-v1";
-const BRIDGED_USDC =
-  "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07" as Address;
-const INHERITED_USDC =
-  "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" as Address;
-
-type A11yPrefs = {
-  largeText: boolean;
-  highContrast: boolean;
-  reduceMotion: boolean;
-  strongFocus: boolean;
-};
-
-type ThemePref = "dark" | "light";
-
-function loadTheme(): ThemePref {
-  try {
-    const t = localStorage.getItem(THEME_KEY);
-    return t === "light" ? "light" : "dark";
-  } catch {
-    return "dark";
-  }
-}
-
-function applyTheme(t: ThemePref) {
-  document.documentElement.dataset.theme = t;
-  try {
-    localStorage.setItem(THEME_KEY, t);
-  } catch {
-    /* ignore */
-  }
-}
-
-const A11Y_DEFAULT: A11yPrefs = {
-  largeText: false,
-  highContrast: false,
-  reduceMotion: false,
-  strongFocus: false,
-};
-
-function loadPrivacyHide(): boolean {
-  try {
-    return localStorage.getItem(PRIVACY_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function savePrivacyHide(on: boolean) {
-  try {
-    if (on) localStorage.setItem(PRIVACY_KEY, "1");
-    else localStorage.removeItem(PRIVACY_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadA11y(): A11yPrefs {
-  try {
-    const raw = localStorage.getItem(A11Y_KEY);
-    if (!raw) return { ...A11Y_DEFAULT };
-    return { ...A11Y_DEFAULT, ...(JSON.parse(raw) as Partial<A11yPrefs>) };
-  } catch {
-    return { ...A11Y_DEFAULT };
-  }
-}
-
-function saveA11y(prefs: A11yPrefs) {
-  try {
-    localStorage.setItem(A11Y_KEY, JSON.stringify(prefs));
-  } catch {
-    /* ignore */
-  }
-}
-
-function applyA11y(prefs: A11yPrefs) {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  root.toggleAttribute("data-a11y-large", prefs.largeText);
-  root.toggleAttribute("data-a11y-contrast", prefs.highContrast);
-  root.toggleAttribute("data-a11y-motion", prefs.reduceMotion);
-  root.toggleAttribute("data-a11y-focus", prefs.strongFocus);
-}
-function HexStakeMark({
-  count,
-  onOpen,
-}: {
-  count: number;
-  onOpen?: () => void;
-}) {
-  const label = `${count} HEX stake${count === 1 ? "" : "s"} — open Stakes`;
-  return (
-    <span
-      className="acct-hex"
-      title={label}
-      aria-label={label}
-      role={onOpen ? "button" : undefined}
-      tabIndex={onOpen ? 0 : undefined}
-      onClick={
-        onOpen
-          ? (e) => {
-              e.stopPropagation();
-              onOpen();
-            }
-          : undefined
-      }
-      onKeyDown={
-        onOpen
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                onOpen();
-              }
-            }
-          : undefined
-      }
-    >
-      <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
-        <polygon
-          points="8,1.1 13.9,4.5 13.9,11.5 8,14.9 2.1,11.5 2.1,4.5"
-          fill="#ff3178"
-        />
-        <text
-          x="8"
-          y="11"
-          textAnchor="middle"
-          fontSize="7.2"
-          fontWeight="700"
-          fill="#fff"
-          fontFamily="system-ui,Segoe UI,sans-serif"
-        >
-          H
-        </text>
-      </svg>
-    </span>
-  );
-}
-
-type Session = {
-  address: Address;
-  derivationIndex: number;
-  derivationPath: string;
-  deviceId: string;
-};
-
 type TokenRow = { token: PackToken; raw: bigint; formatted: string };
 
 export type PulseTrezorProps = {
@@ -394,156 +222,6 @@ export type PulseTrezorProps = {
   className?: string;
 };
 
-
-function AddrParts({ address }: { address: string }) {
-  const a = address.startsWith("0x") ? address : `0x${address}`;
-  const body = a.slice(2);
-  const head = body.slice(0, 4);
-  const mid = body.slice(4, -4);
-  const tail = body.slice(-4);
-  return (
-    <code className="addr-parts" aria-hidden="true">
-      <span className="addr-0x">0x</span>
-      <span className="addr-ends">{head}</span>
-      <span className="addr-mid">
-        {[...mid].map((ch, i) => (
-          <span
-            key={i}
-            className={/[a-fA-F]/.test(ch) ? "addr-letter" : "addr-digit"}
-          >
-            {ch}
-          </span>
-        ))}
-      </span>
-      <span className="addr-ends">{tail}</span>
-    </code>
-  );
-}
-
-function loadWatch(): Session | null {
-  try {
-    const raw = localStorage.getItem(WATCH_KEY);
-    if (!raw) return null;
-    const j = JSON.parse(raw) as Session;
-    if (!j?.address || !isAddress(j.address)) return null;
-    return j;
-  } catch {
-    return null;
-  }
-}
-
-function saveWatch(s: Session | null) {
-  try {
-    if (!s) localStorage.removeItem(WATCH_KEY);
-    else localStorage.setItem(WATCH_KEY, JSON.stringify(s));
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadAccountIndex(): number {
-  try {
-    const n = Number(localStorage.getItem(ACCOUNT_KEY));
-    if (Number.isFinite(n) && n >= 0 && n < 100) return Math.floor(n);
-  } catch {
-    /* ignore */
-  }
-  return 0;
-}
-
-function saveAccountIndex(i: number) {
-  try {
-    localStorage.setItem(ACCOUNT_KEY, String(Math.max(0, Math.floor(i))));
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadAccountCount(): number {
-  try {
-    const n = Number(localStorage.getItem(ACCOUNT_COUNT_KEY));
-    if (Number.isFinite(n) && n >= ACCOUNT_COUNT_MIN) return clampAccountCount(n);
-  } catch {
-    /* ignore */
-  }
-  return 12;
-}
-
-function saveAccountCount(n: number) {
-  try {
-    localStorage.setItem(ACCOUNT_COUNT_KEY, String(clampAccountCount(n)));
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadAccountList(): ListedAccount[] {
-  try {
-    const raw = localStorage.getItem(ACCOUNTS_KEY);
-    if (!raw) return [];
-    const j = JSON.parse(raw) as ListedAccount[];
-    if (!Array.isArray(j)) return [];
-    return j.filter(
-      (a) =>
-        a &&
-        typeof a.derivationIndex === "number" &&
-        typeof a.address === "string" &&
-        isAddress(a.address),
-    );
-  } catch {
-    return [];
-  }
-}
-
-function saveAccountList(list: ListedAccount[]) {
-  try {
-    if (!list.length) localStorage.removeItem(ACCOUNTS_KEY);
-    else localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list));
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadRpcOverride(): string {
-  try {
-    return (localStorage.getItem(RPC_KEY) || "").trim();
-  } catch {
-    return "";
-  }
-}
-
-function saveRpcOverride(url: string) {
-  try {
-    const t = url.trim();
-    if (!t) localStorage.removeItem(RPC_KEY);
-    else localStorage.setItem(RPC_KEY, t);
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadRpcHealthMs(): number {
-  try {
-    const n = Number(localStorage.getItem(RPC_HEALTH_MS_KEY));
-    if (
-      RPC_HEALTH_MS_OPTIONS.some((o) => o.ms === n) ||
-      n === RPC_HEALTH_MS_DEFAULT
-    ) {
-      return n;
-    }
-  } catch {
-    /* ignore */
-  }
-  return RPC_HEALTH_MS_DEFAULT;
-}
-
-function saveRpcHealthMs(ms: number) {
-  try {
-    localStorage.setItem(RPC_HEALTH_MS_KEY, String(ms));
-  } catch {
-    /* ignore */
-  }
-}
 
 export function PulseTrezor({
   defaultChainId = 369,
@@ -579,13 +257,7 @@ export function PulseTrezor({
   const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
   const [watchImportBusy, setWatchImportBusy] = useState(false);
   const [deepWcUri, setDeepWcUri] = useState<string | null>(null);
-  const [injectEth, setInjectEth] = useState(() => {
-    try {
-      return localStorage.getItem(INJECT_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [injectEth, setInjectEth] = useState(() => loadInjectEth());
   const settingsRef = useRef<HTMLDivElement | null>(null);
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null);
   /** Live device session (can sign). */
@@ -667,13 +339,7 @@ export function PulseTrezor({
   const [revokeSel, setRevokeSel] = useState<Set<string>>(() => new Set());
   const [hideZeroBal, setHideZeroBal] = useState(true);
   const [approveMaxAck, setApproveMaxAck] = useState(false);
-  const [mainnetSendAcked, setMainnetSendAcked] = useState(() => {
-    try {
-      return localStorage.getItem(FIRST_MAINNET_SEND_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [mainnetSendAcked, setMainnetSendAcked] = useState(() => loadFirstMainnetSendAcked());
   const [mainnetSendAck, setMainnetSendAck] = useState(false);
   const [actionTab, setActionTab] = useState<
     "send" | "swap" | "sites" | "approve" | "apps"
@@ -1545,7 +1211,7 @@ export function PulseTrezor({
         setTxStatus("pending");
         if (chainId === 369 && !mainnetSendAcked) {
           try {
-            localStorage.setItem(FIRST_MAINNET_SEND_KEY, "1");
+            saveFirstMainnetSendAcked();
           } catch {
             /* ignore */
           }
@@ -2734,423 +2400,53 @@ export function PulseTrezor({
       </button>
       ) : null}
       {showSettings && settingsOpen ? (
-        <div
-          className="rpc-modal-root"
-          role="presentation"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setSettingsOpen(false);
+        <SettingsModal
+          panelRef={settingsRef}
+          onClose={() => setSettingsOpen(false)}
+          onOpenFaq={() => {
+            setSettingsOpen(false);
+            setFaqOpen(true);
           }}
-        >
-          <div
-            className="rpc-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Settings"
-            ref={settingsRef}
-          >
-            <div className="rpc-modal-head">
-              <h3>Settings</h3>
-              <button
-                type="button"
-                className="btn ghost rpc-modal-close"
-                onClick={() => setSettingsOpen(false)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-
-            <h4 className="settings-section">About</h4>
-            <p className="muted fee">
-              Pulse Perch desk · v0.1.0 · no telemetry · hardware path only ·
-              vibe coded, device-tested
-            </p>
-            <p className="muted fee">
-              <button
-                type="button"
-                className="link"
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  font: "inherit",
-                }}
-                onClick={() => {
-                  setSettingsOpen(false);
-                  setFaqOpen(true);
-                }}
-              >
-                Open FAQ
-              </button>
-              {" — how to use this app"}
-            </p>
-            <p className="muted fee">
-              <a
-                className="link"
-                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/status.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                What works today
-              </a>
-              {" · "}
-              <a
-                className="link"
-                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/trezor-on-pulse.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Trezor on Pulse
-              </a>
-              {" · "}
-              <a
-                className="link"
-                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/bridge-receive.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Bridge → receive
-              </a>
-              {" · "}
-              <a
-                className="link"
-                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/provex.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                ProveX
-              </a>
-            </p>
-            <p className="muted fee">
-              <a
-                className="link"
-                href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/migrate-from-eth.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Migrate from ETH
-              </a>
-              {" · "}
-              <a
-                className="link"
-                href="https://github.com/ihelpmaybe/pulse-trezor/blob/main/docs/UNINSTALL-METAMASK-FOR-PULSE.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Uninstall MetaMask
-              </a>
-              {" · "}
-              <a
-                className="link"
-                href="https://suite.trezor.io"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Trezor Suite
-              </a>
-              {" · "}
-              <a
-                className="link"
-                href="https://bridge.pulsechain.com"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Pulse Bridge
-              </a>
-            </p>
-            <p className="muted fee">
-              Channel: desk-web · rebuild to update (
-              <code>docs/UPDATE-CHANNEL.md</code>).
-            </p>
-
-            <h4 className="settings-section">Install</h4>
-            <InstallPwa />
-
-            <h4 className="settings-section">Device</h4>
-            <p className="muted fee">
-              Suite:{" "}
-              {suiteChannel === "desktop"
-                ? "Desktop (connect-ws)"
-                : suiteChannel === "web-or-missing"
-                  ? "Desktop not detected — use Suite Web or start Desktop"
-                  : "checking…"}
-              {deviceHints?.firmware
-                ? ` · FW ${deviceHints.firmware}${deviceHints.outdated ? " (outdated)" : ""}`
-                : ""}
-              {deviceHints?.passphraseProtection
-                ? " · passphrase on"
-                : ""}
-            </p>
-            <button
-              type="button"
-              className="btn ghost"
-              onClick={exportWatchJson}
-            >
-              {t("exportWatch")}
-            </button>
-            <button
-              type="button"
-              className="btn ghost"
-              disabled={!active}
-              onClick={exportBagSnapshot}
-            >
-              Export bag snapshot
-            </button>
-            <label className="btn ghost watch-import">
-              {watchImportBusy ? "…" : t("importWatch")}
-              <input
-                type="file"
-                accept="application/json,.json"
-                hidden
-                disabled={watchImportBusy}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  e.target.value = "";
-                  if (f) onImportWatchFile(f);
-                }}
-              />
-            </label>
-            <SyncPair
-              accounts={accountList.map((a) => ({
-                address: a.address,
-                derivationIndex: a.derivationIndex,
-                derivationPath: a.derivationPath,
-              }))}
-              watch={
-                watch
-                  ? {
-                      address: watch.address,
-                      derivationIndex: watch.derivationIndex,
-                    }
-                  : session
-                    ? {
-                        address: session.address,
-                        derivationIndex: session.derivationIndex,
-                      }
-                    : null
-              }
-              chainId={chainId}
-              walletFingerprint={
-                deviceId ? `trezor:${deviceId}` : watch ? "watch" : "perch"
-              }
-              busy={watchImportBusy}
-              onImportText={(text) => {
-                setWatchImportBusy(true);
-                try {
-                  applyWatchImportText(text);
-                } finally {
-                  setWatchImportBusy(false);
-                }
-              }}
-            />
-
-            <h4 className="settings-section">RPC</h4>
-            <label className="field">
-              Node
-              <select
-                value={rpcSelectValue}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === "__custom__") {
-                    setRpcCustomMode(true);
-                    setRpcDraft(activeRpcUrl);
-                    return;
-                  }
-                  applyRpc(v === defaultRpcUrl ? "" : v, false);
-                }}
-              >
-                {rpcOptions.map((s) => (
-                  <option key={s.url} value={s.url}>
-                    {s.name}
-                  </option>
-                ))}
-                <option value="__custom__">Custom…</option>
-              </select>
-            </label>
-            {rpcSelectValue === "__custom__" ? (
-              <>
-                <label className="field">
-                  Custom URL
-                  <input
-                    value={rpcDraft}
-                    onChange={(e) => setRpcDraft(e.target.value)}
-                    placeholder={defaultRpcUrl}
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
-                </label>
-                <button type="button" className="btn" onClick={onSaveRpc}>
-                  Save RPC
-                </button>
-              </>
-            ) : null}
-            <label className="field">
-              Health check
-              <select
-                value={String(rpcHealthMs)}
-                onChange={(e) => {
-                  const ms = Number(e.target.value);
-                  setRpcHealthMs(ms);
-                  saveRpcHealthMs(ms);
-                }}
-              >
-                {RPC_HEALTH_MS_OPTIONS.map((o) => (
-                  <option key={o.ms} value={o.ms}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="muted fee">
-              How often Perch pings the node for the latency chip. Off = once
-              when the desk loads or RPC changes.
-            </p>
-
-            <h4 className="settings-section">Display</h4>
-            <label className="hide-zero">
-              <input
-                type="checkbox"
-                checked={theme === "light"}
-                onChange={(e) => {
-                  const next: ThemePref = e.target.checked ? "light" : "dark";
-                  setTheme(next);
-                  applyTheme(next);
-                }}
-              />
-              {t("lightTheme")}
-            </label>
-            <label className="hide-zero">
-              <input
-                type="checkbox"
-                checked={mascotOn}
-                onChange={(e) => {
-                  const on = e.target.checked;
-                  setMascotOn(on);
-                  saveMascot(on);
-                }}
-              />
-              Show mascot
-            </label>
-            <p className="muted fee">
-              Corner anime perch art. Off by default — turn on if you want her.
-            </p>
-
-            <h4 className="settings-section">Modules</h4>
-            <label className="hide-zero">
-              <input
-                type="checkbox"
-                checked={hexModule}
-                onChange={(e) => {
-                  const on = e.target.checked;
-                  setHexModule(on);
-                  saveHexModule(on);
-                  if (!on && bagTab === "stakes") setBagTab("tokens");
-                }}
-              />
-              HEX stakes
-            </label>
-            <p className="muted fee">
-              Shows Stakes tab and “has stakes” marks. Liquid HEX in Tokens
-              stays either way. Off by default — lean face.
-            </p>
-
-            <h4 className="settings-section">Privacy</h4>
-            <button
-              type="button"
-              className={privacyHide ? "vision-tile on" : "vision-tile"}
-              aria-pressed={privacyHide}
-              onClick={togglePrivacyHide}
-            >
-              <span className="vision-copy">
-                <span className="vision-title">Dox shield</span>
-                <span className="vision-blurb">
-                  Mask addresses &amp; amounts as ******** (screen share)
-                </span>
-              </span>
-              <span className="vision-switch" aria-hidden="true">
-                <span className="vision-knob" />
-              </span>
-            </button>
-
-            <h4 className="settings-section">Vision impaired</h4>
-            <div className="vision-grid" role="group" aria-label="Vision impaired">
-              {(
-                [
-                  {
-                    key: "largeText" as const,
-                    title: "Larger text",
-                    blurb: "Bump type size",
-                  },
-                  {
-                    key: "highContrast" as const,
-                    title: "High contrast",
-                    blurb: "Brighter type & edges",
-                  },
-                  {
-                    key: "reduceMotion" as const,
-                    title: "Calm motion",
-                    blurb: "Kill animations",
-                  },
-                  {
-                    key: "strongFocus" as const,
-                    title: "Focus ring",
-                    blurb: "Thicker keyboard outline",
-                  },
-                ] as const
-              ).map((opt) => {
-                const on = a11y[opt.key];
-                return (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    className={on ? "vision-tile on" : "vision-tile"}
-                    aria-pressed={on}
-                    onClick={() => patchA11y({ [opt.key]: !on })}
-                  >
-                    <span className="vision-copy">
-                      <span className="vision-title">{opt.title}</span>
-                      <span className="vision-blurb">{opt.blurb}</span>
-                    </span>
-                    <span className="vision-switch" aria-hidden="true">
-                      <span className="vision-knob" />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <AiPolicyPanel />
-
-            <h4 className="settings-section">Injected provider</h4>
-            <button
-              type="button"
-              className={injectEth ? "vision-tile on" : "vision-tile"}
-              aria-pressed={injectEth}
-              onClick={() => {
-                setInjectEth((on) => {
-                  const next = !on;
-                  try {
-                    localStorage.setItem(INJECT_KEY, next ? "1" : "0");
-                  } catch {
-                    /* ignore */
-                  }
-                  return next;
-                });
-              }}
-            >
-              <span className="vision-copy">
-                <span className="vision-title">window.ethereum (this tab)</span>
-                <span className="vision-blurb">
-                  Lab inject for MM-shaped APIs. Cross-site needs extension next.
-                </span>
-              </span>
-              <span className="vision-switch" aria-hidden="true">
-                <span className="vision-knob" />
-              </span>
-            </button>
-          </div>
-        </div>
+          suiteChannel={suiteChannel}
+          deviceHints={deviceHints}
+          exportWatchJson={exportWatchJson}
+          exportBagSnapshot={exportBagSnapshot}
+          active={active}
+          watchImportBusy={watchImportBusy}
+          onImportWatchFile={onImportWatchFile}
+          accountList={accountList}
+          watch={watch}
+          session={session}
+          chainId={chainId}
+          deviceId={deviceId}
+          applyWatchImportText={applyWatchImportText}
+          setWatchImportBusy={setWatchImportBusy}
+          rpcSelectValue={rpcSelectValue}
+          rpcOptions={rpcOptions}
+          defaultRpcUrl={defaultRpcUrl}
+          activeRpcUrl={activeRpcUrl}
+          rpcDraft={rpcDraft}
+          setRpcDraft={setRpcDraft}
+          setRpcCustomMode={setRpcCustomMode}
+          applyRpc={applyRpc}
+          onSaveRpc={onSaveRpc}
+          rpcHealthMs={rpcHealthMs}
+          setRpcHealthMs={setRpcHealthMs}
+          theme={theme}
+          setTheme={setTheme}
+          mascotOn={mascotOn}
+          setMascotOn={setMascotOn}
+          hexModule={hexModule}
+          setHexModule={setHexModule}
+          bagTab={bagTab}
+          setBagTab={setBagTab}
+          privacyHide={privacyHide}
+          togglePrivacyHide={togglePrivacyHide}
+          a11y={a11y}
+          patchA11y={patchA11y}
+          injectEth={injectEth}
+          setInjectEth={setInjectEth}
+        />
       ) : null}
     </div>
   );
@@ -5291,183 +4587,16 @@ export function PulseTrezor({
             hidden={actionTab !== "apps"}
           >
             {actionTab === "apps" ? (
-              <div className="apps-grid">
-                <div className="apps-card">
-                  <h3>Buy / sell $ (ProveX)</h3>
-                  <p className="muted fee">
-                    Fiat on/off-ramp via ProveX — not custody inside Perch. Use
-                    bridged USDC only — not the inherited fork copy.
-                  </p>
-                  {chainId === 369 && active ? (
-                    <p className="muted">
-                      Bridged USDC:{" "}
-                      {tokenRows.find(
-                        (r) =>
-                          r.token.address.toLowerCase() ===
-                          BRIDGED_USDC.toLowerCase(),
-                      )?.formatted ?? "—"}
-                      {tokenRows.some(
-                        (r) =>
-                          r.token.address.toLowerCase() ===
-                            INHERITED_USDC.toLowerCase() && r.raw > 0n,
-                      ) ? (
-                        <span className="tok-tag bad">
-                          {" "}
-                          inherited USDC also in bag — don’t treat as $1
-                        </span>
-                      ) : null}
-                    </p>
-                  ) : (
-                    <p className="muted empty-teach">
-                      Connect on Pulse mainnet to see bridged USDC.
-                    </p>
-                  )}
-                  <a
-                    className="btn ghost"
-                    href="https://app.provex.com"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open ProveX
-                  </a>
-                </div>
-                <div className="apps-card">
-                  <h3>Quick swap</h3>
-                  <p className="muted fee">
-                    In-desk PulseX V2 quote → sign on Trezor. For the full DEX
-                    UI, use Sites → PulseX.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    disabled={chainId !== 369}
-                    onClick={() => setActionTab("swap")}
-                  >
-                    Open Swap
-                  </button>
-                </div>
-                <div className="apps-card">
-                  <h3>Custom contract call</h3>
-                  <p className="muted fee">
-                    Power tool — paste contract + calldata (hex), payable value
-                    from Send amount. Blind selectors need extra confirm.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    onClick={() => {
-                      setCustomCallOpen(true);
-                      setActionTab("send");
-                    }}
-                  >
-                    Open power tool
-                  </button>
-                </div>
-                <div className="apps-card">
-                  <h3>Pulse Bridge</h3>
-                  <p className="muted fee">
-                    Bridge in → then receive here. After Bridge, copy your Perch
-                    address (or QR) as the destination.
-                  </p>
-                  <a
-                    className="btn ghost"
-                    href="https://bridge.pulsechain.com"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open Bridge
-                  </a>
-                </div>
-                <div className="apps-card">
-                  <h3>Migrate from ETH</h3>
-                  <p className="muted fee">
-                    Same BIP44 path as Suite “Ethereum #1”. Connect the same
-                    Trezor account → Load full bag on Pulse → revoke old ETH
-                    allowances you don’t need.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    onClick={() => setActionTab("approve")}
-                    disabled={chainId !== 369 && chainId !== 943}
-                  >
-                    Open Approvals
-                  </button>
-                </div>
-                <div className="apps-card">
-                  <h3>ZKX Wallet</h3>
-                  <p className="muted fee">
-                    Soft + privacy (RAILGUN). Optional HW attach — shield is
-                    soft-only. HWW Pulse bag stays Perch + Trezor.
-                  </p>
-                  <a
-                    className="btn ghost"
-                    href="https://zkxwallet.com"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open ZKX
-                  </a>
-                </div>
-                <div className="apps-card">
-                  <h3>Internet Money</h3>
-                  <p className="muted fee">
-                    Soft Pulse mobile / Chrome. Not a Trezor path — use for
-                    phone daily, not serious HWW.
-                  </p>
-                  <a
-                    className="btn ghost"
-                    href="https://internetmoney.io"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open Internet Money
-                  </a>
-                </div>
-                <div className="apps-card">
-                  <h3>Tip (mobile soft)</h3>
-                  <p className="muted fee">
-                    Soft wallet companion for on-the-go. HWW stays Perch +
-                    Trezor.
-                  </p>
-                  <a
-                    className="btn ghost"
-                    href="https://github.com/ihelpmaybe/Tip-wallet"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Tip wallet
-                  </a>
-                </div>
-                {deeplinks.defi
-                  .filter((d) =>
-                    [
-                      "piteas",
-                      "liquid-loans",
-                      "phiat",
-                      "9mm",
-                      "phux",
-                      "liberty-swap",
-                    ].includes(d.id),
-                  )
-                  .map((d) => (
-                    <div className="apps-card" key={d.id}>
-                      <h3>{d.name}</h3>
-                      <p className="muted fee">
-                        {(d as { role?: string }).role || "Pulse DeFi"} · open
-                        via Sites (WalletConnect) for Trezor sign.
-                      </p>
-                      <a
-                        className="btn ghost"
-                        href={d.app}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open {d.name}
-                      </a>
-                    </div>
-                  ))}
-              </div>
+              <AppsPanel
+                chainId={chainId}
+                active={!!active}
+                tokenRows={tokenRows}
+                onActionTab={setActionTab}
+                onOpenCustomCall={() => {
+                  setCustomCallOpen(true);
+                  setActionTab("send");
+                }}
+              />
             ) : null}
           </div>
         </section>

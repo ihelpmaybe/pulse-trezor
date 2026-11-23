@@ -73,7 +73,7 @@ Also exported: Connect helpers + `sendPlsWithTrezor` + `RpcOverride` from `src/i
 
 ## Modularity / layout
 
-Prefer small modules under `src/ui/` and `src/chain/` / `src/wc/` over growing `PulseTrezor.tsx` further. Recent extracts: `FaqModal`, `CoreFooter`, `InstallPwa`, `SyncPair`, clear-sign / verify / dead-end recipients.
+Prefer small modules under `src/ui/` and `src/chain/` / `src/wc/` over growing `PulseTrezor.tsx` further. Recent extracts: `FaqModal`, `CoreFooter`, `SettingsModal`, `AppsPanel`, `deskStorage`, `AddrParts`, `HexStakeMark`, `swapFace`, `InstallPwa`, `SyncPair`, clear-sign / verify / dead-end recipients.
 
 ---
 
