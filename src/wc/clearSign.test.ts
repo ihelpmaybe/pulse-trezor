@@ -5,6 +5,7 @@ import {
   clearSignTypedFields,
   decodeApproveAmount,
   decodeHexStakeCalldata,
+  hasHardDeadEnd,
   isBlindCalldata,
   needsBlindConfirm,
   needsDangerAck,
@@ -159,6 +160,16 @@ describe("blind calldata", () => {
       data,
     });
     expect(lines.some((l) => /UNLIMITED/i.test(l.title))).toBe(true);
+  });
+
+  it("flags plain send to HEX as dead-end", () => {
+    const lines = clearSignTx({
+      to: "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39",
+      data: "0x",
+      valueHex: "0xde0b6b3a7640000",
+    });
+    expect(hasHardDeadEnd(lines)).toBe(true);
+    expect(lines.some((l) => /Dead-end · HEX/i.test(l.title))).toBe(true);
   });
 
   it("flags never-expire Permit deadline and EIP-7702 bait", () => {

@@ -3,6 +3,10 @@
  * Graded warnings — not a full ABI decoder.
  */
 import { formatEther, formatUnits, maxUint256, type Hex } from "viem";
+import {
+  deadEndNativeSend,
+  deadEndTokenTransfer,
+} from "../chain/deadEndRecipients";
 
 export type ClearTone = "ok" | "warn" | "danger";
 
@@ -24,13 +28,13 @@ export const KNOWN_TO: Record<
   },
   "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39": {
     name: "HEX",
-    tone: "ok",
-    note: "HEX token",
+    tone: "danger",
+    note: "HEX token contract — never plain-send PLS here (use stakeStart / wallet addr)",
   },
   "0xa1077a294dde1b09bb078844df40758a5d0f9a27": {
     name: "WPLS",
-    tone: "ok",
-    note: "Wrapped PLS",
+    tone: "warn",
+    note: "Wrapped PLS — plain send locks; use deposit()",
   },
   "0x70499adebb11efd915e3b69e700c331778628707": {
     name: "WPLS (testnet)",
@@ -423,6 +427,25 @@ export function clearSignTx(opts: {
   }
 
   if (to) {
+    const dead = deadEndNativeSend(to, opts.data);
+    if (dead) {
+      lines.push({
+        tone: "danger",
+        title: `Dead-end · ${dead.name}`,
+        detail: dead.reason,
+      });
+    }
+    const xferHit = decodeErc20Transfer(opts.data);
+    if (xferHit) {
+      const tokDead = deadEndTokenTransfer(to, xferHit.to);
+      if (tokDead) {
+        lines.push({
+          tone: "danger",
+          title: `Dead-end · ${tokDead.name}`,
+          detail: tokDead.reason,
+        });
+      }
+    }
     const known = KNOWN_TO[to];
     if (known) {
       lines.push({
@@ -430,7 +453,7 @@ export function clearSignTx(opts: {
         title: `To · ${known.name}`,
         detail: `${short(to)} · ${known.note}`,
       });
-    } else {
+    } else if (!dead) {
       lines.push({
         tone: "warn",
         title: "To · unknown contract",
@@ -624,10 +647,15 @@ export function needsDangerAck(lines: ClearLine[]): boolean {
   return lines.some(
     (l) =>
       l.tone === "danger" &&
-      /blind calldata|Permit|Order|Raw hex|7702|UNLIMITED|Fake Trezor|phishing/i.test(
+      /blind calldata|Permit|Order|Raw hex|7702|UNLIMITED|Fake Trezor|phishing|Dead-end/i.test(
         `${l.title} ${l.detail}`,
       ),
   );
+}
+
+/** Desk Sign & send should refuse (no override) when clear-sign shows a hard dead-end. */
+export function hasHardDeadEnd(lines: ClearLine[]): boolean {
+  return lines.some((l) => /Dead-end/i.test(l.title));
 }
 
 export function dangerAckLabel(lines: ClearLine[]): string {

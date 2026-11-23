@@ -63,6 +63,10 @@ import {
   type ActivityRow,
 } from "./chain/activity";
 import {
+  deadEndNativeSend,
+  deadEndTokenTransfer,
+} from "./chain/deadEndRecipients";
+import {
   ACCOUNT_COUNT_MAX,
   ACCOUNT_COUNT_MIN,
   clampAccountCount,
@@ -1434,6 +1438,19 @@ export function PulseTrezor({
     if (chainId === 369 && !mainnetSendAcked && !mainnetSendAck) {
       setErr("Confirm the mainnet first-send warning before signing.");
       return;
+    }
+    if (asset === "PLS") {
+      const dead = deadEndNativeSend(to, "0x");
+      if (dead?.block) {
+        setErr(dead.reason);
+        return;
+      }
+    } else if (selectedToken) {
+      const dead = deadEndTokenTransfer(selectedToken.address, to);
+      if (dead?.block) {
+        setErr(dead.reason);
+        return;
+      }
     }
     try {
       if (asset === "PLS") {
@@ -4330,6 +4347,19 @@ export function PulseTrezor({
                   ) : null}
                   {to && isAddress(to)
                     ? (() => {
+                        const dead =
+                          asset === "PLS"
+                            ? deadEndNativeSend(to, "0x")
+                            : selectedToken
+                              ? deadEndTokenTransfer(selectedToken.address, to)
+                              : null;
+                        if (dead) {
+                          return (
+                            <p className="warn-line" role="alert">
+                              Blocked · {dead.name}: {dead.reason}
+                            </p>
+                          );
+                        }
                         const poison = lookalikePoison(to, addressBook);
                         return poison ? (
                           <p className="warn-line" role="alert">
@@ -4578,6 +4608,12 @@ export function PulseTrezor({
                       (chainId === 369 &&
                         !mainnetSendAcked &&
                         !mainnetSendAck) ||
+                      (isAddress(to) &&
+                        !!(asset === "PLS"
+                          ? deadEndNativeSend(to, "0x")
+                          : selectedToken
+                            ? deadEndTokenTransfer(selectedToken.address, to)
+                            : null)) ||
                       (() => {
                         try {
                           if (asset === "PLS" && balance != null) {
