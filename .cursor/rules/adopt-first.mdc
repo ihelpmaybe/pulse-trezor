@@ -1,0 +1,35 @@
+---
+description: Adopt/wrap battle-tested OSS before writing desk code
+alwaysApply: true
+---
+
+# Adopt first (Pulse Perch)
+
+Before writing new desk logic, **find the thing people already trust** and wrap it. Modular files still don’t excuse inventing a second wallet stack.
+
+## Gate (chat, before tools)
+1. **Need:** one sentence.
+2. **Adopt:** named lib / API / sibling repo (or “none exists because…”).
+3. **Glue:** what thin file we add under `src/ui|chain|wc|trezor/`.
+4. **Not inventing:** the engine we refuse to rewrite.
+
+Map: [OPEN-SOURCE-INFRA.md](../../OPEN-SOURCE-INFRA.md).
+
+## Already decided — don’t re-litigate
+| Need | Use |
+|------|-----|
+| Chain I/O | **viem** |
+| Device | **`@trezor/connect-web`** → Suite |
+| Sites | **Reown WalletKit** |
+| QR | **qrcode** |
+| Shell | **Vite + React** |
+| History | **PulseScan / Blockscout HTTP** |
+| Swap route | **PulseX** router — wrap, don’t AMM |
+| Fiat | **ProveX** deep link — don’t custody |
+
+## Forbidden
+- Homegrown RPC client, WC stack, Connect substitute, indexer, AMM, fiat ramp
+- “Quick custom X” when npm already has a maintained X (focus trap, QR, multicall helpers, ABI tools)
+
+## Allowed invent
+Pulse-first chrome, Suite-gap copy, clear-sign strips, dead-end recipient guards, Trezor confirm UX — the product face, not the rails.

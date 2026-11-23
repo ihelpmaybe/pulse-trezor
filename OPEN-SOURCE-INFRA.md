@@ -169,3 +169,18 @@ For AIs and humans. Pair with [PRIORITY.md](./PRIORITY.md) · [BUILD-EFFICIENCY.
 ## Agent rule
 
 Before writing >50 lines of new infra: name the OSS row above you’re wrapping. If none fits, ask — don’t invent a platform.
+
+**Standing Cursor rules:** `.cursor/rules/adopt-first.mdc` · `.cursor/rules/modular-first.mdc`
+
+### Invent debt (keep thin — don’t grow)
+
+| Area | Status | Next adopt if it grows |
+|------|--------|------------------------|
+| Focus trap | Tiny local helper | `focus-trap` / `focus-trap-react` |
+| Gas speed UI | Product chrome | Stay custom (HWW copy) |
+| Address book / poison | Product chrome | Stay custom |
+| Clear-sign strips | Product chrome | Stay custom; decode via **viem** |
+| Activity merge | Thin scan client | Stay on Blockscout/PulseScan HTTP |
+| Pulsex quote | Thin router wrap | Keep wrapping PulseX — no AMM |
+
+Default reflex when tempted to “just write it”: open this file → pick a row → wrap.

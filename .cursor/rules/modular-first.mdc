@@ -7,6 +7,8 @@ alwaysApply: true
 
 Do **not** dump new features into `src/PulseTrezor.tsx`. That file is a thin kernel: connect session, shared state, wiring panels.
 
+**Modular ≠ invent.** Split files around **adopted** rails (viem, Connect, Reown). See `adopt-first.mdc` + `OPEN-SOURCE-INFRA.md` before writing a new engine.
+
 ## Default
 1. New face → new module under `src/ui/` (or `src/chain/` / `src/wc/` / `src/trezor/` for logic).
 2. Kernel only **imports + props + handlers** that span panels.
