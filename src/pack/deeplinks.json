@@ -56,15 +56,6 @@
       "quality": "A"
     },
     {
-      "id": "gopulse",
-      "name": "GoPulse",
-      "app": "https://gopulse.com",
-      "quality": "B",
-      "twitter": "GoPulsecom",
-      "role": "portfolio",
-      "notes": "Footer kit — same as tools.gopulse"
-    },
-    {
       "id": "pump-tires",
       "name": "PUMP.tires",
       "app": "https://pump.tires",
@@ -189,14 +180,6 @@
       "role": "cost-basis"
     },
     {
-      "id": "gopulse",
-      "name": "GoPulse",
-      "app": "https://gopulse.com",
-      "quality": "B",
-      "twitter": "GoPulsecom",
-      "role": "portfolio"
-    },
-    {
       "id": "howtopulse",
       "name": "HowToPulse",
       "app": "https://www.howtopulse.com",
@@ -204,6 +187,7 @@
       "twitter": "HowtoPulse",
       "role": "education"
     },
+
     {
       "id": "hexikani-catalog",
       "name": "PulseChain projects YAML",

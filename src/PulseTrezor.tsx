@@ -171,14 +171,13 @@ import {
   getInjectedProvider,
   type InjectedHost,
 } from "./provider/eip1193";
-/** Official core + scan + GoPulse + PUMP.tires — fine-print footer only. */
+/** Official core + scan + PUMP.tires — fine-print footer only. (No GoPulse.) */
 const FOOTER_CORE_IDS = [
   "pulsechain",
   "hex",
   "pulsex",
   "provex",
   "bridge",
-  "gopulse",
   "pump-tires",
   "scan",
 ] as const;

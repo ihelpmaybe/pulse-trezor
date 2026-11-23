@@ -19,7 +19,8 @@
   --lime: var(--pulse);
   --lime-dim: var(--pulse-dim);
   --lime-glow: var(--pulse-glow);
-  --gold: #ffe14a;
+  /* No “gold” naming — not Gold Pulse. Amber warn hue only if needed. */
+  --amber: #ffe14a;
   --cyan: var(--pulse); /* no cyan in palette — map away */
   --cyan-dim: var(--pulse-dim);
   font-family: "Segoe UI", system-ui, sans-serif;
