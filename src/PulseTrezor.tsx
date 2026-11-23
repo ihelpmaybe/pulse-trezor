@@ -2854,7 +2854,7 @@ export function PulseTrezor({
                 address: a.address,
                 derivationIndex: a.derivationIndex,
                 derivationPath: a.derivationPath,
-              })}
+              }))}
               watch={
                 watch
                   ? {
