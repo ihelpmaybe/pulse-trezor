@@ -17,7 +17,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "How do I start?",
-    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Connect (or Load accounts). 3) Allow in Suite and confirm the address on the Trezor. 4) Load full bag on Pulse (369) or stay on testnet (943) for practice.",
+    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Connect (or Load accounts). 3) Allow in Suite and confirm the address on the Trezor. 4) Load full bag on Pulse (369) or stay on testnet (943) for practice. Longer walkthrough: github.com/ihelpmaybe/pulse-trezor-guides (Suite + Connect, Try Perch).",
   },
   {
     q: "Do I need MetaMask?",

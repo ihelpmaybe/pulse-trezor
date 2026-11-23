@@ -21,7 +21,7 @@ npm run dev
 
 Open **http://127.0.0.1:5174/** → unlock **Trezor Suite** → **Connect** → confirm address on device.
 
-Lab default = **Pulse testnet 943**. Guides: [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides).
+Lab default = **Pulse testnet 943**. Guides: [Suite + Connect](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/suite-connect.md) · [PLS on Trezor](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/pls-on-trezor.md) · [all guides](https://github.com/ihelpmaybe/pulse-trezor-guides).
 
 | Artifact | Link |
 |----------|------|

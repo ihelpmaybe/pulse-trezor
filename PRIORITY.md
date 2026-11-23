@@ -23,7 +23,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 7 | ~~TIP0 locate Tip source / face-vs-code decision~~ **DONE** (interim) | `Tip-wallet` | TIP0 | face-only; code path unknown |
 | 8 | TIP1 consume SYNC4 pack + RPC align | `Tip-wallet` | TIP1 | After #2+#7 |
 | 9 | ~~Desk A2 tokens HEX/PLSX + approve (use SYNC4)~~ **DONE** | `pulse-trezor` | A2 | balances · ERC-20 send · approve |
-| 10 | Guides: Bridge install + Desk receive thin | `pulse-trezor-guides` | G1/G5 | Parallel w/ #5–9 |
+| 10 | ~~Guides: Suite/Connect + Desk receive thin~~ **DONE** | `pulse-trezor-guides` | G1/G5 | suite-connect · pls-on-trezor · desk-install |
 | 11 | ~~Gate T: Desk smoke green + pen draft~~ **DONE** (pen Suite-quit 2026-11-23) | `pulse-trezor` | TEST | — |
 
 **Stop claiming Gate 1 until #5+#9+#11 done.**
