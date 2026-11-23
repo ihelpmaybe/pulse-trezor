@@ -1,33 +1,49 @@
 # Pulse Perch
 
-**PulseChain MetaMask replacement** for a real Trezor — bag, send, approve, Sites (WalletConnect). Suite hosts the device; Perch is the Pulse UI.
+**PulseChain MetaMask replacement** for a real Trezor — bag, send, approve, Sites (WalletConnect).  
+Suite hosts the device; Perch is the Pulse UI.
 
-**Start here → [TRY.md](./TRY.md)** (clone → Suite → Connect → testnet)
+> **Vibe coded, device-tested.** Built fast with AI pair-programming, then smoked on Connect → Suite → Trezor (testnet Gate 1). Rough edges exist. **The Trezor screen is truth** — the browser can lie.
 
-- Not an app directory. Not a PulseX/HEX clone.
-- Not official Trezor Pulse support (Suite still doesn’t list Pulse).
-- Code repo id may still say `pulse-trezor` — product name is **Pulse Perch**.
+**Start here → [TRY.md](./TRY.md)** · In-app **?** FAQ (next to the eye)
 
-## Try it (90-second version)
+---
+
+## Quick start
 
 ```bash
 git clone https://github.com/ihelpmaybe/pulse-trezor.git
 cd pulse-trezor
+cp .env.example .env.local   # optional: VITE_REOWN_PROJECT_ID for Sites
 npm run setup
 npm run dev
 ```
 
-Open **http://127.0.0.1:5174/** · unlock Trezor in **Suite** · **Connect** in Perch · confirm address on device.
+Open **http://127.0.0.1:5174/** → unlock **Trezor Suite** → **Connect** → confirm address on device.
 
-Lab shell defaults to **testnet 943**. Full steps + extension: [TRY.md](./TRY.md).  
-Sideload zip: [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) (`extension-0.1.1`).
+Lab default = **Pulse testnet 943**. Guides: [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides).
 
-## Normie guides
+| Artifact | Link |
+|----------|------|
+| Try / install | [TRY.md](./TRY.md) |
+| Extension sideload | [Releases `extension-0.1.1`](https://github.com/ihelpmaybe/pulse-trezor/releases/tag/extension-0.1.1) (+ SHA256) |
+| Pen report | [tests/pen/REPORT-2026-11-23.md](./tests/pen/REPORT-2026-11-23.md) |
+| Threat watch | [docs/THREAT-WATCH-2026-11.md](./docs/THREAT-WATCH-2026-11.md) |
 
-- [Try Perch](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/try-perch.md)
-- [What works today](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/status.md)
-- [Trezor on Pulse](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/trezor-on-pulse.md)
-- [Bridge → receive](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/bridge-receive.md)
+---
+
+## What works (Gate 1 preview)
+
+- Connect Trezor · bag · send · approve / revoke · PulseX quote-swap  
+- Sites (WC) with Verify + kill-all sessions · clear-sign (Permit / 712 / dead-end HEX block)  
+- Watch / SYNC pair · modular HEX stakes · PWA install · FAQ  
+- Lab MV3 extension (sideload; not Chrome Web Store yet)
+
+**Not claiming yet:** mainnet WC spend with real dust · official Suite Pulse · phone HWW app.
+
+**Not our product:** fake “official Suite for Pulse” · seed-in-browser · GoPulse promo.
+
+---
 
 ## Sibling repos
 
@@ -37,7 +53,9 @@ Sideload zip: [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) (`
 | [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides |
 | [pulse-trezor-platform](https://github.com/ihelpmaybe/pulse-trezor-platform) | Watch registry / badge packs |
 | [pulse-trezor-suite](https://github.com/ihelpmaybe/pulse-trezor-suite) | Suite gap study |
-| [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet) | Soft Android wallet (separate lane) |
+| [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet) | Soft Android (separate lane) |
+
+---
 
 ## Embed
 
@@ -46,19 +64,25 @@ import { PulseTrezor } from "pulse-trezor-desk"; // or relative src
 
 <PulseTrezor />                 // mainnet PulseChain
 <PulseTrezor showTestnet />     // lab: testnet toggle
-<PulseTrezor rpc="https://your-node.example" />  // host-forced RPC
+<PulseTrezor rpc="https://your-node.example" />
 ```
-
-Standalone `npm run dev` shell uses testnet + toggle (`src/App.tsx`).
 
 Also exported: Connect helpers + `sendPlsWithTrezor` + `RpcOverride` from `src/index.ts`.
 
+---
+
+## Modularity / layout
+
+Prefer small modules under `src/ui/` and `src/chain/` / `src/wc/` over growing `PulseTrezor.tsx` further. Recent extracts: `FaqModal`, `CoreFooter`, `InstallPwa`, `SyncPair`, clear-sign / verify / dead-end recipients.
+
+---
+
 ## Maintainer docs
 
-- [PRIORITY.md](./PRIORITY.md) · [TODO.md](./TODO.md) · [AGENTS.md](./AGENTS.md)
-- [ACCEPTANCE.md](./ACCEPTANCE.md) · [TESTING.md](./TESTING.md) · [END-TO-END.md](./END-TO-END.md)
-- [HELPFUL-NOTES.md](./HELPFUL-NOTES.md) · [ADOPTION.md](./ADOPTION.md)
+[PRIORITY](./PRIORITY.md) · [TODO](./TODO.md) · [AGENTS](./AGENTS.md) · [ACCEPTANCE](./ACCEPTANCE.md) · [TESTING](./TESTING.md) · [scripts/README](./scripts/README.md)
 
-## Status
+---
 
-**Gate 1 preview** — Connect · balances · send · approve · Sites (WC) · watch/SYNC · MV3 lab extension. Needs Trezor Suite (Connect 10). Free Reown project id for WalletConnect. Device smokes: `tests/smoke/`.
+## License / trademark
+
+Not affiliated with SatoshiLabs / Trezor. “Trezor” is their mark. PulseChain / HEX / PulseX / ProveX belong to their respective projects.

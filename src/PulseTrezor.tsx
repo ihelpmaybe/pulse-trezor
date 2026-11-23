@@ -140,6 +140,8 @@ import {
 import { decodeSyncPayload } from "./chain/syncPair";
 import { SyncPair } from "./ui/SyncPair";
 import { InstallPwa } from "./ui/InstallPwa";
+import { FaqModal } from "./ui/FaqModal";
+import { CoreFooter } from "./ui/CoreFooter";
 import {
   loadHexModule,
   loadMascot,
@@ -158,6 +160,7 @@ import {
 } from "./chain/pulsex";
 import deeplinks from "./pack/deeplinks.json";
 import { AiPolicyPanel } from "./ai/AiPolicyPanel";
+// deeplinks still used by Apps tab
 import {
   bootAiPolicy,
   registerAgentHandlers,
@@ -171,17 +174,6 @@ import {
   getInjectedProvider,
   type InjectedHost,
 } from "./provider/eip1193";
-/** Official core + scan + PUMP.tires — fine-print footer only. (No GoPulse.) */
-const FOOTER_CORE_IDS = [
-  "pulsechain",
-  "hex",
-  "pulsex",
-  "provex",
-  "bridge",
-  "pump-tires",
-  "scan",
-] as const;
-
 /** Drop trailing zeros from formatGwei for input fields. */
 function trimGwei(s: string): string {
   if (!s.includes(".")) return s;
@@ -570,6 +562,7 @@ export function PulseTrezor({
   const [rpcSaved, setRpcSaved] = useState(() => loadRpcOverride());
   const [rpcHealthMs, setRpcHealthMs] = useState(() => loadRpcHealthMs());
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
   const [rpcCustomMode, setRpcCustomMode] = useState(false);
   const [a11y, setA11y] = useState<A11yPrefs>(() => loadA11y());
   const [privacyHide, setPrivacyHide] = useState(() => loadPrivacyHide());
@@ -2622,6 +2615,22 @@ export function PulseTrezor({
     <div className="rpc-pop-wrap desk-tools">
       <button
         type="button"
+        className={faqOpen ? "btn ghost rpc-pop-btn on" : "btn ghost rpc-pop-btn"}
+        aria-haspopup="dialog"
+        aria-expanded={faqOpen}
+        aria-label="Frequently asked questions"
+        title="FAQ — how to use Perch"
+        onClick={() => {
+          setSettingsOpen(false);
+          setFaqOpen(true);
+        }}
+      >
+        <span className="faq-btn-label" aria-hidden="true">
+          ?
+        </span>
+      </button>
+      <button
+        type="button"
         className={
           privacyHide
             ? "btn ghost rpc-pop-btn privacy-btn on"
@@ -2753,7 +2762,28 @@ export function PulseTrezor({
 
             <h4 className="settings-section">About</h4>
             <p className="muted fee">
-              Pulse Perch desk · v0.1.0 · no telemetry · hardware path only
+              Pulse Perch desk · v0.1.0 · no telemetry · hardware path only ·
+              vibe coded, device-tested
+            </p>
+            <p className="muted fee">
+              <button
+                type="button"
+                className="link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  font: "inherit",
+                }}
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setFaqOpen(true);
+                }}
+              >
+                Open FAQ
+              </button>
+              {" — how to use this app"}
             </p>
             <p className="muted fee">
               <a
@@ -5443,34 +5473,8 @@ export function PulseTrezor({
         </section>
       </div>
 
-      <footer className="core-footer">
-        <div className="core-footer-links">
-          {FOOTER_CORE_IDS.map((id) => {
-            const item = deeplinks.core.find((c) => c.id === id);
-            if (!item) return null;
-            // Footer = mainnet kit links. Don't follow lab/testnet chainId for PulseScan.
-            const href =
-              id === "scan" && active
-                ? explorerAddressUrl(369, active.address)
-                : item.app || item.url;
-            if (!href) return null;
-            return (
-              <a
-                key={id}
-                className="link"
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {item.name}
-              </a>
-            );
-          })}
-        </div>
-        <p className="core-footer-boast">
-          {t("noCollect")}
-        </p>
-      </footer>
+      <CoreFooter activeAddress={active?.address ?? null} />
+      <FaqModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       {mascotOn ? (
         <img
           className="mascot"
