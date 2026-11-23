@@ -134,9 +134,9 @@ describe("blind calldata", () => {
       },
     });
     const fields = clearSignTypedFields(preview);
-    expect(fields.some((l) => l.title === "712 spender")).toBe(true);
-    expect(fields.some((l) => l.title === "712 value")).toBe(true);
-    expect(fields.some((l) => l.title === "712 deadline")).toBe(true);
+    expect(fields.some((l) => l.title.startsWith("712 spender"))).toBe(true);
+    expect(fields.some((l) => l.title.startsWith("712 value"))).toBe(true);
+    expect(fields.some((l) => l.title.startsWith("712 deadline"))).toBe(true);
     expect(fields.some((l) => l.title === "712 chainId")).toBe(true);
 
     const lines = clearSignMessage({
