@@ -19,7 +19,8 @@ npm run dev
 
 Open **http://127.0.0.1:5174/** · unlock Trezor in **Suite** · **Connect** in Perch · confirm address on device.
 
-Lab shell defaults to **testnet 943**. Full steps + extension: [TRY.md](./TRY.md).
+Lab shell defaults to **testnet 943**. Full steps + extension: [TRY.md](./TRY.md).  
+Sideload zip: [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) (`extension-0.1.1`).
 
 ## Normie guides
 

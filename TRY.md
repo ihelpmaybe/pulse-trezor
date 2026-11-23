@@ -50,14 +50,15 @@ Get test PLS from a Pulse testnet faucet if the bag is empty.
 
 ## Chrome extension (optional lab)
 
-Sites that only look for MetaMask:
+Sites that only look for MetaMask.
 
-```bash
-npm run ext:pack
-```
+**Download:** [pulse-perch-extension-0.1.1.zip](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.1/pulse-perch-extension-0.1.1.zip) (GitHub Release `extension-0.1.1`)
 
-Chrome → Extensions → Developer mode → **Load unpacked** → `extension/` folder.  
-Keep the Perch tab open and Connected. Prefer **Sites (WalletConnect)** when the dapp supports it.
+1. Unzip the pack.
+2. Chrome → Extensions → Developer mode → **Load unpacked** → that folder.
+3. Run the desk (`npm run dev`) → **Connect** Trezor → keep the Perch tab open.
+
+Or build locally: `npm run ext:pack` → `dist-ext/`. Prefer **Sites (WalletConnect)** when the dapp supports it.
 
 Details: [extension/README.md](./extension/README.md)
 
