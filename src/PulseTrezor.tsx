@@ -64,19 +64,13 @@ import { t } from "./i18n/en";
 import { getFocusable, trapTabKey } from "./a11y/focusTrap";
 
 export type PulseTrezorProps = {
-  /** Default 369. Standalone demo may pass 943. */
+  /** Default 369. Standalone App uses 943. */
   defaultChainId?: DeskChainId;
-  /**
-   * Show network select (Pulse + test Pulse + ETH / Sepolia / Holesky).
-   * Lab / demo: pass true. Embedders can leave false for Pulse-only default.
-   */
+  /** Network select (Pulse + test + ETH peers). Lab: true. */
   showTestnet?: boolean;
-  /**
-   * Custom RPC from the host app (own node).
-   * User can also set one under collapsed Settings (saved locally).
-   */
+  /** Host RPC override; user can also set under Settings. */
   rpc?: RpcOverride;
-  /** Show collapsed Settings (RPC). Default true. */
+  /** Settings (RPC). Default true. */
   showSettings?: boolean;
   className?: string;
 };
@@ -101,9 +95,7 @@ export function PulseTrezor({
   const [a11y, setA11y] = useState<A11yPrefs>(() => loadA11y());
   const [privacyHide, setPrivacyHide] = useState(() => loadPrivacyHide());
   const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
-  /** Optional HEX stakes UI (Stakes tab / marks) — Settings modules. */
   const [hexModule, setHexModule] = useState(() => loadHexModule());
-  /** Corner anime mascot — Settings → Display; off by default. */
   const [mascotOn, setMascotOn] = useState(() => loadMascot());
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
   const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
@@ -442,9 +434,6 @@ export function PulseTrezor({
     setChainId,
     refreshBalances,
   });
-
-  // nonceHint stays kernel-owned (pending count for Send face)
-  // send hook also has nonceHint — prefer kernel effect; drop unused from send destructure
 
   function onCopy() {
     if (!active) return;

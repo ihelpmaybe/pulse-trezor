@@ -5,6 +5,6 @@
 | Ship / smoke | `gate1-*.mjs`, `ext-*-smoke.mjs`, `suite-down-smoke.mjs`, `fuzz-watch.mjs` | CI / Gate evidence |
 | WC labs | `wc-*.mjs` | Need `REOWN_PROJECT_ID` (see `.env.example`) |
 | Ext labs | `ext-*.mjs`, `chrome-ext-lab.ps1` | CDP lab Chrome |
-| One-off probes | `_probe-*.mjs`, `_click-*.mjs`, `_reconnect-*.mjs` | Local debugging only — not product surface |
+| One-off probes | `_probe-*.mjs`, `_click-*.mjs`, `_reconnect-*.mjs` | Local CDP scratch — candidate for delete |
 
-`tmp-chrome-*` profiles are gitignored. Delete when disk fills (~1GB+).
+`tmp-chrome-*` / `tmp-*.json` / `tmp-*.log` are gitignored.

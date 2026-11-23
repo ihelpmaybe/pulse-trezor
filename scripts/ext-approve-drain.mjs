@@ -40,8 +40,6 @@ await send("Runtime.enable");
 await send("Console.enable");
 
 const logs = [];
-// note: console messages via event - skip, just click
-
 for (let i = 0; i < 10; i++) {
   const out = await send("Runtime.evaluate", {
     awaitPromise: true,

@@ -26,7 +26,7 @@ Lab default = **Pulse testnet 943**. Guides: [Suite + Connect](https://github.co
 | Artifact | Link |
 |----------|------|
 | Try / install | [TRY.md](./TRY.md) |
-| Extension sideload | [Releases `extension-0.1.1`](https://github.com/ihelpmaybe/pulse-trezor/releases/tag/extension-0.1.1) (+ SHA256) |
+| Extension sideload | [TRY.md](./TRY.md) · release [`extension-0.1.1`](https://github.com/ihelpmaybe/pulse-trezor/releases/tag/extension-0.1.1) (pack `0.1.2` via `npm run ext:pack`) |
 | Pen report | [tests/pen/REPORT-2026-11-23.md](./tests/pen/REPORT-2026-11-23.md) |
 | Threat watch | [docs/THREAT-WATCH-2026-11.md](./docs/THREAT-WATCH-2026-11.md) |
 

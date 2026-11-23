@@ -10,10 +10,13 @@ Thumbs.db
 tmp-chrome-*/
 tmp-wc-*.json
 tmp-wc-*.txt
+tmp-wc-*.log
 tmp-ext-*.json
+tmp-ext-*.log
 tmp-wc-uri.txt
-
 tmp-*.json
+tmp-*.log
+tmp-*.txt
 
 dist-ext/
 release/

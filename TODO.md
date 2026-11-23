@@ -10,11 +10,11 @@ What MetaMask can do that Perch still can’t (or hasn’t proven). Product law:
 
 1. [~] **Sites pair smoke** — Piteas + PulseX session + **live WC personal_sign** (`SITES-WC-PERSONAL-SIGN-2026-11-22.md`) · tx/swap sign still needs 369 dust
 2. [x] **Injected provider** — this-tab + MV3 cross-origin request path PASS (`EXT-MV3-2026-11-22.md`); `0.1.2` fans `accountsChanged` / `chainChanged` to dapp tabs
-3. [~] **Activity / history** — denser face + paged PulseScan feed (default 48, More +48) 2026-11-23; infinite scroll later
-4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF) — UI live; stuck-tx live proof later
+3. [x] **Activity / history** — dense grid + paged PulseScan (48) + infinite scroll 2026-11-23
+4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF) — UI + fee math; live stuck-tx proof OPEN
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX (Sites remains MM-replacement path)
-7. [~] **Ship surfaces** — MV3 sideload pack + CWS-ready docs/privacy (`docs/EXT-CWS-READY.md`); Store listing + mobile later
+7. [~] **Ship surfaces** — MV3 sideload `0.1.2` + CWS-ready docs; Store listing + mobile later
 8. [x] **Softer first-run** — Cancel while Connecting/Signing; Suite other-screen cue; fee wild-testnet note; reconcile Suite-linked vs err; empty-teach + FAQ (2026-11-23)
 9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts — not Pulse daily-life blockers. **EVM peers in pack:** ETH / Sepolia / Holesky + Pulse test (same BIP44); Pulse remains product center.
 
@@ -116,10 +116,10 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [~] Consume SYNC registry / token pack from `pulse-trezor-platform` — SYNC1 export/import aligned 2026-11-23; pack tokens still local
 
 ## PLAT — Desk targets (this app)
-- [ ] Windows (primary)
-- [ ] Linux
-- [ ] macOS (Apple)
-- [~] Web / PWA (Connect-web) — desk + PWA shell live; packs later
+- [x] Windows (primary) — lab PASS 2026-11
+- [ ] Linux — OPEN (runbook in docs/OS-DEVICE-MATRIX.md)
+- [ ] macOS (Apple) — OPEN
+- [x] Web / PWA (Connect-web) — desk + SW shell-v3; signed native packs later
 - [x] WalletConnect host (dapps → Trezor) — `src/wc/` (tx / personal_sign / EIP-712 + clear-sign)
 
 ## AI — desk surface
