@@ -91,7 +91,7 @@
 74. [x] Slippage / deadline controls for swaps
 75. [x] ProveX entry + USDC awareness
 76. [x] Bridge deep-link / first-run receive after bridge
-77. [~] HEX stake / end clear-sign companion — stakeStart/End selectors
+77. [x] HEX stake / end clear-sign companion — stakeStart hearts/days + stakeEnd index/id + Stakes tab 2026-11-22
 78. [x] Liquid Loans / Phiat / Sino deep-links pack — Apps tab DeFi cards
 79. [x] Footer core apps always one click away
 80. [x] Migrate-from-ETH wizard entry

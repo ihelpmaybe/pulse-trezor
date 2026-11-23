@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import {
   clearSignMessage,
   clearSignTx,
+  decodeHexStakeCalldata,
   isBlindCalldata,
   needsBlindConfirm,
   needsDangerAck,
   phishingWarn,
 } from "./clearSign";
+
+function padWord(n: bigint | number): string {
+  return BigInt(n).toString(16).padStart(64, "0");
+}
 
 describe("blind calldata", () => {
   it("flags unknown selectors", () => {
@@ -49,6 +54,31 @@ describe("blind calldata", () => {
       dappUrl: "https://ipfs.app.pulsex.com",
     });
     expect(lines.some((l) => l.title === "Origin")).toBe(true);
+  });
+
+  it("decodes HEX stakeStart / stakeEnd companions", () => {
+    const hearts = 1_000_00000n; // 1 HEX @ 8 decimals
+    const startData = `0x52a438b8${padWord(hearts)}${padWord(5555)}`;
+    const start = decodeHexStakeCalldata(startData);
+    expect(start.some((l) => l.title.includes("hearts") && l.detail.includes("1"))).toBe(
+      true,
+    );
+    expect(start.some((l) => l.detail.includes("5555"))).toBe(true);
+
+    const endData = `0x67dcb881${padWord(3)}${padWord(42)}`;
+    const end = decodeHexStakeCalldata(endData);
+    expect(end.some((l) => l.detail.includes("index 3"))).toBe(true);
+    expect(end.some((l) => l.detail.includes("id 42"))).toBe(true);
+
+    const lines = clearSignTx({
+      to: "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39",
+      data: startData,
+      dappUrl: "https://go.hex.com",
+    });
+    expect(lines.some((l) => l.title === "HEX stake UI")).toBe(true);
+    expect(lines.some((l) => l.title.includes("stakeStart · hearts"))).toBe(
+      true,
+    );
   });
 
   it("flags raw hex and Permit for danger ack", () => {

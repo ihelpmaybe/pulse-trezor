@@ -2,7 +2,7 @@
  * Human clear-sign strip for WalletConnect → Trezor.
  * Graded warnings — not a full ABI decoder.
  */
-import { formatEther, type Hex } from "viem";
+import { formatEther, formatUnits, type Hex } from "viem";
 
 export type ClearTone = "ok" | "warn" | "danger";
 
@@ -156,12 +156,58 @@ const HOST_HINTS: {
     detail: "Swap path — still confirm token + amounts on Trezor",
   },
   {
+    re: /hex\.com|go\.hex\.com|hexican/i,
+    title: "HEX stake UI",
+    tone: "warn",
+    detail: "Stake path — confirm hearts, days, and stake index on Trezor",
+  },
+  {
     re: /coast|rampnow|heliuspay/i,
     title: "Fiat / pay corridor",
     tone: "danger",
     detail: "Money leaves crypto — double-check recipient and amount",
   },
 ];
+
+/** Decode HEX stakeStart / stakeEnd args for clear-sign companions. */
+export function decodeHexStakeCalldata(data?: string | null): ClearLine[] {
+  const d = (data || "").toLowerCase().replace(/^0x/, "");
+  if (d.length < 8 + 64 + 64) return [];
+  const sel = `0x${d.slice(0, 8)}`;
+  const a = BigInt(`0x${d.slice(8, 72)}`);
+  const b = BigInt(`0x${d.slice(72, 136)}`);
+  if (sel === "0x52a438b8") {
+    // stakeStart(newStakedHearts, newStakedDays) — HEX 8 decimals
+    return [
+      {
+        tone: "warn",
+        title: "HEX stakeStart · hearts",
+        detail: `${formatUnits(a, 8)} HEX — confirm on Trezor`,
+      },
+      {
+        tone: "warn",
+        title: "HEX stakeStart · days",
+        detail: `${String(b)} days — confirm on Trezor`,
+      },
+    ];
+  }
+  if (sel === "0x67dcb881") {
+    // stakeEnd(stakeIndex, stakeIdUint)
+    return [
+      {
+        tone: "warn",
+        title: "HEX stakeEnd · index",
+        detail: `stakeLists index ${String(a)} — confirm on Trezor`,
+      },
+      {
+        tone: "warn",
+        title: "HEX stakeEnd · stakeId",
+        detail: `id ${String(b)} — confirm on Trezor`,
+      },
+    ];
+  }
+  return [];
+}
 
 function short(addr: string): string {
   if (!addr || addr.length < 12) return addr || "—";
@@ -258,6 +304,9 @@ export function clearSignTx(opts: {
         title: known.name,
         detail: known.note,
       });
+      for (const hexLine of decodeHexStakeCalldata(opts.data)) {
+        lines.push(hexLine);
+      }
     } else {
       lines.push({
         tone: "danger",

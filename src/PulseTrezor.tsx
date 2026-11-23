@@ -302,10 +302,41 @@ function applyA11y(prefs: A11yPrefs) {
   root.toggleAttribute("data-a11y-motion", prefs.reduceMotion);
   root.toggleAttribute("data-a11y-focus", prefs.strongFocus);
 }
-function HexStakeMark({ count }: { count: number }) {
-  const label = `${count} HEX stake${count === 1 ? "" : "s"}`;
+function HexStakeMark({
+  count,
+  onOpen,
+}: {
+  count: number;
+  onOpen?: () => void;
+}) {
+  const label = `${count} HEX stake${count === 1 ? "" : "s"} — open Stakes`;
   return (
-    <span className="acct-hex" title={label} aria-label={label}>
+    <span
+      className="acct-hex"
+      title={label}
+      aria-label={label}
+      role={onOpen ? "button" : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      onClick={
+        onOpen
+          ? (e) => {
+              e.stopPropagation();
+              onOpen();
+            }
+          : undefined
+      }
+      onKeyDown={
+        onOpen
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onOpen();
+              }
+            }
+          : undefined
+      }
+    >
       <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
         <polygon
           points="8,1.1 13.9,4.5 13.9,11.5 8,14.9 2.1,11.5 2.1,4.5"
@@ -641,7 +672,7 @@ export function PulseTrezor({
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
   const [swapQuoteBusy, setSwapQuoteBusy] = useState(false);
   const [swapNeedApprove, setSwapNeedApprove] = useState(false);
-  const [bagTab, setBagTab] = useState<"tokens" | "nfts">("tokens");
+  const [bagTab, setBagTab] = useState<"tokens" | "nfts" | "stakes">("tokens");
   const [nfts, setNfts] = useState<ScanNft[]>([]);
   const [nftsTruncated, setNftsTruncated] = useState(0);
   const [nftBusy, setNftBusy] = useState(false);
@@ -987,6 +1018,12 @@ export function PulseTrezor({
     if (bagTab !== "nfts" || !active) return;
     void refreshNfts(active.address, chainId);
   }, [bagTab, active, chainId, refreshNfts]);
+
+  useEffect(() => {
+    if (bagTab !== "stakes" || !active || chainId !== 369) return;
+    if (!fullBag && !bagBusy) onLoadFullBag();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load bag once when Stakes opens
+  }, [bagTab, active?.address, chainId]);
 
   useEffect(() => {
     if (actionTab !== "approve" || !active) return;
@@ -3016,7 +3053,15 @@ export function PulseTrezor({
                     </span>
                     <code className="acct-addr">{shortAddr(a.address)}</code>
                     <span className="acct-bal">{balText}</span>
-                    {hexN > 0 ? <HexStakeMark count={hexN} /> : null}
+                    {hexN > 0 ? (
+                      <HexStakeMark
+                        count={hexN}
+                        onOpen={() => {
+                          selectListedAccount(a);
+                          setBagTab("stakes");
+                        }}
+                      />
+                    ) : null}
                   </button>
                 );
               })}
@@ -3076,6 +3121,24 @@ export function PulseTrezor({
               >
                 NFTs
               </button>
+              {chainId === 369 ? (
+                <button
+                  type="button"
+                  id="bag-tab-stakes"
+                  role="tab"
+                  aria-selected={bagTab === "stakes"}
+                  aria-controls="bag-panel-stakes"
+                  tabIndex={bagTab === "stakes" ? 0 : -1}
+                  className={bagTab === "stakes" ? "tab on" : "tab"}
+                  onClick={() => setBagTab("stakes")}
+                >
+                  Stakes
+                  {(acctHexStakes[active?.address?.toLowerCase() ?? ""] ?? 0) >
+                  0
+                    ? ` · ${acctHexStakes[active!.address.toLowerCase()]}`
+                    : ""}
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -3094,6 +3157,46 @@ export function PulseTrezor({
                 ) : balance != null && balance > 0n ? (
                   <p className="bal">
                     {formatEther(balance)} {pack.currency.symbol}
+                  </p>
+                ) : null}
+                {chainId === 369 && active ? (
+                  <p className="hex-strip muted fee" aria-label="HEX liquid vs staked">
+                    {(() => {
+                      const hexRow = tokenRows.find(
+                        (r) =>
+                          r.token.address.toLowerCase() ===
+                          "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39",
+                      );
+                      const liquid = hexRow?.formatted ?? "—";
+                      const stakedN =
+                        fullBag?.stakeCount ??
+                        acctHexStakes[active.address.toLowerCase()] ??
+                        0;
+                      const stakedHex =
+                        fullBag?.stakes.reduce(
+                          (n, s) => n + Number(s.formattedHex || 0),
+                          0,
+                        ) ?? null;
+                      return (
+                        <>
+                          HEX liquid {liquid}
+                          {" · "}
+                          {stakedN > 0
+                            ? stakedHex != null
+                              ? `staked ~${stakedHex.toLocaleString(undefined, { maximumFractionDigits: 2 })} (${stakedN})`
+                              : `${stakedN} stake${stakedN === 1 ? "" : "s"}`
+                            : "no stakes"}
+                          {" · "}
+                          <button
+                            type="button"
+                            className="link-btn"
+                            onClick={() => setBagTab("stakes")}
+                          >
+                            Stakes
+                          </button>
+                        </>
+                      );
+                    })()}
                   </p>
                 ) : null}
                 <label className="hide-zero">
@@ -3351,39 +3454,16 @@ export function PulseTrezor({
                       </p>
                     )}
                     {fullBag.stakeCount > 0 ? (
-                      <details className="bag-block">
-                        <summary>
-                          HEX stakes ({fullBag.stakeCount})
-                        </summary>
-                        <p className="muted fee">
-                          Clear-sign companion: stakeStart / stakeEnd show as
-                          warn on Sites. Confirm hearts, days, and stake index
-                          on Trezor — dApp labels can lie.{" "}
-                          <a
-                            className="link"
-                            href="https://go.hex.com"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            go.hex.com
-                          </a>
-                        </p>
-                        <ul className="stake-list">
-                          {fullBag.stakes.map((s) => (
-                            <li key={s.stakeId}>
-                              #{s.stakeId} · {s.formattedHex} HEX ·{" "}
-                              {s.stakedDays}d
-                              {s.unlockedDay > 0 ? " · ended" : ""}
-                            </li>
-                          ))}
-                          {fullBag.stakeCount > fullBag.stakes.length ? (
-                            <li className="muted">
-                              +{fullBag.stakeCount - fullBag.stakes.length}{" "}
-                              more on-chain
-                            </li>
-                          ) : null}
-                        </ul>
-                      </details>
+                      <p className="muted fee">
+                        HEX stakes {fullBag.stakeCount} ·{" "}
+                        <button
+                          type="button"
+                          className="link-btn"
+                          onClick={() => setBagTab("stakes")}
+                        >
+                          Open Stakes
+                        </button>
+                      </p>
                     ) : (
                       <p className="muted">No HEX stakes.</p>
                     )}
@@ -3471,6 +3551,81 @@ export function PulseTrezor({
                     Open bag on PulseScan
                   </a>
                 </p>
+              </>
+            )}
+          </div>
+
+          <div
+            id="bag-panel-stakes"
+            role="tabpanel"
+            aria-labelledby="bag-tab-stakes"
+            hidden={bagTab !== "stakes"}
+          >
+            {!active ? (
+              <p className="muted">Connect to load HEX stakes.</p>
+            ) : chainId !== 369 ? (
+              <p className="muted">HEX stakes are mainnet (369) only.</p>
+            ) : bagBusy && !fullBag ? (
+              <p className="muted">Loading stakes…</p>
+            ) : (
+              <>
+                <p className="muted fee">
+                  Clear-sign: Sites shows stakeStart hearts/days and stakeEnd
+                  index/id. Confirm on Trezor — dApp labels can lie.{" "}
+                  <a
+                    className="link"
+                    href="https://go.hex.com"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    go.hex.com
+                  </a>
+                </p>
+                <div className="row">
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    disabled={bagBusy}
+                    onClick={onLoadFullBag}
+                  >
+                    {bagBusy ? "Loading…" : "Reload stakes"}
+                  </button>
+                </div>
+                {fullBag && fullBag.stakeCount > 0 ? (
+                  <ul className="stake-grid">
+                    {fullBag.stakes.map((s) => (
+                      <li key={s.stakeId} className="stake-card">
+                        <span className="stake-id">#{s.stakeId}</span>
+                        <span className="stake-amt">
+                          {s.formattedHex} HEX
+                        </span>
+                        <span className="muted">
+                          {s.stakedDays}d
+                          {s.unlockedDay > 0 ? " · ended" : " · locked"}
+                        </span>
+                      </li>
+                    ))}
+                    {fullBag.stakeCount > fullBag.stakes.length ? (
+                      <li className="stake-card muted">
+                        +{fullBag.stakeCount - fullBag.stakes.length} more
+                        on-chain
+                      </li>
+                    ) : null}
+                  </ul>
+                ) : (
+                  <p className="muted empty-teach">
+                    No HEX stakes on this account. Start / end stakes via{" "}
+                    <a
+                      className="link"
+                      href="https://go.hex.com"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      go.hex.com
+                    </a>{" "}
+                    → Sites (WalletConnect).
+                  </p>
+                )}
               </>
             )}
           </div>
