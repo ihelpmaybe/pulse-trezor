@@ -101,6 +101,11 @@ const PHISH_HINTS: { re: RegExp; detail: string }[] = [
     detail: "Classic wallet-drain / fake-support lure — do not sign",
   },
   {
+    // Fake Suite / Connect hosts (real = trezor.io / suite.trezor.io / connect.trezor.io).
+    re: /suiteconnect[-_.]?trezor|trezor[-_.]?connect\.com|connect[-_.]?trezor\.com|trezor[-_.]?suite\.(?!io\b)|trezor[-_.]?wallet|trezor[-_.]?app\.(?!io\b)|firmware[-_.]?trezor|trezor[-_.]?update/i,
+    detail: "Fake Trezor Suite/Connect host — never enter a seed; close this origin",
+  },
+  {
     // Real ProveX is app.provex.com / provex.com — do NOT match that (prover?x did).
     // Catch typosquats: proverx.*, prove-x.*, pulsex/pulsechain off-TLD.
     re: /pulsex\.(?!com\b)|pulsechain\.(?!com\b)|proverx[-_.]|prove[-_.]x[-_.]/i,
@@ -220,15 +225,39 @@ export function clearSignTypedFields(preview: string): ClearLine[] {
     if (v == null || v === "") continue;
     const s = String(v);
     const isAddr = /^0x[0-9a-fA-F]{40}$/.test(s);
+    let unlimitedish = false;
+    if (
+      (key === "value" || key === "amount" || key === "deadline") &&
+      /^\d+$/.test(s)
+    ) {
+      try {
+        const n = BigInt(s);
+        if (n === maxUint256 || n >= 10n ** 18n * 10n ** 12n) {
+          unlimitedish = true;
+        }
+        // Far-future deadline (unix >> ~year 2100) ≈ never expires
+        if (key === "deadline" && n > 4_102_444_800n) unlimitedish = true;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (key === "allowed" && /^(true|1)$/i.test(s)) unlimitedish = true;
     const danger =
       key === "spender" ||
       key === "value" ||
       key === "amount" ||
-      key === "allowed";
+      key === "allowed" ||
+      unlimitedish;
     lines.push({
       tone: danger ? "danger" : "warn",
-      title: `712 ${key}`,
-      detail: isAddr ? `${short(s)} — confirm on Trezor` : s.slice(0, 96),
+      title: unlimitedish
+        ? `712 ${key} · UNLIMITED / NEVER`
+        : `712 ${key}`,
+      detail: isAddr
+        ? `${short(s)} — confirm on Trezor`
+        : unlimitedish
+          ? `${s.slice(0, 48)} — classic Permit drain bait; refuse unless you trust spender`
+          : s.slice(0, 96),
     });
   }
   if (typeof j.primaryType === "string" && j.primaryType) {
@@ -539,6 +568,20 @@ export function clearSignMessage(opts: {
       });
     }
   }
+
+  // EIP-7702 / set-code style authority — rising drain chain after Pectra.
+  if (
+    /7702|setCode|set.?code|authorization.?list|eth_signTransaction.*code/i.test(
+      `${method} ${preview}`,
+    )
+  ) {
+    lines.push({
+      tone: "danger",
+      title: "EIP-7702 / set-code",
+      detail:
+        "Can change how this EOA executes — refuse unless you fully trust the dApp and read the device",
+    });
+  }
   return lines;
 }
 
@@ -581,7 +624,9 @@ export function needsDangerAck(lines: ClearLine[]): boolean {
   return lines.some(
     (l) =>
       l.tone === "danger" &&
-      /blind calldata|Permit|Order|Raw hex/i.test(l.title),
+      /blind calldata|Permit|Order|Raw hex|7702|UNLIMITED|Fake Trezor|phishing/i.test(
+        `${l.title} ${l.detail}`,
+      ),
   );
 }
 
@@ -589,8 +634,11 @@ export function dangerAckLabel(lines: ClearLine[]): string {
   if (lines.some((l) => /Raw hex/i.test(l.title))) {
     return "I understand this is opaque hex — I will read the Trezor screen before signing.";
   }
-  if (lines.some((l) => /Permit/i.test(l.title))) {
-    return "I understand Permit can drain this token — I will check spender, amount, and deadline on Trezor.";
+  if (lines.some((l) => /7702|set-code/i.test(l.title))) {
+    return "I understand EIP-7702 can change this wallet’s execution — I will refuse unless I trust this dApp completely.";
+  }
+  if (lines.some((l) => /Permit|UNLIMITED/i.test(`${l.title}`))) {
+    return "I understand Permit / unlimited can drain this token — I will check spender, amount, and deadline on Trezor.";
   }
   if (lines.some((l) => /Order/i.test(l.title))) {
     return "I understand this Order can move assets — I will read every field on Trezor.";

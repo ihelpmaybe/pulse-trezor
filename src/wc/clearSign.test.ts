@@ -53,6 +53,13 @@ describe("blind calldata", () => {
     expect(phishingWarn("https://provex.com")).toBeNull();
     expect(phishingWarn("https://proverx.evil")?.tone).toBe("danger");
     expect(phishingWarn("https://prove-x.scam")?.tone).toBe("danger");
+    expect(phishingWarn("https://suiteconnect-trezor.com")?.tone).toBe(
+      "danger",
+    );
+    expect(phishingWarn("https://trezor-connect.com/seed")?.tone).toBe(
+      "danger",
+    );
+    expect(phishingWarn("https://suite.trezor.io")).toBeNull();
   });
 
   it("always surfaces Origin line", () => {
@@ -152,5 +159,31 @@ describe("blind calldata", () => {
       data,
     });
     expect(lines.some((l) => /UNLIMITED/i.test(l.title))).toBe(true);
+  });
+
+  it("flags never-expire Permit deadline and EIP-7702 bait", () => {
+    const fields = clearSignTypedFields(
+      JSON.stringify({
+        primaryType: "Permit",
+        domain: { name: "USDC", chainId: 1 },
+        message: {
+          spender: "0x2222222222222222222222222222222222222222",
+          value: maxUint256.toString(),
+          deadline: maxUint256.toString(),
+        },
+      }),
+    );
+    expect(fields.some((l) => /UNLIMITED/i.test(l.title))).toBe(true);
+
+    const z = clearSignMessage({
+      method: "eth_signTypedData_v4",
+      dappUrl: "https://evil.example",
+      preview: JSON.stringify({
+        primaryType: "Authorization",
+        message: { setCode: "0xdead" },
+      }),
+    });
+    expect(z.some((l) => /7702/i.test(l.title))).toBe(true);
+    expect(needsDangerAck(z)).toBe(true);
   });
 });
