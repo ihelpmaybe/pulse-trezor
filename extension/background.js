@@ -50,6 +50,34 @@ async function ensurePerchBridge(tabId) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.kind === "eip1193-broadcast") {
+    (async () => {
+      const tabs = await chrome.tabs.query({
+        url: ["https://*/*", "http://*/*"],
+      });
+      for (const tab of tabs) {
+        if (tab.id == null) continue;
+        /* Skip desk tabs — they already know */
+        const url = tab.url || "";
+        if (
+          /:\/\/(127\.0\.0\.1|localhost):(5173|5174)\b/.test(url)
+        ) {
+          continue;
+        }
+        try {
+          await chrome.tabs.sendMessage(tab.id, {
+            kind: "eip1193-event",
+            event: msg.event,
+            args: msg.args || [],
+          });
+        } catch {
+          /* tab without content.js */
+        }
+      }
+    })();
+    return false;
+  }
+
   if (!msg || msg.kind !== "eip1193") return false;
 
   (async () => {

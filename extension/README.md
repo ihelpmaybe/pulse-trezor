@@ -9,9 +9,9 @@ npm run ext:pack
 ```
 Zip lands at `dist-ext/pulse-perch-extension-<version>.zip` (icons + MV3 shell).
 
-Release `extension-0.1.1` SHA256:
+Release `extension-0.1.2` SHA256:
 
-`c36c25d20eb71b816e2a2ee1b24ce8472be1eb16e5eb9e3e92d13c9a30d4b394`
+`819da484d586dc95ab7db00e178a0ec68e4f6a2b7b2b5034862c1f2108b85d27`
 
 ## Load unpacked
 1. `npm run dev` (desk on `:5174`)
@@ -29,6 +29,8 @@ Cursor Simple Browser cannot load unpacked MV3 — use real Chrome.
 
 ## Flow
 dapp → `inpage.js` → content → background → Perch tab `perch-bridge.js` → EIP-1193 host → Connect/Suite/device
+
+Account / chain changes on the desk fan out: desk → `perch-bridge` → background → dapp `content.js` → `accountsChanged` / `chainChanged` on `window.ethereum`.
 
 ## Limits
 - Desk tab must stay open and Connected for signs

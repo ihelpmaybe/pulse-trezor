@@ -54,4 +54,17 @@
       },
     );
   });
+
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (!msg || msg.kind !== "eip1193-event") return;
+    window.postMessage(
+      {
+        source: "pulse-perch-ext",
+        type: "event",
+        event: msg.event,
+        args: msg.args || [],
+      },
+      "*",
+    );
+  });
 })();

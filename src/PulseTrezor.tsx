@@ -10,20 +10,14 @@ import { useDeskSend } from "./hooks/useDeskSend";
 import { useDeskApprovals } from "./hooks/useDeskApprovals";
 import { useDeskSwap } from "./hooks/useDeskSwap";
 import { useDeskWatch } from "./hooks/useDeskWatch";
+import { useDeskRpc } from "./hooks/useDeskRpc";
+import { useDeskInject } from "./hooks/useDeskInject";
 import {
-  hexToString,
-  isAddress,
-  isHex,
   type Address,
-  type Hex,
 } from "viem";
 import {
-  failoverRpc,
   makePublicClient,
-  packFor,
-  resolveRpcUrl,
   chainLabel,
-  isDeskChainId,
   type DeskChainId,
   type RpcOverride,
 } from "./chain/client";
@@ -32,15 +26,8 @@ import {
   type BookEntry,
 } from "./chain/addressBook";
 import { type ScanToken } from "./chain/portfolio";
-import { addCustomToken } from "./chain/customTokens";
 import { type PackToken } from "./chain/tokens";
 import { reconcileErrWithSuite } from "./trezor/errors";
-import { sendPlsWithTrezor } from "./trezor/signPulseTx";
-import {
-  parseTypedDataParams,
-  signPersonalMessage,
-  signTypedData,
-} from "./trezor/signMessage";
 import { WcPanel } from "./wc/WcPanel";
 import { loadFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
@@ -63,14 +50,10 @@ import {
   applyA11y,
   applyTheme,
   loadA11y,
-  loadInjectEth,
   loadPrivacyHide,
-  loadRpcHealthMs,
-  loadRpcOverride,
   loadTheme,
   saveA11y,
   savePrivacyHide,
-  saveRpcOverride,
   saveWatch,
 } from "./ui/deskStorage";
 import {
@@ -78,19 +61,7 @@ import {
   loadMascot,
 } from "./ui/modules";
 import { t } from "./i18n/en";
-import {
-  bootAiPolicy,
-  registerAgentHandlers,
-  type AgentTxDraft,
-} from "./ai/hooks";
 import { getFocusable, trapTabKey } from "./a11y/focusTrap";
-import {
-  PulsePerchProvider,
-  attachInjectedProvider,
-  detachInjectedProvider,
-  getInjectedProvider,
-  type InjectedHost,
-} from "./provider/eip1193";
 
 export type PulseTrezorProps = {
   /** Default 369. Standalone demo may pass 943. */
@@ -125,12 +96,8 @@ export function PulseTrezor({
     clearSendHard: () => void;
   } | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [rpcDraft, setRpcDraft] = useState(() => loadRpcOverride());
-  const [rpcSaved, setRpcSaved] = useState(() => loadRpcOverride());
-  const [rpcHealthMs, setRpcHealthMs] = useState(() => loadRpcHealthMs());
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
-  const [rpcCustomMode, setRpcCustomMode] = useState(false);
   const [a11y, setA11y] = useState<A11yPrefs>(() => loadA11y());
   const [privacyHide, setPrivacyHide] = useState(() => loadPrivacyHide());
   const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
@@ -141,18 +108,11 @@ export function PulseTrezor({
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
   const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
   const [deepWcUri, setDeepWcUri] = useState<string | null>(null);
-  const [injectEth, setInjectEth] = useState(() => loadInjectEth());
   const settingsRef = useRef<HTMLDivElement | null>(null);
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null);
   const [chainId, setChainId] = useState<DeskChainId>(defaultChainId);
   const [copied, setCopied] = useState(false);
   const [asset, setAsset] = useState<"PLS" | string>("PLS");
-  const [rpcHealth, setRpcHealth] = useState<
-    | { state: "checking" }
-    | { state: "ok"; block: bigint; latencyMs: number; url: string }
-    | { state: "down"; detail: string }
-  >({ state: "checking" });
-  const [rpcFailoverUrl, setRpcFailoverUrl] = useState<string | null>(null);
   const [nonceHint, setNonceHint] = useState<number | null>(null);
   const [addressBook, setAddressBook] = useState<BookEntry[]>(() =>
     loadAddressBook(),
@@ -163,30 +123,10 @@ export function PulseTrezor({
   >("send");
   const [bagTab, setBagTab] = useState<"tokens" | "nfts" | "stakes">("tokens");
 
-  const pack = packFor(chainId);
-  /** User saved RPC wins; else host prop; else auto-failover pick; else pack default. */
-  const effectiveRpc: RpcOverride | undefined =
-    rpcSaved || rpc || rpcFailoverUrl || undefined;
-  const activeRpcUrl = resolveRpcUrl(chainId, effectiveRpc);
-  const defaultRpcUrl = pack.rpc[0];
-  const rpcNorm = (u: string) => u.replace(/\/$/, "").toLowerCase();
-  const rpcOptions: { name: string; url: string }[] =
-    (
-      pack as {
-        rpcOptions?: { name: string; url: string }[];
-      }
-    ).rpcOptions?.length
-      ? (pack as { rpcOptions: { name: string; url: string }[] }).rpcOptions
-      : pack.rpc.map((url, i) => ({
-          name: i === 0 ? "Official" : url,
-          url,
-        }));
-  const rpcMatchesPreset = rpcOptions.some(
-    (s) => rpcNorm(s.url) === rpcNorm(activeRpcUrl),
-  );
-  const rpcSelectValue =
-    rpcCustomMode || !rpcMatchesPreset ? "__custom__" : activeRpcUrl;
-
+  const bagRefreshRef = useRef<
+    | ((addr: Address, cid: DeskChainId) => void | Promise<void>)
+    | null
+  >(null);
 
   const {
     warm,
@@ -228,6 +168,31 @@ export function PulseTrezor({
   function onForget() {
     onForgetSession();
   }
+
+  const {
+    pack,
+    effectiveRpc,
+    activeRpcUrl,
+    defaultRpcUrl,
+    rpcOptions,
+    rpcSelectValue,
+    rpcDraft,
+    setRpcDraft,
+    setRpcCustomMode,
+    rpcHealthMs,
+    setRpcHealthMs,
+    rpcHealth,
+    applyRpc,
+    onSaveRpc,
+  } = useDeskRpc({
+    chainId,
+    rpc,
+    active,
+    setErr,
+    refreshBalances: (addr, cid) => {
+      void bagRefreshRef.current?.(addr, cid);
+    },
+  });
 
   const bag = useDeskBag({
     active,
@@ -271,6 +236,7 @@ export function PulseTrezor({
     refreshNfts,
     onLoadFullBag,
   } = bag;
+  bagRefreshRef.current = refreshBalances;
 
   const selectedCore: PackToken | null =
     asset === "PLS"
@@ -466,6 +432,14 @@ export function PulseTrezor({
     refreshBalances,
   });
 
+  const { injectEth, setInjectEth } = useDeskInject({
+    session,
+    chainId,
+    effectiveRpc,
+    setChainId,
+    refreshBalances,
+  });
+
   // nonceHint stays kernel-owned (pending count for Send face)
   // send hook also has nonceHint — prefer kernel effect; drop unused from send destructure
 
@@ -492,47 +466,6 @@ export function PulseTrezor({
 
 
   useEffect(() => {
-    let cancelled = false;
-    let timer: number | undefined;
-    let first = true;
-
-    const tick = async () => {
-      if (first && !cancelled) {
-        setRpcHealth({ state: "checking" });
-        first = false;
-      }
-      // Custom RPC: probe only that. Else walk pack list and stick to a healthy one.
-      const forced = rpcSaved || rpc;
-      const r = forced
-        ? await failoverRpc(chainId, forced)
-        : await failoverRpc(chainId);
-      if (cancelled) return;
-      if (r.ok) {
-        if (!forced) setRpcFailoverUrl(r.url);
-        setRpcHealth({
-          state: "ok",
-          block: r.block,
-          latencyMs: r.latencyMs,
-          url: r.url,
-        });
-      } else {
-        setRpcHealth({ state: "down", detail: r.error });
-      }
-      if (!cancelled && rpcHealthMs > 0) {
-        timer = window.setTimeout(() => {
-          void tick();
-        }, rpcHealthMs);
-      }
-    };
-
-    void tick();
-    return () => {
-      cancelled = true;
-      if (timer !== undefined) window.clearTimeout(timer);
-    };
-  }, [chainId, rpcSaved, rpc, rpcHealthMs]);
-
-  useEffect(() => {
     if (!active) {
       setNonceHint(null);
       return;
@@ -554,20 +487,6 @@ export function PulseTrezor({
     };
   }, [active, chainId, effectiveRpc, lastTx, txStatus]);
 
-  function applyRpc(url: string, custom = false) {
-    const next = url.trim();
-    setRpcDraft(next);
-    saveRpcOverride(next);
-    setRpcSaved(next);
-    setRpcCustomMode(custom);
-    setErr(null);
-    if (active) void refreshBalances(active.address, chainId);
-  }
-
-  function onSaveRpc() {
-    applyRpc(rpcDraft, true);
-  }
-
   function patchA11y(partial: Partial<A11yPrefs>) {
     setA11y((prev) => {
       const next = { ...prev, ...partial };
@@ -580,7 +499,6 @@ export function PulseTrezor({
   useEffect(() => {
     applyA11y(loadA11y());
     applyTheme(loadTheme());
-    bootAiPolicy();
     try {
       const q = new URLSearchParams(window.location.search);
       const syncParam = q.get("sync");
@@ -665,240 +583,6 @@ export function PulseTrezor({
     };
   }, [chainId, tokenRows, customRows]);
 
-  /** Agent bridge only — human Send / WC stay ungated. */
-  useEffect(() => {
-    if (!session) {
-      registerAgentHandlers({ sign: null, prepare: null });
-      return;
-    }
-    const account = session.address;
-    const derivationIndex = session.derivationIndex;
-    registerAgentHandlers({
-      sign: async (draft: AgentTxDraft) => {
-        const value =
-          typeof draft.value === "bigint"
-            ? draft.value
-            : BigInt(draft.value ?? 0);
-        const broadcast = await sendPlsWithTrezor({
-          chainId: draft.chainId ?? chainId,
-          account,
-          to: draft.to,
-          value,
-          data: draft.data,
-          derivationIndex,
-          rpc: draft.rpc ?? effectiveRpc,
-        });
-        return broadcast.hash;
-      },
-      prepare: async (draft: AgentTxDraft) => {
-        const value =
-          typeof draft.value === "bigint"
-            ? draft.value.toString()
-            : String(draft.value ?? "0");
-        return {
-          chainId: draft.chainId ?? chainId,
-          to: draft.to,
-          value,
-          data: draft.data,
-          note: `Prepared for ${account} — unsigned. Sign only via requestSign if policy allows.`,
-        };
-      },
-    });
-    return () => registerAgentHandlers({ sign: null, prepare: null });
-  }, [session, chainId, effectiveRpc]);
-
-  /**
-   * Extension content script is isolated — it cannot read `__pulsePerchInject`.
-   * Answer postMessage relays from perch-bridge.js (pulse-perch-ext-bridge).
-   */
-  useEffect(() => {
-    const onBridgeMsg = (ev: MessageEvent) => {
-      const data = ev.data;
-      if (!data || data.source !== "pulse-perch-ext-bridge") return;
-      if (data.type === "ping") {
-        const inject = (
-          window as Window & { __pulsePerchInject?: { request?: unknown } }
-        ).__pulsePerchInject;
-        window.postMessage(
-          {
-            source: "pulse-perch-page-bridge",
-            type: "pong",
-            id: data.id,
-            ready: typeof inject?.request === "function",
-          },
-          "*",
-        );
-        return;
-      }
-      if (data.type !== "request") return;
-      void (async () => {
-        const inject = (
-          window as Window & {
-            __pulsePerchInject?: {
-              request: (args: {
-                method: string;
-                params?: unknown;
-              }) => Promise<unknown>;
-            };
-          }
-        ).__pulsePerchInject;
-        if (!inject?.request) {
-          window.postMessage(
-            {
-              source: "pulse-perch-page-bridge",
-              type: "response",
-              id: data.id,
-              error: {
-                code: 4100,
-                message:
-                  "Pulse Perch tab open but inject bridge not ready — connect Trezor",
-              },
-            },
-            "*",
-          );
-          return;
-        }
-        try {
-          const result = await inject.request({
-            method: data.method,
-            params: data.params,
-          });
-          window.postMessage(
-            {
-              source: "pulse-perch-page-bridge",
-              type: "response",
-              id: data.id,
-              result,
-            },
-            "*",
-          );
-        } catch (e) {
-          const err = e as { code?: number; message?: string };
-          window.postMessage(
-            {
-              source: "pulse-perch-page-bridge",
-              type: "response",
-              id: data.id,
-              error: {
-                code: err?.code ?? 4200,
-                message: err?.message || String(e),
-              },
-            },
-            "*",
-          );
-        }
-      })();
-    };
-    window.addEventListener("message", onBridgeMsg);
-    return () => window.removeEventListener("message", onBridgeMsg);
-  }, []);
-
-  /** Host for this-tab inject + extension bridge (`window.__pulsePerchInject`). */
-  useEffect(() => {
-    const host: InjectedHost = {
-      getSelectedAddress: () => session?.address ?? null,
-      getChainId: () => chainId,
-      switchChain: async (id) => {
-        if (!isDeskChainId(id)) throw new Error(`Unsupported chain ${id}`);
-        setChainId(id);
-      },
-      sendTransaction: async (tx) => {
-        if (!session) throw new Error("Connect Trezor first");
-        if (!tx.to || !isAddress(tx.to)) throw new Error("Invalid tx.to");
-        const value =
-          tx.value != null && String(tx.value) !== ""
-            ? BigInt(tx.value as string)
-            : 0n;
-        const data = (tx.data as Hex | undefined) || "0x";
-        const broadcast = await sendPlsWithTrezor({
-          chainId,
-          account: session.address,
-          to: tx.to as Address,
-          value,
-          data,
-          derivationIndex: session.derivationIndex,
-          rpc: effectiveRpc,
-        });
-        return broadcast.hash;
-      },
-      personalSign: async (message) => {
-        if (!session) throw new Error("Connect Trezor first");
-        let text = message;
-        if (isHex(message)) {
-          try {
-            text = hexToString(message as Hex);
-          } catch {
-            text = message;
-          }
-        }
-        return signPersonalMessage(text, session.derivationIndex);
-      },
-      signTypedData: async (params) => {
-        if (!session) throw new Error("Connect Trezor first");
-        const { address, data } = parseTypedDataParams(params);
-        if (
-          address &&
-          address.toLowerCase() !== session.address.toLowerCase()
-        ) {
-          throw new Error("Typed-data address mismatch");
-        }
-        return signTypedData(data, session.derivationIndex);
-      },
-      watchAsset: async (asset) => {
-        if (!isDeskChainId(chainId)) return false;
-        const addr = asset.options.address as Address;
-        if (!isAddress(addr)) return false;
-        const symbol = String(asset.options.symbol || "TOKEN").slice(0, 32);
-        const decimals = Number(asset.options.decimals);
-        addCustomToken({
-          chainId,
-          address: addr,
-          symbol,
-          name: symbol,
-          decimals: Number.isFinite(decimals) ? decimals : 18,
-        });
-        const who = session?.address;
-        if (who) void refreshBalances(who, chainId);
-        return true;
-      },
-      readRpc: async (method, params) => {
-        const client = makePublicClient(chainId, effectiveRpc);
-        return client.request({
-          method: method as "eth_blockNumber",
-          params: params as never,
-        });
-      },
-    };
-
-    const w = window as Window & {
-      __pulsePerchInject?: PulsePerchProvider;
-    };
-    if (w.__pulsePerchInject) {
-      w.__pulsePerchInject.setHost(host);
-    } else {
-      w.__pulsePerchInject = new PulsePerchProvider(host);
-    }
-    w.__pulsePerchInject.notifyAccountsChanged(
-      session?.address ? [session.address] : [],
-    );
-    w.__pulsePerchInject.notifyChainChanged(chainId);
-
-    if (injectEth) {
-      const existing = getInjectedProvider();
-      if (existing) {
-        existing.setHost(host);
-      } else {
-        attachInjectedProvider(host);
-      }
-      getInjectedProvider()?.notifyAccountsChanged(
-        session?.address ? [session.address] : [],
-      );
-      getInjectedProvider()?.notifyChainChanged(chainId);
-    } else {
-      detachInjectedProvider();
-    }
-  }, [injectEth, session, chainId, effectiveRpc, refreshBalances]);
-
   useEffect(() => {
     if (!settingsOpen) return;
     const root = settingsRef.current;
@@ -920,17 +604,6 @@ export function PulseTrezor({
       (settingsBtnRef.current || previously)?.focus?.();
     };
   }, [settingsOpen]);
-
-  useEffect(() => {
-    if (!rpcMatchesPreset && rpcSaved) setRpcCustomMode(true);
-  }, [rpcMatchesPreset, rpcSaved]);
-
-
-
-
-
-
-
 
   // Anti-phish: Pulse networks always say Pulse — path lives on Device, not here.
   const networkName =

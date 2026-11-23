@@ -1,6 +1,6 @@
 /**
  * EIP-1193 provider for Pulse Perch.
- * Same-tab inject is a lab wedge; MM-only sites need the extension shell next.
+ * Same-tab inject is a lab wedge; MM-only sites use the MV3 extension shell.
  * Signs still go Connect → Suite → device (dont-pretend).
  */
 

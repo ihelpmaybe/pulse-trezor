@@ -9,7 +9,7 @@ Legend: `[ ]` todo · `[x]` done
 What MetaMask can do that Perch still can’t (or hasn’t proven). Product law: bag / send / approve / Sites / sign without MetaMask.
 
 1. [~] **Sites pair smoke** — Piteas + PulseX session + **live WC personal_sign** (`SITES-WC-PERSONAL-SIGN-2026-11-22.md`) · tx/swap sign still needs 369 dust
-2. [~] **Injected provider** — live this-tab inject personal_sign PASS (`SIGN-PERSONAL-INJECT-LIVE-2026-11-22.md`); MV3 unpacked cross-origin still open
+2. [x] **Injected provider** — this-tab + MV3 cross-origin request path PASS (`EXT-MV3-2026-11-22.md`); `0.1.2` fans `accountsChanged` / `chainChanged` to dapp tabs
 3. [~] **Activity / history** — PulseScan feed + poison lookalike/dust flags; denser face; deeper history later
 4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF)
 5. [x] **Token UX** — custom import + hide zeros + favorites

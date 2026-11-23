@@ -463,7 +463,7 @@ export function SettingsModal(p: Props) {
           <span className="vision-copy">
             <span className="vision-title">window.ethereum (this tab)</span>
             <span className="vision-blurb">
-              Lab inject for MM-shaped APIs. Cross-site needs extension next.
+              Lab this-tab inject. Cross-site dapps use the sideload MV3 extension.
             </span>
           </span>
           <span className="vision-switch" aria-hidden="true">

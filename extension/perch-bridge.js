@@ -41,6 +41,27 @@
     });
   }
 
+  /** Desk → dapp fan-out: accountsChanged / chainChanged */
+  window.addEventListener("message", (ev) => {
+    const data = ev.data;
+    if (
+      !data ||
+      data.source !== "pulse-perch-page-bridge" ||
+      data.type !== "provider-event"
+    ) {
+      return;
+    }
+    try {
+      chrome.runtime.sendMessage({
+        kind: "eip1193-broadcast",
+        event: data.event,
+        args: data.args || [],
+      });
+    } catch {
+      /* SW asleep / no listener — dapp keeps last-known until next request */
+    }
+  });
+
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.kind === "eip1193-ping") {
       sendResponse({ ok: true });

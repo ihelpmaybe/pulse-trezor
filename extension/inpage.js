@@ -80,7 +80,23 @@
     },
   };
 
-  window.ethereum = provider;
+  /* If another wallet already set ethereum, join providers[] instead of clobbering */
+  const existing = window.ethereum;
+  if (existing && existing !== provider && !existing.isPulsePerch) {
+    const list = Array.isArray(existing.providers)
+      ? existing.providers.slice()
+      : [existing];
+    if (!list.some((p) => p && p.isPulsePerch)) list.push(provider);
+    provider.providers = list;
+    existing.providers = list;
+    if (!window.ethereum.isPulsePerch) {
+      /* Prefer Perch when we claim MetaMask-shaped API for Pulse dapps */
+      window.ethereum = provider;
+    }
+  } else {
+    window.ethereum = provider;
+    provider.providers = [provider];
+  }
   try {
     window.dispatchEvent(new Event("ethereum#initialized"));
   } catch {
