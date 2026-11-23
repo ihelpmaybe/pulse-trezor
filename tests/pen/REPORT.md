@@ -1,10 +1,10 @@
 # Pen report — Pulse Perch (Gate 1 gate)
 
-**Status:** IN PROGRESS — code-proven rows marked; manual device rows still open. Not a PASS.
+**Status:** IN PROGRESS — cancel-on-device row timed; Suite-quit row still open. Not a full Gate 1 PASS.
 
 | Date | Tester | Build |
 |---|---|---|
-| 2026-11-22 | desk agent (code) + TBD manual | `0.1.0` |
+| 2026-11-22 | desk agent (code + emu lab) | `0.1.0` · `7cd5691` |
 
 ## Scope
 
@@ -19,7 +19,7 @@ Hardware path only: Connect 10 → Suite → Trezor. Desk bag / send / approve /
 - [x] Blind calldata requires extra ack before Sign — WC checkbox gate
 - [x] Approve / Permit clear-sign shows spender — Approvals + WC strip
 - [x] Custom contract call warns power-user — Send details + TxExplain
-- [ ] Suite-down / cancel-on-device honest errors (manual)
+- [~] Suite-down / cancel-on-device honest errors — cancel PASS (“Cancelled on Trezor…”); Suite-quit still open · [SUITE-DOWN-CANCEL-2026-11-22.md](../smoke/SUITE-DOWN-CANCEL-2026-11-22.md)
 - [x] Extension / inject does not bypass Trezor — signs still host → Connect path
 - [x] WC origin shown before sign — Sites panel
 - [x] Deep link `?uri=` / `web+pulseperch:` lands on Sites (no silent sign)

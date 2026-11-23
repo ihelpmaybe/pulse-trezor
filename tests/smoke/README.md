@@ -15,7 +15,8 @@ Legacy standalone Bridge `:21325` is **not** the Connect 10 path.
 | 6 | Disconnect → watch-only still shows address/balances | YES | 2026-11-22 · localStorage `pulse-trezor-watch-v1` |
 | 7 | Silent a11y plumbing (live region, dialog focus, tabs, labels) | YES | 2026-11-22 · [A11Y-2026-11-22.md](./A11Y-2026-11-22.md) |
 | 8 | Sites: PulseX IPFS WC session approve | YES | 2026-11-22 · [SITES-PULSEX-2026-11-22.md](./SITES-PULSEX-2026-11-22.md) |
-| 9 | Sites: WC **personal_sign** on device | YES | 2026-11-22 · [SITES-WC-PERSONAL-SIGN-2026-11-22.md](./SITES-WC-PERSONAL-SIGN-2026-11-22.md) · **tx** still open (0 PLS on 369) |
+| 9 | Sites: WC **personal_sign** on device | YES | 2026-11-22 · [SITES-WC-PERSONAL-SIGN-2026-11-22.md](./SITES-WC-PERSONAL-SIGN-2026-11-22.md) |
+| 9b | Sites: WC **eth_sendTransaction** dust | | PARTIAL · [SITES-WC-SEND-TX-2026-11-22.md](./SITES-WC-SEND-TX-2026-11-22.md) · 943 dust ready; hash not landed |
 | 10 | Inject this-tab: personal_sign live | YES | 2026-11-22 · [SIGN-PERSONAL-INJECT-LIVE-2026-11-22.md](./SIGN-PERSONAL-INJECT-LIVE-2026-11-22.md) |
 | 11 | MV3 extension load-unpacked checklist | | deferred — come back (`scripts/ext-cdp-smoke.mjs`) |
 

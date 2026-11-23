@@ -1,6 +1,6 @@
 # Suite-down / cancel-on-device — lab notes (2026-11-22)
 
-**Status: CODE PATHS READY · manual re-smoke when convenient**
+**Status: PARTIAL PASS (timed cancel evidence) · Suite-down quit still open**
 
 ## What exists
 - `cancelTrezorConnect` + Cancel while Connecting / Signing on face
@@ -8,8 +8,13 @@
 - Device/user cancel surfaces via `humanTrezorError`
 
 ## Lab checks (testnet / emu — no mainnet)
-1. Start Sign & send → Cancel before Suite Confirm → Perch idle, no stuck Signing
-2. Suite Confirm open → Cancel on Perch → Connect cancel; no zombie button-request (yield before next YES)
-3. Quit Suite mid-session → face shows honest missing/linked reconcile, not conflicting banners
 
-## Not claiming PASS until one timed re-run with evidence clip
+| # | Check | Result | Time (local) | Evidence |
+|---|---|---|---|---|
+| 1 | Start Connect → Cancel / device reject before finish | PASS | ~20:02 | Face alert: “Cancelled on Trezor — try again when ready.” · idle Connect button restored |
+| 2 | Suite Confirm open → Cancel on Perch | code-ready | — | Cancel button present while “Connecting…”; not re-timed this pass |
+| 3 | Quit Suite mid-session → honest reconcile | OPEN | — | Needs Suite quit while linked |
+
+## Notes
+- Suite Grant Permissions dialog for Pulse Perch was live on primary (PQQ-SMOKE) during Connect.
+- Unit coverage: `src/trezor/errors.test.ts` (cancel vs Suite-linked reconcile).

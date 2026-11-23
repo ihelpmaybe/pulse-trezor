@@ -44,7 +44,7 @@
 33. [x] WalletConnect / Reown peer as Pulse Perch
 34. [x] Pair wc: URI from Sites tab
 35. [x] Approve / reject session
-36. [~] eth_sendTransaction via WC → Trezor
+36. [~] eth_sendTransaction via WC → Trezor — lab URI + Suite Grant up 2026-11-22; hash blocked (Confirm click / 0 PLS on 369)
 37. [x] personal_sign via WC — live PASS 2026-11-22 (lab.pulseperch.dev pair + Suite); inject also PASS
 38. [~] eth_signTypedData_v4 / EIP-712 — wired WC+inject; inject smoke PASS 2026-11-22
 39. [~] wallet_switchEthereumChain → 369
