@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   clearSignMessage,
   clearSignTx,
+  clearSignTypedFields,
+  decodeApproveAmount,
   decodeHexStakeCalldata,
   isBlindCalldata,
   needsBlindConfirm,
   needsDangerAck,
   phishingWarn,
 } from "./clearSign";
+import { maxUint256 } from "viem";
 
 function padWord(n: bigint | number): string {
   return BigInt(n).toString(16).padStart(64, "0");
@@ -106,5 +109,48 @@ describe("blind calldata", () => {
     expect(permit.some((l) => l.title === "Permit")).toBe(true);
     expect(needsDangerAck(permit)).toBe(true);
     expect(needsBlindConfirm(permit)).toBe(false);
+  });
+
+  it("surfaces EIP-712 spender / value / deadline fields", () => {
+    const preview = JSON.stringify({
+      primaryType: "Permit",
+      domain: {
+        name: "HEX",
+        chainId: 369,
+        verifyingContract: "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+      },
+      message: {
+        owner: "0x1111111111111111111111111111111111111111",
+        spender: "0x2222222222222222222222222222222222222222",
+        value: "1000",
+        deadline: "9999999999",
+      },
+    });
+    const fields = clearSignTypedFields(preview);
+    expect(fields.some((l) => l.title === "712 spender")).toBe(true);
+    expect(fields.some((l) => l.title === "712 value")).toBe(true);
+    expect(fields.some((l) => l.title === "712 deadline")).toBe(true);
+    expect(fields.some((l) => l.title === "712 chainId")).toBe(true);
+
+    const lines = clearSignMessage({
+      method: "eth_signTypedData_v4",
+      dappUrl: "https://app.pulsex.com",
+      preview,
+    });
+    expect(lines.some((l) => l.title === "712 spender")).toBe(true);
+  });
+
+  it("decodes approve unlimited amount", () => {
+    const data =
+      "0x095ea7b3" +
+      "0000000000000000000000001111111111111111111111111111111111111111" +
+      maxUint256.toString(16).padStart(64, "0");
+    const amt = decodeApproveAmount(data);
+    expect(amt?.unlimited).toBe(true);
+    const lines = clearSignTx({
+      to: "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39",
+      data,
+    });
+    expect(lines.some((l) => /UNLIMITED/i.test(l.title))).toBe(true);
   });
 });

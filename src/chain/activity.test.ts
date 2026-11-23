@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapScanTx } from "./activity";
+import { mapScanTokenTransfer, mapScanTx } from "./activity";
 
 const owner = "0x73d0385F4d8E00C5e6504C6030F47BF6212736A8";
 
@@ -38,5 +38,24 @@ describe("mapScanTx", () => {
     expect(row?.counterparty).toBe(
       "0x1111111111111111111111111111111111111111",
     );
+    expect(row?.asset).toBe("PLS");
+  });
+
+  it("maps token transfer", () => {
+    const row = mapScanTokenTransfer(
+      {
+        tx_hash: "0x" + "cd".repeat(32),
+        timestamp: "2026-11-23T00:00:00.000000Z",
+        from: { hash: owner },
+        to: { hash: "0x1111111111111111111111111111111111111111" },
+        total: { value: "100000000", decimals: "8" },
+        token: { symbol: "HEX" },
+      },
+      owner,
+    );
+    expect(row?.direction).toBe("out");
+    expect(row?.asset).toBe("HEX");
+    expect(row?.kind).toBe("token");
+    expect(row?.valueEth).toBe("1");
   });
 });

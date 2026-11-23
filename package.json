@@ -14,6 +14,7 @@
     "fuzz": "node scripts/fuzz-watch.mjs",
     "smoke": "npm run typecheck && npm run build && vitest run && npm run fuzz",
     "ext:icons": "node scripts/ext-make-icons.mjs",
+    "pwa:icons": "node scripts/pwa-icons.mjs",
     "ext:pack": "node scripts/ext-make-icons.mjs && node scripts/ext-pack.mjs"
   },
   "engines": {

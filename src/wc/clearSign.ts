@@ -2,7 +2,7 @@
  * Human clear-sign strip for WalletConnect → Trezor.
  * Graded warnings — not a full ABI decoder.
  */
-import { formatEther, formatUnits, type Hex } from "viem";
+import { formatEther, formatUnits, maxUint256, type Hex } from "viem";
 
 export type ClearTone = "ok" | "warn" | "danger";
 
@@ -143,6 +143,104 @@ export function decodeSpenderFromCalldata(data?: string | null): string | null {
   return `0x${d.slice(34, 74)}`;
 }
 
+/** approve(address,uint256) amount word — maxUint256 = unlimited. */
+export function decodeApproveAmount(data?: string | null): {
+  raw: bigint;
+  unlimited: boolean;
+} | null {
+  const d = (data || "").toLowerCase().replace(/^0x/, "");
+  if (!d.startsWith("095ea7b3") || d.length < 8 + 64 + 64) return null;
+  const raw = BigInt(`0x${d.slice(8 + 64, 8 + 64 + 64)}`);
+  return { raw, unlimited: raw === maxUint256 };
+}
+
+/** transfer(address,uint256) recipient + amount. */
+export function decodeErc20Transfer(data?: string | null): {
+  to: string;
+  raw: bigint;
+} | null {
+  const d = (data || "").toLowerCase().replace(/^0x/, "");
+  if (!d.startsWith("a9059cbb") || d.length < 8 + 64 + 64) return null;
+  return {
+    to: `0x${d.slice(8 + 24, 8 + 64)}`,
+    raw: BigInt(`0x${d.slice(8 + 64, 8 + 64 + 64)}`),
+  };
+}
+
+/** Pull human fields from EIP-712 JSON preview (Permit / Order / generic). */
+export function clearSignTypedFields(preview: string): ClearLine[] {
+  let j: {
+    primaryType?: string;
+    domain?: Record<string, unknown>;
+    message?: Record<string, unknown>;
+  };
+  try {
+    j = JSON.parse(preview) as typeof j;
+  } catch {
+    return [];
+  }
+  const lines: ClearLine[] = [];
+  const domain = j.domain || {};
+  const message = j.message || {};
+  if (typeof domain.name === "string" && domain.name) {
+    lines.push({
+      tone: "warn",
+      title: "712 domain",
+      detail: domain.name,
+    });
+  }
+  if (domain.chainId != null) {
+    lines.push({
+      tone: "warn",
+      title: "712 chainId",
+      detail: String(domain.chainId),
+    });
+  }
+  if (typeof domain.verifyingContract === "string") {
+    lines.push({
+      tone: "danger",
+      title: "712 verifyingContract",
+      detail: `${short(domain.verifyingContract)} — confirm on Trezor`,
+    });
+  }
+  const fieldKeys = [
+    "owner",
+    "spender",
+    "value",
+    "amount",
+    "deadline",
+    "nonce",
+    "allowed",
+    "from",
+    "to",
+    "token",
+  ] as const;
+  for (const key of fieldKeys) {
+    const v = message[key];
+    if (v == null || v === "") continue;
+    const s = String(v);
+    const isAddr = /^0x[0-9a-fA-F]{40}$/.test(s);
+    const danger =
+      key === "spender" ||
+      key === "value" ||
+      key === "amount" ||
+      key === "allowed";
+    lines.push({
+      tone: danger ? "danger" : "warn",
+      title: `712 ${key}`,
+      detail: isAddr ? `${short(s)} — confirm on Trezor` : s.slice(0, 96),
+    });
+  }
+  if (typeof j.primaryType === "string" && j.primaryType) {
+    lines.push({
+      tone: "warn",
+      title: "712 primaryType",
+      detail: j.primaryType,
+    });
+  }
+  return lines;
+}
+
 const HOST_HINTS: {
   re: RegExp;
   title: string;
@@ -276,6 +374,24 @@ export function clearSignTx(opts: {
       detail: `${short(spender)} — confirm this address on Trezor`,
     });
   }
+  const approveAmt = decodeApproveAmount(opts.data);
+  if (approveAmt) {
+    lines.push({
+      tone: "danger",
+      title: approveAmt.unlimited ? "Approve amount · UNLIMITED" : "Approve amount",
+      detail: approveAmt.unlimited
+        ? "max uint256 — spender can drain this token until revoke"
+        : `${approveAmt.raw.toString()} (raw token units — check decimals on device)`,
+    });
+  }
+  const xfer = decodeErc20Transfer(opts.data);
+  if (xfer) {
+    lines.push({
+      tone: "warn",
+      title: "ERC-20 transfer to",
+      detail: `${short(xfer.to)} · raw ${xfer.raw.toString()}`,
+    });
+  }
 
   if (to) {
     const known = KNOWN_TO[to];
@@ -395,6 +511,9 @@ export function clearSignMessage(opts: {
       title: "EIP-712",
       detail: "Typed data can authorize spends — read every field on Trezor",
     });
+    for (const field of clearSignTypedFields(preview)) {
+      lines.push(field);
+    }
     let primary = "";
     try {
       const j = JSON.parse(preview) as { primaryType?: string };

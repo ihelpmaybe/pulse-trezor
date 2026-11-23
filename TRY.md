@@ -72,8 +72,14 @@ Details: [extension/README.md](./extension/README.md)
 
 ---
 
+## Install as an app (optional)
+
+Settings → **Install Pulse Perch** when Chrome/Edge offers it (localhost or HTTPS).  
+Or: `npm run build && npm run preview`, then use the browser install icon.
+
 ## Honest limits
 
 - Not official Trezor Pulse support. Suite still does not list Pulse.
 - Mainnet spend is your call — this page is the **testnet** try path.
 - No seed in the browser. Signs stay on the device via Suite.
+- Fiat buy/sell = ProveX link, not custody inside Perch.

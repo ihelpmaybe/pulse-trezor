@@ -1,6 +1,13 @@
 /* Pulse Perch — thin offline shell. Cache app shell only; never cache RPC/API. */
-const CACHE = "pulse-perch-shell-v1";
-const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/perch-icon.svg"];
+const CACHE = "pulse-perch-shell-v2";
+const SHELL = [
+  "/",
+  "/index.html",
+  "/manifest.webmanifest",
+  "/perch-icon.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

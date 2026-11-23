@@ -135,6 +135,7 @@ import {
 } from "./chain/watchImport";
 import { decodeSyncPayload } from "./chain/syncPair";
 import { SyncPair } from "./ui/SyncPair";
+import { InstallPwa } from "./ui/InstallPwa";
 import { loadHexModule, saveHexModule } from "./ui/modules";
 import { t } from "./i18n/en";
 import {
@@ -570,6 +571,8 @@ export function PulseTrezor({
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
   const [callData, setCallData] = useState("");
   const [callTo, setCallTo] = useState("");
+  const [customCallOpen, setCustomCallOpen] = useState(false);
+  const [actLimit, setActLimit] = useState(24);
   const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
   const [watchImportBusy, setWatchImportBusy] = useState(false);
   const [deepWcUri, setDeepWcUri] = useState<string | null>(null);
@@ -931,19 +934,22 @@ export function PulseTrezor({
     [effectiveRpc],
   );
 
-  const refreshActivity = useCallback(async (addr: Address, cid: DeskChainId) => {
-    setActBusy(true);
-    setActErr(null);
-    try {
-      const rows = await fetchAddressActivity(cid, addr, 8);
-      setActivity(rows);
-    } catch (e) {
-      setActivity([]);
-      setActErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setActBusy(false);
-    }
-  }, []);
+  const refreshActivity = useCallback(
+    async (addr: Address, cid: DeskChainId, limit = actLimit) => {
+      setActBusy(true);
+      setActErr(null);
+      try {
+        const rows = await fetchAddressActivity(cid, addr, limit);
+        setActivity(rows);
+      } catch (e) {
+        setActivity([]);
+        setActErr(e instanceof Error ? e.message : String(e));
+      } finally {
+        setActBusy(false);
+      }
+    },
+    [actLimit],
+  );
 
   useEffect(() => {
     if (!active) {
@@ -2805,6 +2811,9 @@ export function PulseTrezor({
               <code>docs/UPDATE-CHANNEL.md</code>).
             </p>
 
+            <h4 className="settings-section">Install</h4>
+            <InstallPwa />
+
             <h4 className="settings-section">Device</h4>
             <p className="muted fee">
               Suite:{" "}
@@ -3963,6 +3972,27 @@ export function PulseTrezor({
                     <span className="activity-frac" />
                   </span>
                   <span className="activity-when">mining</span>
+                  {(txStatus === "pending" || txStatus === "timeout") &&
+                  session ? (
+                    <span className="row activity-stuck">
+                      <button
+                        type="button"
+                        className="btn ghost gas-pill"
+                        disabled={busy}
+                        onClick={onSpeedUp}
+                      >
+                        Speed up
+                      </button>
+                      <button
+                        type="button"
+                        className="btn ghost gas-pill"
+                        disabled={busy}
+                        onClick={onCancelStuck}
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  ) : null}
                 </li>
               ) : null}
               {(() => {
@@ -4034,8 +4064,8 @@ export function PulseTrezor({
                         <span
                           className="activity-amt"
                           title={
-                            row.method
-                              ? `${row.method} · ${row.valueEth}`
+                            row.asset || row.method
+                              ? `${row.asset || row.method} · ${row.valueEth}`
                               : row.valueEth
                           }
                         >
@@ -4045,6 +4075,12 @@ export function PulseTrezor({
                               <span className="activity-frac">
                                 {parts.frac != null ? `.${parts.frac}` : ""}
                               </span>
+                              {row.asset && row.asset !== "PLS" ? (
+                                <span className="activity-asset">
+                                  {" "}
+                                  {row.asset}
+                                </span>
+                              ) : null}
                             </>
                           ) : (
                             <span className="activity-int method">
@@ -4073,6 +4109,20 @@ export function PulseTrezor({
               })()}
             </ul>
           )}
+          {active && activity.length > 0 ? (
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={actBusy}
+              onClick={() => {
+                const next = actLimit + 24;
+                setActLimit(next);
+                void refreshActivity(active.address, chainId, next);
+              }}
+            >
+              {actBusy ? "…" : "Load more history"}
+            </button>
+          ) : null}
         </section>
 
         <section className="card send">
@@ -4557,8 +4607,14 @@ export function PulseTrezor({
                       </span>
                     </label>
                   ) : null}
-                  <details className="gas-details">
-                    <summary>Custom contract call</summary>
+                  <details
+                    className="gas-details"
+                    open={customCallOpen}
+                    onToggle={(e) =>
+                      setCustomCallOpen((e.target as HTMLDetailsElement).open)
+                    }
+                  >
+                    <summary>Custom contract call (power tool)</summary>
                     <label className="field">
                       Contract
                       <input
@@ -5150,10 +5206,10 @@ export function PulseTrezor({
             {actionTab === "apps" ? (
               <div className="apps-grid">
                 <div className="apps-card">
-                  <h3>ProveX</h3>
+                  <h3>Buy / sell $ (ProveX)</h3>
                   <p className="muted fee">
-                    Dollar-linked corridor. Use bridged USDC only — not the
-                    inherited fork copy.
+                    Fiat on/off-ramp via ProveX — not custody inside Perch. Use
+                    bridged USDC only — not the inherited fork copy.
                   </p>
                   {chainId === 369 && active ? (
                     <p className="muted">
@@ -5187,6 +5243,38 @@ export function PulseTrezor({
                   >
                     Open ProveX
                   </a>
+                </div>
+                <div className="apps-card">
+                  <h3>Quick swap</h3>
+                  <p className="muted fee">
+                    In-desk PulseX V2 quote → sign on Trezor. For the full DEX
+                    UI, use Sites → PulseX.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    disabled={chainId !== 369}
+                    onClick={() => setActionTab("swap")}
+                  >
+                    Open Swap
+                  </button>
+                </div>
+                <div className="apps-card">
+                  <h3>Custom contract call</h3>
+                  <p className="muted fee">
+                    Power tool — paste contract + calldata (hex), payable value
+                    from Send amount. Blind selectors need extra confirm.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    onClick={() => {
+                      setCustomCallOpen(true);
+                      setActionTab("send");
+                    }}
+                  >
+                    Open power tool
+                  </button>
                 </div>
                 <div className="apps-card">
                   <h3>Pulse Bridge</h3>
