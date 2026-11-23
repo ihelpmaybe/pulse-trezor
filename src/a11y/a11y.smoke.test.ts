@@ -22,7 +22,9 @@ describe("a11y contract smoke", () => {
     expect(t).toMatch(/role="alert"/);
     expect(t).toMatch(/trapTabKey/);
     expect(t).toMatch(/settingsBtnRef/);
-    expect(t).toMatch(/aria-label=\{\s*\n?\s*copied/);
+    expect(t).toMatch(/Copied address \$\{active\.address\}/);
+    expect(t).toMatch(/Address hidden/);
+    expect(t).toMatch(/privacyHide/);
     expect(t).toMatch(/role="tabpanel"/);
     expect(t).toMatch(/aria-controls="perch-panel-send"/);
     expect(t).toMatch(/role="status"/);

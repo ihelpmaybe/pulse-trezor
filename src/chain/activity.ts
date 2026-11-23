@@ -99,6 +99,7 @@ export async function fetchAddressActivity(
   return out;
 }
 
+/** Face: short month+day — time on hover via fullWhen. */
 export function shortWhen(iso: string): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -106,7 +107,21 @@ export function shortWhen(iso: string): string {
   return d.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
+  });
+}
+
+/** Full local date+time for hover / title. */
+export function fullWhen(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   });
 }

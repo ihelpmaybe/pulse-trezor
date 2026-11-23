@@ -87,6 +87,14 @@ const PHISH_HINTS: { re: RegExp; detail: string }[] = [
     detail: "Looks like a phishing lure — do not sign",
   },
   {
+    re: /claim[-_.]?pls|pls[-_.]?giveaway|hex[-_.]?drain|trezor[-_.]?(sync|suite|login|support)|wallet[-_.]?validate|seed[-_.]?phrase|support[-_.]?trezor|suite[-_.]?login/i,
+    detail: "Classic wallet-drain / fake-support lure — do not sign",
+  },
+  {
+    re: /pulsex\.(?!com\b)|pulsechain\.(?!com\b)|prover?x[-_.]/i,
+    detail: "Lookalike Pulse brand domain — verify carefully",
+  },
+  {
     re: /^https?:\/\/\d+\.\d+\.\d+\.\d+/i,
     detail: "Raw IP origin — unusual for real Pulse apps",
   },
@@ -294,23 +302,54 @@ export function clearSignMessage(opts: {
       detail: "No dApp origin on this request",
     });
   }
+  const preview = opts.preview || "";
   lines.push({
     tone: "warn",
     title: "Preview",
-    detail: opts.preview.slice(0, 280) || "(empty)",
+    detail: preview.slice(0, 280) || "(empty)",
   });
-  if (/typed|712/i.test(opts.method)) {
+
+  const method = opts.method || "";
+  const hexOpaque =
+    /^0x[0-9a-fA-F]{64,}$/.test(preview.trim()) ||
+    (/^0x[0-9a-fA-F]+$/.test(preview.trim()) && preview.trim().length >= 66);
+  if (/^eth_sign$/i.test(method) || hexOpaque) {
+    lines.push({
+      tone: "danger",
+      title: "Raw hex",
+      detail:
+        "Opaque hex message (eth_sign-style) — can authorize spends. Prefer plain personal_sign text you can read.",
+    });
+  }
+
+  if (/typed|712/i.test(method)) {
     lines.push({
       tone: "danger",
       title: "EIP-712",
       detail: "Typed data can authorize spends — read every field on Trezor",
     });
-    if (/permit/i.test(opts.preview)) {
+    let primary = "";
+    try {
+      const j = JSON.parse(preview) as { primaryType?: string };
+      if (typeof j.primaryType === "string") primary = j.primaryType;
+    } catch {
+      /* preview may be truncated string */
+    }
+    const blob = `${primary} ${preview}`;
+    if (/permit/i.test(blob)) {
       lines.push({
         tone: "danger",
         title: "Permit",
         detail:
-          "Looks like EIP-2612 Permit — same power as approve; check spender + amount + deadline",
+          "Looks like Permit / Permit2 — same power as approve; check spender + amount + deadline on device",
+      });
+    }
+    if (/\b(order|seaport|listing|offer)\b/i.test(blob)) {
+      lines.push({
+        tone: "danger",
+        title: "Order",
+        detail:
+          "Looks like a marketplace Order — can move NFTs/tokens. Read maker/taker/price on Trezor",
       });
     }
   }
@@ -349,6 +388,28 @@ export function isBlindCalldata(data?: string | null): boolean {
 
 export function needsBlindConfirm(lines: ClearLine[]): boolean {
   return lines.some((l) => /blind calldata/i.test(l.title));
+}
+
+/** Extra face ack before Sign — blind calldata, Permit, Order, raw eth_sign hex. */
+export function needsDangerAck(lines: ClearLine[]): boolean {
+  return lines.some(
+    (l) =>
+      l.tone === "danger" &&
+      /blind calldata|Permit|Order|Raw hex/i.test(l.title),
+  );
+}
+
+export function dangerAckLabel(lines: ClearLine[]): string {
+  if (lines.some((l) => /Raw hex/i.test(l.title))) {
+    return "I understand this is opaque hex — I will read the Trezor screen before signing.";
+  }
+  if (lines.some((l) => /Permit/i.test(l.title))) {
+    return "I understand Permit can drain this token — I will check spender, amount, and deadline on Trezor.";
+  }
+  if (lines.some((l) => /Order/i.test(l.title))) {
+    return "I understand this Order can move assets — I will read every field on Trezor.";
+  }
+  return "I will read the Trezor screen for this high-risk request (dApp labels can lie).";
 }
 
 export type TxLike = {

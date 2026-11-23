@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  clearSignMessage,
   clearSignTx,
   isBlindCalldata,
   needsBlindConfirm,
+  needsDangerAck,
   phishingWarn,
 } from "./clearSign";
 
@@ -33,6 +35,10 @@ describe("blind calldata", () => {
 
   it("flags phishing-ish origins", () => {
     expect(phishingWarn("https://claim-hex.example")?.tone).toBe("danger");
+    expect(phishingWarn("https://wallet-validate.example")?.tone).toBe(
+      "danger",
+    );
+    expect(phishingWarn("https://pulsex.xyz")?.tone).toBe("danger");
     expect(phishingWarn("https://app.pulsex.com")).toBeNull();
   });
 
@@ -43,5 +49,27 @@ describe("blind calldata", () => {
       dappUrl: "https://ipfs.app.pulsex.com",
     });
     expect(lines.some((l) => l.title === "Origin")).toBe(true);
+  });
+
+  it("flags raw hex and Permit for danger ack", () => {
+    const hex = clearSignMessage({
+      method: "eth_sign",
+      dappUrl: "https://app.pulsex.com",
+      preview: "0x" + "ab".repeat(32),
+    });
+    expect(hex.some((l) => l.title === "Raw hex")).toBe(true);
+    expect(needsDangerAck(hex)).toBe(true);
+
+    const permit = clearSignMessage({
+      method: "eth_signTypedData_v4",
+      dappUrl: "https://app.pulsex.com",
+      preview: JSON.stringify({
+        primaryType: "Permit",
+        message: { spender: "0x1", value: "1" },
+      }),
+    });
+    expect(permit.some((l) => l.title === "Permit")).toBe(true);
+    expect(needsDangerAck(permit)).toBe(true);
+    expect(needsBlindConfirm(permit)).toBe(false);
   });
 });

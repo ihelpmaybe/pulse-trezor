@@ -10,7 +10,7 @@ What MetaMask can do that Perch still can’t (or hasn’t proven). Product law:
 
 1. [~] **Sites pair smoke** — Piteas + **PulseX IPFS session approved** (2026-11-22, `0x73d0…36A8`) · still need live WC **sign** (mainnet bag is 0 PLS — fund dust or message-sign path)
 2. [~] **Injected provider** — EIP-1193 + Settings this-tab + MV3 shell (`extension/`); load unpacked for cross-origin lab
-3. [~] **Activity / history** — PulseScan feed on face (testnet+mainnet API); deeper history later
+3. [~] **Activity / history** — PulseScan feed + poison lookalike/dust flags; denser face; deeper history later
 4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF)
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX (Sites remains MM-replacement path)
@@ -39,7 +39,8 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [ ] Malformed token meta + RPC error bodies
 - [x] Registry JSON import fuzz (no crash; reject seed-like fields) — `npm run fuzz`
 - [ ] EIP-681 / WC session fuzz when those land
-- [~] Time-boxed fuzz job — `scripts/fuzz-watch.mjs` in smoke
+- [x] Time-boxed fuzz job — `scripts/fuzz-watch.mjs` (+ extreme amounts/lookalike) in smoke
+- [x] Extreme face/poison/clear-sign sim — `src/ui/extreme.sim.test.ts`
 
 ### Pen
 - [x] Phishing UX: PulseChain labeled; spender clear-sign

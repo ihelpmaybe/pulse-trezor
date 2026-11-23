@@ -35,9 +35,11 @@ import {
   type RpcOverride,
 } from "./chain/client";
 import {
+  activityPoison,
   bookLabel,
   isKnownRecipient,
   loadAddressBook,
+  lookalikePoison,
   upsertAddressBook,
   type BookEntry,
 } from "./chain/addressBook";
@@ -48,6 +50,7 @@ import {
 } from "./chain/nftApprovals";
 import {
   fetchFullBag,
+  fetchHexStakeCount,
   fetchScanNfts,
   type FullBag,
   type ScanNft,
@@ -55,9 +58,18 @@ import {
 } from "./chain/portfolio";
 import {
   fetchAddressActivity,
+  fullWhen,
   shortWhen,
   type ActivityRow,
 } from "./chain/activity";
+import {
+  ACCOUNT_COUNT_MAX,
+  ACCOUNT_COUNT_MIN,
+  clampAccountCount,
+  fmtActivityAmtParts,
+  shortAddr,
+  shortNative,
+} from "./ui/faceFormat";
 import {
   addCustomToken,
   fetchCustomBalances,
@@ -202,8 +214,11 @@ const ACCOUNT_KEY = "pulse-trezor-account-v1";
 const ACCOUNTS_KEY = "pulse-trezor-accounts-v1";
 const ACCOUNT_COUNT_KEY = "pulse-trezor-account-count-v1";
 const A11Y_KEY = "pulse-perch-a11y-v1";
+const PRIVACY_KEY = "pulse-perch-privacy-hide-v1";
 const INJECT_KEY = "pulse-perch-inject-v1";
 const THEME_KEY = "pulse-perch-theme-v1";
+/** One-time stronger mainnet send cue — then soft “Mainnet” line only. */
+const FIRST_MAINNET_SEND_KEY = "pulse-perch-first-mainnet-send-v1";
 const BRIDGED_USDC =
   "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07" as Address;
 const INHERITED_USDC =
@@ -243,6 +258,23 @@ const A11Y_DEFAULT: A11yPrefs = {
   strongFocus: false,
 };
 
+function loadPrivacyHide(): boolean {
+  try {
+    return localStorage.getItem(PRIVACY_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function savePrivacyHide(on: boolean) {
+  try {
+    if (on) localStorage.setItem(PRIVACY_KEY, "1");
+    else localStorage.removeItem(PRIVACY_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function loadA11y(): A11yPrefs {
   try {
     const raw = localStorage.getItem(A11Y_KEY);
@@ -269,12 +301,30 @@ function applyA11y(prefs: A11yPrefs) {
   root.toggleAttribute("data-a11y-motion", prefs.reduceMotion);
   root.toggleAttribute("data-a11y-focus", prefs.strongFocus);
 }
-const ACCOUNT_COUNT_MIN = 1;
-/**
- * Functionality headroom for Suite address pulls (not the Blsx product target).
- * Migrate monthly length ceiling is 186 (5555d÷30) — see mHEX migrateSchedule.
- */
-const ACCOUNT_COUNT_MAX = 2000;
+function HexStakeMark({ count }: { count: number }) {
+  const label = `${count} HEX stake${count === 1 ? "" : "s"}`;
+  return (
+    <span className="acct-hex" title={label} aria-label={label}>
+      <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
+        <polygon
+          points="8,1.1 13.9,4.5 13.9,11.5 8,14.9 2.1,11.5 2.1,4.5"
+          fill="#ff3178"
+        />
+        <text
+          x="8"
+          y="11"
+          textAnchor="middle"
+          fontSize="7.2"
+          fontWeight="700"
+          fill="#fff"
+          fontFamily="system-ui,Segoe UI,sans-serif"
+        >
+          H
+        </text>
+      </svg>
+    </span>
+  );
+}
 
 type Session = {
   address: Address;
@@ -303,19 +353,6 @@ export type PulseTrezorProps = {
   className?: string;
 };
 
-function shortAddr(a: string) {
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
-}
-
-/** Activity amounts — locale commas, no toPrecision junk. */
-function fmtActivityAmt(raw: string, digits = 6): string {
-  const n = Number(raw);
-  if (!Number.isFinite(n) || n === 0) return "0";
-  return n.toLocaleString(undefined, {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: 0,
-  });
-}
 
 function AddrParts({ address }: { address: string }) {
   const a = address.startsWith("0x") ? address : `0x${address}`;
@@ -379,14 +416,6 @@ function saveAccountIndex(i: number) {
   } catch {
     /* ignore */
   }
-}
-
-function clampAccountCount(n: number): number {
-  if (!Number.isFinite(n)) return 12;
-  return Math.max(
-    ACCOUNT_COUNT_MIN,
-    Math.min(ACCOUNT_COUNT_MAX, Math.floor(n)),
-  );
 }
 
 function loadAccountCount(): number {
@@ -494,6 +523,7 @@ export function PulseTrezor({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [rpcCustomMode, setRpcCustomMode] = useState(false);
   const [a11y, setA11y] = useState<A11yPrefs>(() => loadA11y());
+  const [privacyHide, setPrivacyHide] = useState(() => loadPrivacyHide());
   const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
   const [callData, setCallData] = useState("");
@@ -528,6 +558,12 @@ export function PulseTrezor({
   const [listing, setListing] = useState(false);
   const [chainId, setChainId] = useState<DeskChainId>(defaultChainId);
   const [balance, setBalance] = useState<bigint | null>(null);
+  /** Native PLS per listed account (lowercase address → wei). */
+  const [acctPls, setAcctPls] = useState<Record<string, bigint>>({});
+  /** HEX stakeCount > 0 → show mark on account card. */
+  const [acctHexStakes, setAcctHexStakes] = useState<Record<string, number>>(
+    {},
+  );
   const [balBusy, setBalBusy] = useState(false);
   const [tokenRows, setTokenRows] = useState<TokenRow[]>([]);
   const [to, setTo] = useState("");
@@ -582,6 +618,15 @@ export function PulseTrezor({
   const [apprErr, setApprErr] = useState<string | null>(null);
   const [revokeSel, setRevokeSel] = useState<Set<string>>(() => new Set());
   const [hideZeroBal, setHideZeroBal] = useState(true);
+  const [approveMaxAck, setApproveMaxAck] = useState(false);
+  const [mainnetSendAcked, setMainnetSendAcked] = useState(() => {
+    try {
+      return localStorage.getItem(FIRST_MAINNET_SEND_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [mainnetSendAck, setMainnetSendAck] = useState(false);
   const [actionTab, setActionTab] = useState<
     "send" | "swap" | "sites" | "approve" | "apps"
   >("send");
@@ -780,12 +825,48 @@ export function PulseTrezor({
     };
   }, [active, chainId, effectiveRpc, lastTx, txStatus]);
 
+  const refreshAcctFace = useCallback(async () => {
+    if (accountList.length === 0) {
+      setAcctPls({});
+      setAcctHexStakes({});
+      return;
+    }
+    const rows = await Promise.all(
+      accountList.map(async (a) => {
+        const key = a.address.toLowerCase();
+        const addr = a.address as Address;
+        const [plsR, hexR] = await Promise.allSettled([
+          fetchPlsBalance(chainId, addr, effectiveRpc),
+          fetchHexStakeCount(chainId, addr, effectiveRpc),
+        ]);
+        return {
+          key,
+          pls: plsR.status === "fulfilled" ? plsR.value : null,
+          hex: hexR.status === "fulfilled" ? hexR.value : 0,
+        };
+      }),
+    );
+    const nextPls: Record<string, bigint> = {};
+    const nextHex: Record<string, number> = {};
+    for (const r of rows) {
+      if (r.pls != null) nextPls[r.key] = r.pls;
+      if (r.hex > 0) nextHex[r.key] = r.hex;
+    }
+    setAcctPls(nextPls);
+    setAcctHexStakes(nextHex);
+  }, [accountList, chainId, effectiveRpc]);
+
+  useEffect(() => {
+    void refreshAcctFace();
+  }, [refreshAcctFace]);
+
   const refreshBalances = useCallback(
     async (addr: Address, cid: DeskChainId) => {
       setBalBusy(true);
       try {
         const b = await fetchPlsBalance(cid, addr, effectiveRpc);
         setBalance(b);
+        setAcctPls((prev) => ({ ...prev, [addr.toLowerCase()]: b }));
         const rows = await fetchTokenBalances(cid, addr, effectiveRpc);
         setTokenRows(rows);
         const customs = loadCustomTokens(cid);
@@ -859,6 +940,13 @@ export function PulseTrezor({
         setFullBag(bag);
         setNfts(bag.nfts);
         setNftsTruncated(bag.nftsTruncated);
+        const ak = active.address.toLowerCase();
+        setAcctHexStakes((prev) => {
+          if (bag.stakeCount > 0) return { ...prev, [ak]: bag.stakeCount };
+          const next = { ...prev };
+          delete next[ak];
+          return next;
+        });
         if (bag.warnings?.length) {
           setErr(`Full bag partial: ${bag.warnings[0]}`);
         }
@@ -1211,9 +1299,21 @@ export function PulseTrezor({
 
   function onCopy() {
     if (!active) return;
+    if (privacyHide) {
+      setErr("Unhide (dox shield) before copying the address.");
+      return;
+    }
     void navigator.clipboard.writeText(active.address).then(() => {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  function togglePrivacyHide() {
+    setPrivacyHide((on) => {
+      const next = !on;
+      savePrivacyHide(next);
+      return next;
     });
   }
 
@@ -1268,6 +1368,10 @@ export function PulseTrezor({
     }
     if (chainId !== 369 && chainId !== 943 && chainId !== 1 && chainId !== 11155111 && chainId !== 17000) {
       setErr("Unsupported chain.");
+      return;
+    }
+    if (chainId === 369 && !mainnetSendAcked && !mainnetSendAck) {
+      setErr("Confirm the mainnet first-send warning before signing.");
       return;
     }
     try {
@@ -1369,6 +1473,14 @@ export function PulseTrezor({
         setLastTx(broadcast.hash);
         setStuckTx(broadcast);
         setTxStatus("pending");
+        if (chainId === 369 && !mainnetSendAcked) {
+          try {
+            localStorage.setItem(FIRST_MAINNET_SEND_KEY, "1");
+          } catch {
+            /* ignore */
+          }
+          setMainnetSendAcked(true);
+        }
         void refreshBalances(session.address, chainId);
         void waitForTxStatus(chainId, broadcast.hash, effectiveRpc).then(
           (st) => {
@@ -2285,8 +2397,74 @@ export function PulseTrezor({
     .filter(Boolean)
     .join(" ");
 
-  const settingsPicker = showSettings ? (
-    <div className="rpc-pop-wrap">
+  const deskTools = (
+    <div className="rpc-pop-wrap desk-tools">
+      <button
+        type="button"
+        className={
+          privacyHide
+            ? "btn ghost rpc-pop-btn privacy-btn on"
+            : "btn ghost rpc-pop-btn privacy-btn"
+        }
+        aria-pressed={privacyHide}
+        title={
+          privacyHide
+            ? "Show addresses & amounts"
+            : "Hide addresses & amounts (********)"
+        }
+        aria-label={
+          privacyHide
+            ? "Show addresses and amounts"
+            : "Hide addresses and amounts"
+        }
+        onClick={togglePrivacyHide}
+      >
+        {privacyHide ? (
+          <svg
+            className="privacy-eye"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10.4 10.4 0 0 1 12 5c5 0 9.3 3.1 11 7.5a11.5 11.5 0 0 1-4.2 5.1M6.6 6.6A11.4 11.4 0 0 0 1 12.5C2.7 16.9 7 20 12 20a10.5 10.5 0 0 0 4.3-.9"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="privacy-eye"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M2 12.5C3.7 8.1 7.9 5 12 5s8.3 3.1 10 7.5c-1.7 4.4-5.9 7.5-10 7.5S3.7 16.9 2 12.5z"
+            />
+            <circle
+              cx="12"
+              cy="12.5"
+              r="3"
+              stroke="currentColor"
+              strokeWidth="1.75"
+            />
+          </svg>
+        )}
+      </button>
+      {showSettings ? (
       <button
         type="button"
         ref={settingsBtnRef}
@@ -2324,7 +2502,8 @@ export function PulseTrezor({
           />
         </svg>
       </button>
-      {settingsOpen ? (
+      ) : null}
+      {showSettings && settingsOpen ? (
         <div
           className="rpc-modal-root"
           role="presentation"
@@ -2510,6 +2689,24 @@ export function PulseTrezor({
               {t("lightTheme")}
             </label>
 
+            <h4 className="settings-section">Privacy</h4>
+            <button
+              type="button"
+              className={privacyHide ? "vision-tile on" : "vision-tile"}
+              aria-pressed={privacyHide}
+              onClick={togglePrivacyHide}
+            >
+              <span className="vision-copy">
+                <span className="vision-title">Dox shield</span>
+                <span className="vision-blurb">
+                  Mask addresses &amp; amounts as ******** (screen share)
+                </span>
+              </span>
+              <span className="vision-switch" aria-hidden="true">
+                <span className="vision-knob" />
+              </span>
+            </button>
+
             <h4 className="settings-section">Vision impaired</h4>
             <div className="vision-grid" role="group" aria-label="Vision impaired">
               {(
@@ -2590,10 +2787,13 @@ export function PulseTrezor({
         </div>
       ) : null}
     </div>
-  ) : null;
+  );
 
   return (
-    <div className={["pulse-trezor", className].filter(Boolean).join(" ")}>
+    <div
+      className={["pulse-trezor", className].filter(Boolean).join(" ")}
+      data-privacy-hide={privacyHide ? "1" : undefined}
+    >
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {a11yLive}
       </div>
@@ -2606,7 +2806,7 @@ export function PulseTrezor({
             </p>
           ) : null}
         </div>
-        {settingsPicker}
+        {deskTools}
       </div>
       <div className="top-strip">
         {active ? (
@@ -2614,11 +2814,19 @@ export function PulseTrezor({
             type="button"
             className="addr-bar"
             onClick={onCopy}
-            title={copied ? "Copied" : "Click to copy full address"}
+            title={
+              privacyHide
+                ? "Unhide to copy address"
+                : copied
+                  ? "Copied"
+                  : "Click to copy full address"
+            }
             aria-label={
-              copied
-                ? `Copied address ${active.address}`
-                : `Copy address ${active.address}`
+              privacyHide
+                ? "Address hidden"
+                : copied
+                  ? `Copied address ${active.address}`
+                  : `Copy address ${active.address}`
             }
           >
             <AddrParts address={active.address} />
@@ -2673,11 +2881,6 @@ export function PulseTrezor({
         <section className="card device">
           <div className="device-head">
             <h2>Device</h2>
-            {active ? (
-              <p className="muted device-path">
-                Account #{active.derivationIndex + 1}
-              </p>
-            ) : null}
           </div>
           {showTestnet ? (
             <label className="field">
@@ -2782,8 +2985,14 @@ export function PulseTrezor({
           {accountList.length > 0 ? (
             <div className="acct-grid" role="list">
               {accountList.map((a) => {
-                const on =
-                  active?.address?.toLowerCase() === a.address.toLowerCase();
+                const key = a.address.toLowerCase();
+                const on = active?.address?.toLowerCase() === key;
+                const wei = acctPls[key];
+                const hexN = acctHexStakes[key] ?? 0;
+                const balText =
+                  wei != null
+                    ? `${shortNative(wei)} ${pack.currency.symbol}`
+                    : "…";
                 return (
                   <button
                     key={a.derivationIndex}
@@ -2792,15 +3001,21 @@ export function PulseTrezor({
                     className={on ? "acct-card on" : "acct-card"}
                     onClick={() => selectListedAccount(a)}
                     title={a.derivationPath}
-                    aria-label={`Account #${a.derivationIndex + 1}, ${a.address}${
-                      on ? ", selected" : ""
-                    }`}
+                    aria-label={
+                      privacyHide
+                        ? `Account #${a.derivationIndex + 1}${on ? ", selected" : ""}, values hidden`
+                        : `Account #${a.derivationIndex + 1}, ${a.address}, ${balText}${
+                            hexN > 0 ? `, ${hexN} HEX stakes` : ""
+                          }${on ? ", selected" : ""}`
+                    }
                     aria-current={on ? "true" : undefined}
                   >
                     <span className="acct-label">
-                      Account #{a.derivationIndex + 1}
+                      #{a.derivationIndex + 1}
                     </span>
                     <code className="acct-addr">{shortAddr(a.address)}</code>
+                    <span className="acct-bal">{balText}</span>
+                    {hexN > 0 ? <HexStakeMark count={hexN} /> : null}
                   </button>
                 );
               })}
@@ -2830,33 +3045,37 @@ export function PulseTrezor({
 
         </section>
 
-        <section className="card">
-          <h2>Balances</h2>
-          <div className="action-tabs bag-tabs" role="tablist" aria-label="Bag">
-            <button
-              type="button"
-              id="bag-tab-tokens"
-              role="tab"
-              aria-selected={bagTab === "tokens"}
-              aria-controls="bag-panel-tokens"
-              tabIndex={bagTab === "tokens" ? 0 : -1}
-              className={bagTab === "tokens" ? "tab on" : "tab"}
-              onClick={() => setBagTab("tokens")}
-            >
-              Tokens
-            </button>
-            <button
-              type="button"
-              id="bag-tab-nfts"
-              role="tab"
-              aria-selected={bagTab === "nfts"}
-              aria-controls="bag-panel-nfts"
-              tabIndex={bagTab === "nfts" ? 0 : -1}
-              className={bagTab === "nfts" ? "tab on" : "tab"}
-              onClick={() => setBagTab("nfts")}
-            >
-              NFTs
-            </button>
+        <section className="card bag-card">
+          <div className="bag-head">
+            <h2 title={active ? "Balances for this account" : undefined}>
+              {active ? `Account #${active.derivationIndex + 1}` : "Balances"}
+            </h2>
+            <div className="action-tabs bag-tabs" role="tablist" aria-label="Bag">
+              <button
+                type="button"
+                id="bag-tab-tokens"
+                role="tab"
+                aria-selected={bagTab === "tokens"}
+                aria-controls="bag-panel-tokens"
+                tabIndex={bagTab === "tokens" ? 0 : -1}
+                className={bagTab === "tokens" ? "tab on" : "tab"}
+                onClick={() => setBagTab("tokens")}
+              >
+                Tokens
+              </button>
+              <button
+                type="button"
+                id="bag-tab-nfts"
+                role="tab"
+                aria-selected={bagTab === "nfts"}
+                aria-controls="bag-panel-nfts"
+                tabIndex={bagTab === "nfts" ? 0 : -1}
+                className={bagTab === "nfts" ? "tab on" : "tab"}
+                onClick={() => setBagTab("nfts")}
+              >
+                NFTs
+              </button>
+            </div>
           </div>
 
           <div
@@ -3257,10 +3476,10 @@ export function PulseTrezor({
         </section>
 
         <section className="card activity">
-          <div className="device-head">
+          <div className="device-head activity-head">
             <h2>Activity</h2>
             {active ? (
-              <div className="row">
+              <div className="row activity-tools">
                 <div className="gas-speed" role="group" aria-label="Activity filter">
                   {(
                     [
@@ -3285,11 +3504,11 @@ export function PulseTrezor({
                 </div>
                 <button
                   type="button"
-                  className="btn ghost"
+                  className="btn ghost gas-pill"
                   disabled={actBusy}
                   onClick={() => void refreshActivity(active.address, chainId)}
                 >
-                  {actBusy ? "…" : "Refresh"}
+                  {actBusy ? "…" : "↻"}
                 </button>
               </div>
             ) : null}
@@ -3318,50 +3537,121 @@ export function PulseTrezor({
                       void navigator.clipboard.writeText(lastTx);
                     }}
                   >
-                    pending
+                    …
                   </button>
-                  <span className="activity-val">…</span>
-                  <span className="muted activity-when">mining…</span>
+                  <span className="activity-amt">
+                    <span className="activity-int">…</span>
+                    <span className="activity-frac" />
+                  </span>
+                  <span className="activity-when">mining</span>
                 </li>
               ) : null}
-              {activity
-                .filter((row) =>
-                  actFilter === "all" ? true : row.direction === actFilter,
-                )
-                .map((row) => (
-                <li key={row.hash} className="activity-row">
-                  <button
-                    type="button"
-                    className={`activity-dir ${row.direction}`}
-                    title={`Copy ${row.hash}`}
-                    onClick={() => {
-                      void navigator.clipboard.writeText(row.hash);
-                    }}
-                  >
-                    {row.direction}
-                  </button>
-                  <span
-                    className="activity-val"
-                    title={
-                      row.method
-                        ? `${row.method} · ${row.valueEth}`
-                        : row.valueEth
-                    }
-                  >
-                    {row.method
-                      ? row.method
-                      : Number(row.valueEth) === 0
-                        ? "—"
-                        : fmtActivityAmt(row.valueEth)}
-                  </span>
-                  <span className="muted activity-when">
-                    {Number(row.valueEth) > 0 && row.method
-                      ? `${fmtActivityAmt(row.valueEth, 4)} · `
-                      : ""}
-                    {shortWhen(row.timestamp)}
-                  </span>
-                </li>
-              ))}
+              {(() => {
+                const poisonPeers: { address: string; label: string }[] = [
+                  ...addressBook.map((b) => ({
+                    address: b.address,
+                    label: b.label,
+                  })),
+                ];
+                const seen = new Set(
+                  poisonPeers.map((p) => p.address.toLowerCase()),
+                );
+                for (const a of activity) {
+                  if (a.direction !== "out" || !a.counterparty) continue;
+                  const k = a.counterparty.toLowerCase();
+                  if (seen.has(k)) continue;
+                  seen.add(k);
+                  poisonPeers.push({
+                    address: a.counterparty,
+                    label:
+                      bookLabel(a.counterparty) ||
+                      `${a.counterparty.slice(0, 6)}…${a.counterparty.slice(-4)}`,
+                  });
+                }
+                return activity
+                  .filter((row) =>
+                    actFilter === "all" ? true : row.direction === actFilter,
+                  )
+                  .map((row) => {
+                    const parts =
+                      !row.method && Number(row.valueEth) !== 0
+                        ? fmtActivityAmtParts(row.valueEth)
+                        : null;
+                    const dirLabel =
+                      row.direction === "in"
+                        ? "In"
+                        : row.direction === "out"
+                          ? "Out"
+                          : row.direction === "self"
+                            ? "Self"
+                            : row.direction;
+                    const poison = activityPoison(row, poisonPeers);
+                    const poisonTitle = poison
+                      ? poison.direction === "in"
+                        ? `Possible poison${poison.dust ? " dust" : ""} — lookalike of “${poison.label}”. Don’t copy this sender as a recipient.`
+                        : `Lookalike of “${poison.label}” — confirm full address before trusting this Out.`
+                      : undefined;
+                    return (
+                      <li
+                        key={row.hash}
+                        className={
+                          poison
+                            ? poison.dust
+                              ? "activity-row poison dust"
+                              : "activity-row poison"
+                            : "activity-row"
+                        }
+                      >
+                        <button
+                          type="button"
+                          className={`activity-dir ${row.direction}`}
+                          title={`Copy ${row.hash}`}
+                          onClick={() => {
+                            void navigator.clipboard.writeText(row.hash);
+                          }}
+                        >
+                          {dirLabel}
+                        </button>
+                        <span
+                          className="activity-amt"
+                          title={
+                            row.method
+                              ? `${row.method} · ${row.valueEth}`
+                              : row.valueEth
+                          }
+                        >
+                          {parts ? (
+                            <>
+                              <span className="activity-int">{parts.int}</span>
+                              <span className="activity-frac">
+                                {parts.frac != null ? `.${parts.frac}` : ""}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="activity-int method">
+                              {row.method || "—"}
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          className={
+                            poison ? "activity-poison on" : "activity-poison"
+                          }
+                          title={poisonTitle}
+                          aria-label={poisonTitle}
+                        >
+                          {poison ? "!" : ""}
+                        </span>
+                        <span
+                          className="activity-when"
+                          title={fullWhen(row.timestamp) || undefined}
+                        >
+                          {shortWhen(row.timestamp)}
+                        </span>
+                      </li>
+                    );
+                  });
+              })()}
             </ul>
           )}
         </section>
@@ -3547,6 +3837,18 @@ export function PulseTrezor({
                         ))}
                     </div>
                   ) : null}
+                  {to && isAddress(to)
+                    ? (() => {
+                        const poison = lookalikePoison(to, addressBook);
+                        return poison ? (
+                          <p className="warn-line" role="alert">
+                            Lookalike of “{poison.label}” — same start/end,
+                            different middle. Clipboard scams do this. Check
+                            every character on Trezor.
+                          </p>
+                        ) : null;
+                      })()
+                    : null}
                   {to && isAddress(to) ? (
                     isKnownRecipient(to) ? (
                       <p className="muted fee">
@@ -3773,6 +4075,9 @@ export function PulseTrezor({
                       busy ||
                       !to ||
                       !amount ||
+                      (chainId === 369 &&
+                        !mainnetSendAcked &&
+                        !mainnetSendAck) ||
                       (() => {
                         try {
                           if (asset === "PLS" && balance != null) {
@@ -3811,6 +4116,19 @@ export function PulseTrezor({
                   >
                     {busy ? "Signing…" : "Sign & send"}
                   </button>
+                  {chainId === 369 && !mainnetSendAcked ? (
+                    <label className="blind-ack">
+                      <input
+                        type="checkbox"
+                        checked={mainnetSendAck}
+                        onChange={(e) => setMainnetSendAck(e.target.checked)}
+                      />
+                      <span>
+                        First mainnet send — real PLS/tokens leave this wallet.
+                        I will read the recipient and amount on Trezor.
+                      </span>
+                    </label>
+                  ) : null}
                   <details className="gas-details">
                     <summary>Custom contract call</summary>
                     <label className="field">
@@ -3853,7 +4171,7 @@ export function PulseTrezor({
                       Sign call
                     </button>
                   </details>
-                  {chainId === 369 ? (
+                  {chainId === 369 && mainnetSendAcked ? (
                     <p className="warn-line">Mainnet — real funds.</p>
                   ) : null}
                   {lastTx ? (
@@ -4358,14 +4676,31 @@ export function PulseTrezor({
                         <button
                           type="button"
                           className="btn ghost"
-                          disabled={busy || !spender || !selectedToken}
+                          disabled={
+                            busy ||
+                            !spender ||
+                            !selectedToken ||
+                            !approveMaxAck
+                          }
                           onClick={() => onApprove(true)}
                         >
                           Approve max
                         </button>
                       </div>
+                      <label className="blind-ack">
+                        <input
+                          type="checkbox"
+                          checked={approveMaxAck}
+                          onChange={(e) => setApproveMaxAck(e.target.checked)}
+                        />
+                        <span>
+                          Unlimited approve — this spender can drain the whole
+                          token balance until I revoke. I will read the Trezor
+                          screen.
+                        </span>
+                      </label>
                       <p className="warn-line">
-                        Read spender on device. Max = unlimited.
+                        Prefer exact amount when you can. Max = unlimited.
                       </p>
                     </>
                   )}

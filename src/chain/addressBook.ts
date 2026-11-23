@@ -68,6 +68,84 @@ export function isKnownRecipient(address: string): boolean {
   return bookLabel(address) != null;
 }
 
+export type LookalikeHit = { label: string; known: string };
+
+/**
+ * Same start+end, different middle — classic clipboard / history poison.
+ */
+export function lookalikeAgainst(
+  address: string,
+  peers: readonly { address: string; label: string }[],
+): LookalikeHit | null {
+  const a = address.trim().toLowerCase();
+  if (!/^0x[a-f0-9]{40}$/.test(a)) return null;
+  const head = a.slice(0, 6);
+  const tail = a.slice(-4);
+  for (const b of peers) {
+    const k = b.address.trim().toLowerCase();
+    if (!/^0x[a-f0-9]{40}$/.test(k) || k === a) continue;
+    if (k.slice(0, 6) === head && k.slice(-4) === tail) {
+      return { label: b.label || short(k), known: b.address };
+    }
+  }
+  return null;
+}
+
+/**
+ * Clipboard / UI poisoning vs saved contacts.
+ */
+export function lookalikePoison(
+  address: string,
+  book: BookEntry[] = loadRaw(),
+): LookalikeHit | null {
+  return lookalikeAgainst(
+    address,
+    book.map((b) => ({ address: b.address, label: b.label })),
+  );
+}
+
+/** Tiny inbound used to plant a lookalike in history (PLS / native). */
+export const POISON_DUST_ETH = 0.05;
+
+export type ActivityPoisonHit = LookalikeHit & {
+  dust: boolean;
+  direction: "in" | "out";
+};
+
+/**
+ * Flag activity rows that look like address-poisoning theater:
+ * lookalike of a book contact or a prior Out counterparty (esp. tiny In).
+ */
+export function activityPoison(
+  row: {
+    direction: string;
+    valueEth: string;
+    counterparty: string | null;
+  },
+  peers: readonly { address: string; label: string }[],
+  dustEth = POISON_DUST_ETH,
+): ActivityPoisonHit | null {
+  if (
+    (row.direction !== "in" && row.direction !== "out") ||
+    !row.counterparty
+  ) {
+    return null;
+  }
+  const hit = lookalikeAgainst(row.counterparty, peers);
+  if (!hit) return null;
+  const v = Number(row.valueEth);
+  const dust =
+    row.direction === "in" &&
+    Number.isFinite(v) &&
+    v >= 0 &&
+    v <= dustEth;
+  return {
+    ...hit,
+    dust,
+    direction: row.direction,
+  };
+}
+
 function short(a: string): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }

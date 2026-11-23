@@ -228,6 +228,27 @@ function rowToStake(row: readonly unknown[]): HexStakeRow {
   };
 }
 
+/** Cheap stakeCount only — for account-card badges. Pulse mainnet HEX. */
+export async function fetchHexStakeCount(
+  chainId: DeskChainId,
+  staker: Address,
+  rpc?: RpcOverride,
+): Promise<number> {
+  if (chainId !== 369) return 0;
+  try {
+    const count = await makePublicClient(chainId, rpc).readContract({
+      address: HEX,
+      abi: hexStakeAbi,
+      functionName: "stakeCount",
+      args: [staker],
+    });
+    const n = Number(count);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export async function fetchHexStakes(
   chainId: DeskChainId,
   staker: Address,
@@ -235,15 +256,9 @@ export async function fetchHexStakes(
   max = STAKE_SOFT_CEILING,
 ): Promise<{ stakes: HexStakeRow[]; stakeCount: number }> {
   if (chainId !== 369) return { stakes: [], stakeCount: 0 };
+  const n = await fetchHexStakeCount(chainId, staker, rpc);
+  if (n <= 0) return { stakes: [], stakeCount: 0 };
   const client = makePublicClient(chainId, rpc);
-  const count = await client.readContract({
-    address: HEX,
-    abi: hexStakeAbi,
-    functionName: "stakeCount",
-    args: [staker],
-  });
-  const n = Number(count);
-  if (!Number.isFinite(n) || n <= 0) return { stakes: [], stakeCount: 0 };
   const take = Math.min(n, max);
   const stakes: HexStakeRow[] = [];
 

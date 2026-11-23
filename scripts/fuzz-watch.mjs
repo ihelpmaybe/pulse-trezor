@@ -69,8 +69,37 @@ for (let i = 0; i < 200; i++) {
   }
 }
 
+// Extreme lookalike / amount chaos (pure string checks — no throw)
+function poisonTwin(a, mid = "deadbeefdeadbeefdeadbeefdeadbeef") {
+  return a.slice(0, 6) + mid + a.slice(-4);
+}
+const whale = "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8";
+const twin = poisonTwin(whale);
+if (twin.length !== 42 || twin === whale) {
+  console.error("FAIL poison twin shape");
+  fail += 1;
+}
+const crazyAmts = [
+  "0",
+  "-1",
+  "1e309",
+  "NaN",
+  "999999999999999999999999999999",
+  "0.000000000000000001",
+  "",
+  "🦄",
+];
+for (const a of crazyAmts) {
+  try {
+    Number(a);
+  } catch (e) {
+    console.error("FAIL amount threw:", a, e);
+    fail += 1;
+  }
+}
+
 if (fail) {
   console.error(`fuzz-watch: ${fail} failure(s)`);
   process.exit(1);
 }
-console.log("fuzz-watch: OK (seed rejects + 200 junk)");
+console.log("fuzz-watch: OK (seed rejects + 200 junk + extreme)");

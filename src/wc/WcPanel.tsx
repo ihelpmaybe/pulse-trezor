@@ -10,8 +10,9 @@ import {
 import {
   clearSignMessage,
   clearSignTx,
+  dangerAckLabel,
   explainClearLines,
-  needsBlindConfirm,
+  needsDangerAck,
   phishingWarn,
   worstTone,
   type ClearLine,
@@ -613,17 +614,14 @@ export function WcPanel({
                   {simHint}
                 </p>
               ) : null}
-              {needsBlindConfirm(pending.lines) ? (
+              {needsDangerAck(pending.lines) ? (
                 <label className="blind-ack">
                   <input
                     type="checkbox"
                     checked={blindAck}
                     onChange={(e) => setBlindAck(e.target.checked)}
                   />
-                  <span>
-                    I will read the Trezor screen for this blind calldata (dApp
-                    labels can lie).
-                  </span>
+                  <span>{dangerAckLabel(pending.lines)}</span>
                 </label>
               ) : null}
               <div className="row">
@@ -640,7 +638,7 @@ export function WcPanel({
                   className="btn"
                   disabled={
                     busy ||
-                    (needsBlindConfirm(pending.lines) && !blindAck) ||
+                    (needsDangerAck(pending.lines) && !blindAck) ||
                     !!phishingWarn(pending.dappUrl)
                   }
                   onClick={() => void onApproveRequest()}
