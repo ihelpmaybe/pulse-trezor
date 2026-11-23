@@ -549,18 +549,32 @@ export function WcPanel({
                 ) === true ? (
                 <p className="muted fee">Remembered allow for this origin.</p>
               ) : null}
+              {phishingWarn(proposal.params.proposer.metadata.url) ? (
+                <label className="hide-zero">
+                  <input
+                    type="checkbox"
+                    checked={blindAck}
+                    onChange={(e) => setBlindAck(e.target.checked)}
+                  />
+                  <span>
+                    I understand the origin warn — still approve this session
+                  </span>
+                </label>
+              ) : null}
               <div className="row">
                 <button
                   type="button"
                   className="btn"
                   disabled={
                     busy ||
-                    !!phishingWarn(proposal.params.proposer.metadata.url)
+                    (!!phishingWarn(proposal.params.proposer.metadata.url) &&
+                      !blindAck)
                   }
                   onClick={() => void onApproveSession()}
                   title={
-                    phishingWarn(proposal.params.proposer.metadata.url)
-                      ? "Blocked — phishing warn"
+                    phishingWarn(proposal.params.proposer.metadata.url) &&
+                    !blindAck
+                      ? "Check the origin warn first"
                       : undefined
                   }
                 >
