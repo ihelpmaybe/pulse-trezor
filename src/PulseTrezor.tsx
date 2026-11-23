@@ -223,6 +223,7 @@ export function PulseTrezor({
     setActFilter,
     actLimit,
     setActLimit,
+    actHasMore,
     nfts,
     nftsTruncated,
     nftBusy,
@@ -842,6 +843,7 @@ export function PulseTrezor({
           setActFilter={setActFilter}
           actLimit={actLimit}
           setActLimit={setActLimit}
+          actHasMore={actHasMore}
           refreshActivity={refreshActivity}
           addressBook={addressBook}
           lastTx={lastTx}

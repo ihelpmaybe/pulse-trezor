@@ -67,6 +67,7 @@ export function useDeskBag(opts: {
   const [actErr, setActErr] = useState<string | null>(null);
   const [actFilter, setActFilter] = useState<"all" | "in" | "out">("all");
   const [actLimit, setActLimit] = useState(48);
+  const [actHasMore, setActHasMore] = useState(false);
   const [nfts, setNfts] = useState<ScanNft[]>([]);
   const [nftsTruncated, setNftsTruncated] = useState(0);
   const [nftBusy, setNftBusy] = useState(false);
@@ -146,8 +147,10 @@ export function useDeskBag(opts: {
       try {
         const rows = await fetchAddressActivity(cid, addr, limit);
         setActivity(rows);
+        setActHasMore(rows.length >= limit);
       } catch (e) {
         setActivity([]);
+        setActHasMore(false);
         setActErr(e instanceof Error ? e.message : String(e));
       } finally {
         setActBusy(false);
@@ -163,6 +166,8 @@ export function useDeskBag(opts: {
       setFullBag(null);
       setActivity([]);
       setActErr(null);
+      setActHasMore(false);
+      setActLimit(48);
       setNfts([]);
       setNftsTruncated(0);
       setNftErr(null);
@@ -276,6 +281,7 @@ export function useDeskBag(opts: {
     setActFilter,
     actLimit,
     setActLimit,
+    actHasMore,
     nfts,
     nftsTruncated,
     nftBusy,

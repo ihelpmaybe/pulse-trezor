@@ -22,4 +22,17 @@ describe("bumpFees", () => {
     });
     expect(next.gasPrice).toBe(250n);
   });
+
+  it("meets common RBF floor (≥12.5%) at default 125%", () => {
+    const base = 1_000_000_000n;
+    const next = bumpFees({
+      eip1559: true,
+      gas: 21_000n,
+      maxFeePerGas: base,
+      maxPriorityFeePerGas: base,
+    });
+    const floor = (base * 1125n) / 1000n;
+    expect(next.maxFeePerGas! >= floor).toBe(true);
+    expect(next.maxPriorityFeePerGas! >= floor).toBe(true);
+  });
 });

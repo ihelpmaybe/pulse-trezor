@@ -1,7 +1,8 @@
 /**
  * Activity card — PulseScan feed, poison flags, stuck-tx shortcuts.
- * Dense grid on wide panels (ui-real-estate).
+ * Dense grid on wide panels (ui-real-estate) + infinite scroll.
  */
+import { useEffect, useRef } from "react";
 import type { Address, Hash } from "viem";
 import {
   activityPoison,
@@ -30,6 +31,7 @@ type Props = {
   setActFilter: (f: ActFilter) => void;
   actLimit: number;
   setActLimit: (n: number) => void;
+  actHasMore: boolean;
   refreshActivity: (
     address: Address,
     chainId: DeskChainId,
@@ -61,6 +63,7 @@ export function ActivityPanel({
   setActFilter,
   actLimit,
   setActLimit,
+  actHasMore,
   refreshActivity,
   addressBook,
   lastTx,
@@ -99,6 +102,33 @@ export function ActivityPanel({
     !!lastTx &&
     txStatus === "pending" &&
     !activity.some((a) => a.hash.toLowerCase() === lastTx.toLowerCase());
+
+  const moreRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (!active || !actHasMore || actBusy) return;
+    const el = moreRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (actBusy || !actHasMore) return;
+        const next = actLimit + 48;
+        setActLimit(next);
+        void refreshActivity(active.address, chainId, next);
+      },
+      { root: null, rootMargin: "160px", threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [
+    active,
+    actHasMore,
+    actBusy,
+    actLimit,
+    chainId,
+    refreshActivity,
+    setActLimit,
+  ]);
 
   return (
     <section className="card activity">
@@ -295,8 +325,9 @@ export function ActivityPanel({
           </ul>
         </>
       )}
-      {active && activity.length > 0 ? (
+      {active && actHasMore ? (
         <button
+          ref={moreRef}
           type="button"
           className="btn ghost activity-more"
           disabled={actBusy}

@@ -15,7 +15,8 @@
     "smoke": "npm run typecheck && npm run build && vitest run && npm run fuzz",
     "ext:icons": "node scripts/ext-make-icons.mjs",
     "pwa:icons": "node scripts/pwa-icons.mjs",
-    "ext:pack": "node scripts/ext-make-icons.mjs && node scripts/ext-pack.mjs"
+    "ext:pack": "node scripts/ext-make-icons.mjs && node scripts/ext-pack.mjs",
+    "desk:pack": "node scripts/desk-pack.mjs"
   },
   "engines": {
     "node": ">=20"

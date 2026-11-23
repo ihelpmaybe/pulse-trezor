@@ -16,3 +16,4 @@ tmp-wc-uri.txt
 tmp-*.json
 
 dist-ext/
+release/
