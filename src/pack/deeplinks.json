@@ -3,7 +3,7 @@
   "kind": "deeplinks",
   "version": "1.0.0",
   "doc": "Seamless kit — link to builders; do not rebuild. Sources: official sites + hexikani usable + DefiLlama 2026-11.",
-  "updated": "2026-11-22",
+  "updated": "2026-11-23",
   "core": [
     {
       "id": "pulsechain",
@@ -54,6 +54,23 @@
       "app": "https://scan.pulsechain.com",
       "api": "https://api.scan.pulsechain.com",
       "quality": "A"
+    },
+    {
+      "id": "gopulse",
+      "name": "GoPulse",
+      "app": "https://gopulse.com",
+      "quality": "B",
+      "twitter": "GoPulsecom",
+      "role": "portfolio",
+      "notes": "Footer kit — same as tools.gopulse"
+    },
+    {
+      "id": "pump-tires",
+      "name": "PUMP.tires",
+      "app": "https://pump.tires",
+      "quality": "B",
+      "role": "meme-launch",
+      "notes": "Bonding curve → PulseX graduate; no official socials"
     }
   ],
   "defi": [

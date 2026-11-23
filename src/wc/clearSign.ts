@@ -168,6 +168,12 @@ const HOST_HINTS: {
     detail: "Swap path — still confirm token + amounts on Trezor",
   },
   {
+    re: /pump\.tires/i,
+    title: "PUMP.tires / meme launch",
+    tone: "warn",
+    detail: "Bonding-curve meme path — high loss risk; confirm amounts on Trezor",
+  },
+  {
     re: /hex\.com|go\.hex\.com|hexican/i,
     title: "HEX stake UI",
     tone: "warn",
