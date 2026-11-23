@@ -39,6 +39,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://github.com/ihelpmaybe/Tip-wallet",
     mark: "Tip",
     tone: "violet",
+    iconSrc: "/sw-brands/tip-wallet.svg",
   },
   {
     name: "Hearts Archive",
@@ -54,6 +55,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://github.com/ihelpmaybe/Just-The-Tip",
     mark: "JT",
     tone: "amber",
+    iconSrc: "/sw-brands/just-the-tip.png",
   },
   {
     name: "Free Super chat",
