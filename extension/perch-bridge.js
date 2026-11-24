@@ -41,7 +41,7 @@
     });
   }
 
-  /** Desk → dapp fan-out: accountsChanged / chainChanged */
+  /** Desk → dapp fan-out: accountsChanged / chainChanged + session cache */
   window.addEventListener("message", (ev) => {
     const data = ev.data;
     if (
@@ -57,6 +57,25 @@
         event: data.event,
         args: data.args || [],
       });
+      if (data.event === "accountsChanged") {
+        const acc = Array.isArray(data.args?.[0]) ? data.args[0][0] : null;
+        chrome.runtime.sendMessage({
+          kind: "perch-session",
+          address: acc || null,
+          chainId: undefined,
+        });
+      }
+      if (data.event === "chainChanged") {
+        const hex = String(data.args?.[0] || "");
+        const chainId = hex.startsWith("0x")
+          ? parseInt(hex, 16)
+          : Number(hex) || 369;
+        chrome.runtime.sendMessage({
+          kind: "perch-session",
+          address: undefined,
+          chainId,
+        });
+      }
     } catch {
       /* SW asleep / no listener — dapp keeps last-known until next request */
     }

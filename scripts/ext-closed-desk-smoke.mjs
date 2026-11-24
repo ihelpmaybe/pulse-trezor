@@ -1,7 +1,10 @@
 /**
- * Lab Chrome CDP: with the Perch desk tab closed, inject calls fail 4100
- * and do not open a new desk tab.
- * Reload the extension first so background.js is the closed-desk build.
+ * Lab Chrome CDP: with the Perch desk tab closed, silent inject calls
+ * must NOT open a new desk tab.
+ * - No prior session: eth_chainId / eth_accounts → 4100 (or empty via offscreen miss)
+ * - After Connect (0.1.4+): may return cached chainId/accounts without spawning desk
+ * eth_requestAccounts may open desk — this smoke does not call that.
+ * Reload the extension first so background.js is current.
  * Env: CDP_PORT=9233
  */
 import WebSocket from "ws";
@@ -128,14 +131,20 @@ const after = await listPages();
 const reopened = after.filter(isPerch).map((p) => p.url);
 console.log("REOPENED", reopened);
 
-const honest =
-  probe?.isPulsePerch === true &&
+const noSpawn = reopened.length === 0;
+const failClosed =
   probe?.chainOk === false &&
   probe?.chainCode === 4100 &&
-  /desk is closed/i.test(probe?.chainMessage || "") &&
   probe?.accountsOk === false &&
-  probe?.accountsCode === 4100 &&
-  reopened.length === 0;
+  probe?.accountsCode === 4100;
+const cachedOk =
+  probe?.chainOk === true &&
+  probe?.accountsOk === true &&
+  Array.isArray(probe?.accounts);
+const honest =
+  probe?.isPulsePerch === true &&
+  noSpawn &&
+  (failClosed || cachedOk);
 
 const result = { ok: honest, closed: closed.length, probe, reopened };
 writeFileSync("tmp-ext-closed-desk.json", JSON.stringify(result, null, 2));

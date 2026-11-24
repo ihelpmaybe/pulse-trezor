@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pulse Perch bridge</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+      iframe {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hidden desk host — Connect/Suite still signs; no soft-seed in the SW. -->
+    <iframe
+      id="desk"
+      title="Pulse Perch desk bridge"
+      src="http://127.0.0.1:5174/"
+      allow=""
+    ></iframe>
+    <script src="offscreen.js"></script>
+  </body>
+</html>

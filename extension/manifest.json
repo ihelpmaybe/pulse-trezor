@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Pulse Perch",
-  "version": "0.1.2",
-  "description": "PulseChain wallet inject for Pulse Perch — Trezor signs via the open desk tab. Lab / sideload.",
+  "version": "0.1.4",
+  "description": "PulseChain wallet inject for Pulse Perch — Trezor signs via desk / offscreen bridge → Suite. Lab / sideload.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": ["tabs", "storage", "scripting"],
+  "permissions": ["tabs", "storage", "scripting", "offscreen"],
   "host_permissions": [
     "http://127.0.0.1/*",
     "http://localhost/*",

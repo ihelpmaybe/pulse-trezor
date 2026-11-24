@@ -8,8 +8,123 @@ const PERCH_MATCH = [
   "http://localhost:5173/*",
 ];
 
+const DESK_URL = "http://127.0.0.1:5174/";
+const SESSION_KEY = "perchSession";
+const OFFSCREEN_URL = "offscreen.html";
+const OFFSCREEN_REASON = "DOM_SCRAPING";
+const OFFSCREEN_JUSTIFICATION =
+  "Host Pulse Perch desk iframe so EIP-1193 can relay without a visible desk tab. Signing stays on Connect/Suite inside the desk app.";
+
+/** User is asking to connect — OK to open/focus desk. */
+function isConnectIntent(method) {
+  const m = String(method || "");
+  return m === "eth_requestAccounts" || m === "wallet_requestPermissions";
+}
+
+/** Needs Suite/device — open desk or use offscreen bridge. */
+function isSignIntent(method) {
+  const m = String(method || "");
+  return (
+    m === "eth_sendTransaction" ||
+    m === "eth_signTransaction" ||
+    m === "eth_sign" ||
+    m === "personal_sign" ||
+    m === "eth_signTypedData" ||
+    m === "eth_signTypedData_v3" ||
+    m === "eth_signTypedData_v4" ||
+    m === "wallet_sendCalls" ||
+    m === "wallet_addEthereumChain" ||
+    m === "wallet_switchEthereumChain" ||
+    m === "wallet_watchAsset"
+  );
+}
+
+/** Safe to answer from chrome.storage when desk tab is gone. */
+function isCachedRead(method) {
+  const m = String(method || "");
+  return (
+    m === "eth_accounts" ||
+    m === "eth_chainId" ||
+    m === "net_version" ||
+    m === "wallet_getPermissions"
+  );
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function loadSession() {
+  try {
+    const bag = await chrome.storage.session.get(SESSION_KEY);
+    return bag?.[SESSION_KEY] || null;
+  } catch {
+    try {
+      const bag = await chrome.storage.local.get(SESSION_KEY);
+      return bag?.[SESSION_KEY] || null;
+    } catch {
+      return null;
+    }
+  }
+}
+
+async function saveSession(snap) {
+  const payload = { [SESSION_KEY]: snap };
+  try {
+    await chrome.storage.session.set(payload);
+  } catch {
+    /* session storage missing on old chrome */
+  }
+  try {
+    await chrome.storage.local.set(payload);
+  } catch {
+    /* ignore */
+  }
+}
+
+function answerFromCache(method, session) {
+  if (!session?.address) return null;
+  const chainId = Number(session.chainId) || 369;
+  const hexChain = `0x${chainId.toString(16)}`;
+  const accounts = [session.address];
+  switch (String(method || "")) {
+    case "eth_accounts":
+      return accounts;
+    case "eth_chainId":
+      return hexChain;
+    case "net_version":
+      return String(chainId);
+    case "wallet_getPermissions":
+      return [
+        {
+          parentCapability: "eth_accounts",
+          caveats: [
+            { type: "restrictReturnedAccounts", value: accounts },
+          ],
+        },
+      ];
+    default:
+      return null;
+  }
+}
+
+async function setDeskBadge(ok) {
+  try {
+    await chrome.action.setBadgeText({ text: ok ? "" : "!" });
+    await chrome.action.setBadgeBackgroundColor({
+      color: ok ? "#2a7a4b" : "#b33a3a",
+    });
+    await chrome.action.setTitle({
+      title: ok
+        ? "Pulse Perch — desk / bridge up"
+        : "Pulse Perch — desk closed (click to open)",
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
 async function findPerchTab() {
-  /** Prefer active / most-recent desk tab — stale tabs lack a live inject host. */
   let best = null;
   for (const pattern of PERCH_MATCH) {
     const tabs = await chrome.tabs.query({ url: pattern });
@@ -29,6 +144,66 @@ async function findPerchTab() {
   return best;
 }
 
+async function refreshDeskBadge() {
+  const tab = await findPerchTab();
+  const off = await hasOffscreen();
+  await setDeskBadge(!!tab || off);
+  return tab;
+}
+
+async function hasOffscreen() {
+  try {
+    if (!chrome.offscreen?.hasDocument) return false;
+    return await chrome.offscreen.hasDocument();
+  } catch {
+    return false;
+  }
+}
+
+async function ensureOffscreen() {
+  if (await hasOffscreen()) return true;
+  if (!chrome.offscreen?.createDocument) return false;
+  try {
+    await chrome.offscreen.createDocument({
+      url: OFFSCREEN_URL,
+      reasons: [OFFSCREEN_REASON],
+      justification: OFFSCREEN_JUSTIFICATION,
+    });
+    await sleep(600);
+    return true;
+  } catch (e) {
+    console.warn("ensureOffscreen", e?.message || e);
+    return false;
+  }
+}
+
+async function openOrFocusDesk() {
+  const existing = await findPerchTab();
+  if (existing?.id != null) {
+    if (existing.discarded) {
+      try {
+        await chrome.tabs.reload(existing.id);
+        await sleep(400);
+      } catch {
+        /* ignore */
+      }
+    }
+    await chrome.tabs.update(existing.id, { active: true });
+    if (existing.windowId != null) {
+      try {
+        await chrome.windows.update(existing.windowId, { focused: true });
+      } catch {
+        /* ignore */
+      }
+    }
+    await setDeskBadge(true);
+    return existing;
+  }
+  const created = await chrome.tabs.create({ url: DESK_URL, active: true });
+  await setDeskBadge(true);
+  return created;
+}
+
 async function ensurePerchBridge(tabId) {
   try {
     await chrome.tabs.sendMessage(tabId, { kind: "eip1193-ping" });
@@ -41,7 +216,7 @@ async function ensurePerchBridge(tabId) {
       target: { tabId },
       files: ["perch-bridge.js"],
     });
-    await new Promise((r) => setTimeout(r, 200));
+    await sleep(200);
     return true;
   } catch (e) {
     console.warn("ensurePerchBridge", e?.message || e);
@@ -49,19 +224,93 @@ async function ensurePerchBridge(tabId) {
   }
 }
 
+async function waitForDeskBridge(tabId, attempts = 8) {
+  for (let i = 0; i < attempts; i++) {
+    const ok = await ensurePerchBridge(tabId);
+    if (ok) {
+      try {
+        await chrome.tabs.sendMessage(tabId, { kind: "eip1193-ping" });
+        return true;
+      } catch {
+        /* not ready */
+      }
+    }
+    await sleep(350);
+  }
+  return false;
+}
+
+async function forwardToTab(tab, method, params) {
+  await ensurePerchBridge(tab.id);
+  return chrome.tabs.sendMessage(tab.id, {
+    kind: "eip1193-forward",
+    method,
+    params,
+  });
+}
+
+async function forwardToOffscreen(method, params) {
+  const ok = await ensureOffscreen();
+  if (!ok) return null;
+  try {
+    return await chrome.runtime.sendMessage({
+      kind: "eip1193-forward-offscreen",
+      method,
+      params,
+    });
+  } catch (e) {
+    return {
+      error: {
+        code: 4100,
+        message: e?.message || "Offscreen bridge unreachable",
+      },
+    };
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.kind === "perch-session") {
+    void (async () => {
+      const prev = (await loadSession()) || {};
+      const next = {
+        address:
+          msg.address !== undefined ? msg.address : prev.address || null,
+        chainId:
+          msg.chainId !== undefined
+            ? msg.chainId
+            : prev.chainId || 369,
+        at: Date.now(),
+      };
+      await saveSession(next);
+      sendResponse({ ok: true });
+    })();
+    return true;
+  }
+
   if (msg?.kind === "eip1193-broadcast") {
     (async () => {
+      if (msg.event === "accountsChanged" || msg.event === "chainChanged") {
+        const session = (await loadSession()) || {};
+        if (msg.event === "accountsChanged") {
+          const acc = Array.isArray(msg.args?.[0]) ? msg.args[0][0] : null;
+          session.address = acc || null;
+        }
+        if (msg.event === "chainChanged") {
+          const hex = String(msg.args?.[0] || "");
+          session.chainId = hex.startsWith("0x")
+            ? parseInt(hex, 16)
+            : Number(hex) || session.chainId;
+        }
+        session.at = Date.now();
+        await saveSession(session);
+      }
       const tabs = await chrome.tabs.query({
         url: ["https://*/*", "http://*/*"],
       });
       for (const tab of tabs) {
         if (tab.id == null) continue;
-        /* Skip desk tabs — they already know */
         const url = tab.url || "";
-        if (
-          /:\/\/(127\.0\.0\.1|localhost):(5173|5174)\b/.test(url)
-        ) {
+        if (/:\/\/(127\.0\.0\.1|localhost):(5173|5174)\b/.test(url)) {
           continue;
         }
         try {
@@ -81,8 +330,60 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || msg.kind !== "eip1193") return false;
 
   (async () => {
-    const tab = await findPerchTab();
+    let tab = await findPerchTab();
+    await setDeskBadge(!!tab || (await hasOffscreen()));
+
+    /* Cached reads — no desk spawn (dapp probes). */
+    if (!tab && isCachedRead(msg.method)) {
+      const session = await loadSession();
+      const cached = answerFromCache(msg.method, session);
+      if (cached != null) {
+        sendResponse({ result: cached });
+        return;
+      }
+      /* Try offscreen before 4100 — may still have live inject. */
+      const viaOff = await forwardToOffscreen(msg.method, msg.params);
+      if (viaOff && !viaOff.error) {
+        sendResponse(viaOff);
+        return;
+      }
+      sendResponse({
+        error: {
+          code: 4100,
+          message:
+            "Pulse Perch not connected — open desk, Connect Trezor once",
+        },
+      });
+      return;
+    }
+
+    if (!tab && (isConnectIntent(msg.method) || isSignIntent(msg.method))) {
+      /* Prefer offscreen bridge for signs when desk tab closed. */
+      if (isSignIntent(msg.method) && !isConnectIntent(msg.method)) {
+        const viaOff = await forwardToOffscreen(msg.method, msg.params);
+        if (viaOff && !viaOff.error) {
+          sendResponse(viaOff);
+          return;
+        }
+      }
+      tab = await openOrFocusDesk();
+      if (tab?.id != null) {
+        await waitForDeskBridge(tab.id);
+      }
+    }
+
     if (!tab) {
+      const viaOff = await forwardToOffscreen(msg.method, msg.params);
+      if (viaOff) {
+        sendResponse(
+          viaOff.error
+            ? viaOff
+            : viaOff.result !== undefined
+              ? viaOff
+              : { result: viaOff.result },
+        );
+        return;
+      }
       sendResponse({
         error: {
           code: 4100,
@@ -91,15 +392,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       });
       return;
     }
+
+    if (tab.discarded && tab.id != null) {
+      try {
+        await chrome.tabs.reload(tab.id);
+        await sleep(400);
+        await waitForDeskBridge(tab.id);
+      } catch {
+        /* ignore */
+      }
+    }
+
     try {
-      await ensurePerchBridge(tab.id);
-      const resp = await chrome.tabs.sendMessage(tab.id, {
-        kind: "eip1193-forward",
-        method: msg.method,
-        params: msg.params,
-      });
-      sendResponse(resp || { error: { code: 4100, message: "No response from Perch" } });
+      const resp = await forwardToTab(tab, msg.method, msg.params);
+      sendResponse(
+        resp || { error: { code: 4100, message: "No response from Perch" } },
+      );
     } catch (e) {
+      const viaOff = await forwardToOffscreen(msg.method, msg.params);
+      if (viaOff && !viaOff.error) {
+        sendResponse(viaOff);
+        return;
+      }
       sendResponse({
         error: {
           code: 4100,
@@ -115,10 +429,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 chrome.action.onClicked.addListener(async () => {
-  const tab = await findPerchTab();
-  if (tab?.id != null) {
-    await chrome.tabs.update(tab.id, { active: true });
-    return;
-  }
-  await chrome.tabs.create({ url: "http://127.0.0.1:5174/" });
+  await openOrFocusDesk();
+  void ensureOffscreen();
 });
+
+chrome.tabs.onRemoved.addListener(() => {
+  void refreshDeskBadge();
+});
+
+chrome.tabs.onUpdated.addListener((_id, change) => {
+  if (change.status === "complete" || change.url) {
+    void refreshDeskBadge();
+  }
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  void refreshDeskBadge();
+  void ensureOffscreen();
+});
+
+void refreshDeskBadge();

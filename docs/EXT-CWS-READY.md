@@ -15,7 +15,7 @@ Pack: `npm run ext:pack` → `dist-ext/pulse-perch-extension-<version>.zip` + `.
 1. Run desk (`npm run dev` → `:5174`) or host build.
 2. Chrome → Extensions → Developer mode → **Load unpacked** → `extension/`  
    or unpack the release zip first.
-3. Connect Trezor on the Perch tab; keep that tab open for signs.
+3. Connect Trezor on the Perch tab. Toolbar shows `!` if the desk tab is missing — click the icon to open it. Dapp **Connect** can open the desk; background probes will not.
 4. Dapp tabs get `window.ethereum` (Perch). Prefer **Sites** (WalletConnect) when the dapp supports it.
 
 ## CWS listing checklist (do when ready to submit)
