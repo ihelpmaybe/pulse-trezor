@@ -38,8 +38,48 @@ export const THEME_KEY = "pulse-perch-theme-v1";
 export const PATH_TEMPLATE_KEY = "pulse-perch-path-template-v1";
 /** Device card: show Account'/Change/Count/Path when on. */
 export const DEVICE_ADVANCED_KEY = "pulse-perch-device-advanced-v1";
+/** Migrate-from-ETH walk checkboxes (Advanced Apps card). */
+export const MIGRATE_WALK_KEY = "pulse-perch-migrate-walk-v1";
 /** One-time stronger mainnet send cue — then soft “Mainnet” line only. */
 export const FIRST_MAINNET_SEND_KEY = "pulse-perch-first-mainnet-send-v1";
+
+export type MigrateWalkState = {
+  sameAddrAck: boolean;
+  suiteReady: boolean;
+  onPulse: boolean;
+  listedAssets: boolean;
+  bridged: boolean;
+  bagOk: boolean;
+  approvalsClean: boolean;
+};
+
+const MIGRATE_WALK_DEFAULT: MigrateWalkState = {
+  sameAddrAck: false,
+  suiteReady: false,
+  onPulse: false,
+  listedAssets: false,
+  bridged: false,
+  bagOk: false,
+  approvalsClean: false,
+};
+
+export function loadMigrateWalk(): MigrateWalkState {
+  try {
+    const raw = localStorage.getItem(MIGRATE_WALK_KEY);
+    if (!raw) return { ...MIGRATE_WALK_DEFAULT };
+    return { ...MIGRATE_WALK_DEFAULT, ...(JSON.parse(raw) as Partial<MigrateWalkState>) };
+  } catch {
+    return { ...MIGRATE_WALK_DEFAULT };
+  }
+}
+
+export function saveMigrateWalk(state: MigrateWalkState) {
+  try {
+    localStorage.setItem(MIGRATE_WALK_KEY, JSON.stringify(state));
+  } catch {
+    /* ignore */
+  }
+}
 
 export type A11yPrefs = {
   largeText: boolean;
@@ -111,6 +151,9 @@ export function saveDeviceAdvanced(on: boolean) {
   try {
     if (on) localStorage.setItem(DEVICE_ADVANCED_KEY, "1");
     else localStorage.removeItem(DEVICE_ADVANCED_KEY);
+    window.dispatchEvent(
+      new CustomEvent("pulse-perch-device-advanced", { detail: { on } }),
+    );
   } catch {
     /* ignore */
   }

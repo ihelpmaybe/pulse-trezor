@@ -2502,10 +2502,42 @@ html[data-a11y-focus] :focus-visible {
   gap: 0.25rem;
 }
 
+.apps-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
 .apps-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: 0.45rem;
+}
+
+.migrate-card {
+  grid-column: 1 / -1;
+}
+
+.migrate-card-advanced {
+  min-height: 0;
+}
+
+.migrate-steps {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+
+.migrate-steps .blind-ack {
+  margin: 0;
+}
+
+.migrate-actions {
+  margin-top: 0.45rem;
+  flex-wrap: wrap;
 }
 
 .apps-card {

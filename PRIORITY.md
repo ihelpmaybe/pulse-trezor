@@ -77,7 +77,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 | # | Task | Repo | TODO id |
 |---|------|------|---------|
-| 36 | Desk E power/migrate tools | `pulse-trezor` | E |
+| 36 | ~~Desk E power/migrate tools~~ **DONE** (Apps Migrate walk + Advanced) | `pulse-trezor` | E |
 | 37 | MPC0–MPC2 Tip recovery spike | `pulse-trezor-platform` | MPC |
 | 38 | TIP2 Trezor on Android | `Tip-wallet` | TIP2 |
 | 39 | AI2–AI6 MCP/policy/skills | `pulse-trezor-platform` | AI |
@@ -143,5 +143,6 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 ## Current focus (update when claiming)
 
 **Active band: finish Desk.** Tip/mobile parked.  
-Desk leftovers: hygiene commit · device RBF · mainnet Sites tx dust · Win desktop pack · ext smoke · EIP-712/Permit polish (#29) · migrate Advanced (#36).  
+Desk leftovers: device RBF (parked) · mainnet Sites tx dust · signed native packs · ext smoke.  
+Offline GitHub mirrors (not for public GH): `E:\vault\github` (`mirrors\private` · `mirrors\public` · `releases`).  
 Say: `Taking Desk …` (not Tip).

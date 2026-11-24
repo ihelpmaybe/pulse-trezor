@@ -30,6 +30,7 @@ import { type ScanToken } from "./chain/portfolio";
 import { type PackToken } from "./chain/tokens";
 import { reconcileErrWithSuite } from "./trezor/errors";
 import { WcPanel } from "./wc/WcPanel";
+import { MigratePanel } from "./ui/MigratePanel";
 import { loadFavorites, loadWalletFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
 import { decodeSyncPayload } from "./chain/syncPair";
@@ -1096,22 +1097,39 @@ export function PulseTrezor({
             hidden={actionTab !== "apps"}
           >
             {actionTab === "apps" ? (
-              <WcPanel
-                embedded
-                address={canSign && session ? session.address : null}
-                derivationIndex={session?.derivationIndex ?? 0}
-                chainId={chainId}
-                initialUri={deepWcUri}
-                onSwitchChain={(id) => {
-                  setChainId(id);
-                  try {
-                    setAsset(nativeSymbol(id));
-                  } catch {
-                    setAsset("PLS");
-                  }
-                }}
-                onError={(msg) => setErr(msg)}
-              />
+              <div className="apps-stack">
+                <div className="apps-grid">
+                  <MigratePanel
+                    chainId={chainId}
+                    canSign={canSign}
+                    onSwitchPulse={() => {
+                      setChainId(369);
+                      try {
+                        setAsset(nativeSymbol(369));
+                      } catch {
+                        setAsset("PLS");
+                      }
+                    }}
+                    onGotoApprovals={() => setActionTab("approve")}
+                  />
+                </div>
+                <WcPanel
+                  embedded
+                  address={canSign && session ? session.address : null}
+                  derivationIndex={session?.derivationIndex ?? 0}
+                  chainId={chainId}
+                  initialUri={deepWcUri}
+                  onSwitchChain={(id) => {
+                    setChainId(id);
+                    try {
+                      setAsset(nativeSymbol(id));
+                    } catch {
+                      setAsset("PLS");
+                    }
+                  }}
+                  onError={(msg) => setErr(msg)}
+                />
+              </div>
             ) : null}
           </div>
         </section>

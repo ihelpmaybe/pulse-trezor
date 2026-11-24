@@ -111,7 +111,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 
 ## E — Power tools
 - [x] Portfolio snapshot helpers — export bag snapshot JSON
-- [ ] Migrate walks → product Advanced mode
+- [x] Migrate walks → product Advanced mode — Apps → Migrate card (Device Advanced)
 - [ ] Connect e2e harness (fakes + device checklist)
 
 ## G — Ecosystem (desk-owned bits)
