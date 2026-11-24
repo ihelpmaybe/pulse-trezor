@@ -25,6 +25,7 @@
   "dependencies": {
     "@reown/walletkit": "^1.6.0",
     "@trezor/connect-web": "^10.0.1",
+    "@valve-tech/gas-oracle": "^0.24.1",
     "@walletconnect/core": "^2.26.0",
     "@walletconnect/utils": "^2.26.0",
     "qrcode": "^1.5.4",

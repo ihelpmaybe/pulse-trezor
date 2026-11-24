@@ -3,10 +3,18 @@
  */
 import { isAddress, type Address } from "viem";
 import {
-  ACCOUNT_COUNT_MIN,
+  ACCOUNT_INDEX_MAX,
   clampAccountCount,
+  parseLoadSpec,
 } from "./faceFormat";
+import { isRetiredRpcUrl } from "../chain/rpcErrors";
 import type { ListedAccount } from "../trezor/connect";
+import {
+  DEFAULT_PATH_TEMPLATE,
+  LEGACY_LEDGER_PATH_TEMPLATE,
+  normalizePathTemplate,
+  setPathTemplate,
+} from "../trezor/paths";
 
 export const WATCH_KEY = "pulse-trezor-watch-v1";
 export const RPC_KEY = "pulse-trezor-rpc-v1";
@@ -27,6 +35,9 @@ export const A11Y_KEY = "pulse-perch-a11y-v1";
 export const PRIVACY_KEY = "pulse-perch-privacy-hide-v1";
 export const INJECT_KEY = "pulse-perch-inject-v1";
 export const THEME_KEY = "pulse-perch-theme-v1";
+export const PATH_TEMPLATE_KEY = "pulse-perch-path-template-v1";
+/** Device card: show Account'/Change/Count/Path when on. */
+export const DEVICE_ADVANCED_KEY = "pulse-perch-device-advanced-v1";
 /** One-time stronger mainnet send cue — then soft “Mainnet” line only. */
 export const FIRST_MAINNET_SEND_KEY = "pulse-perch-first-mainnet-send-v1";
 
@@ -88,6 +99,23 @@ export function savePrivacyHide(on: boolean) {
   }
 }
 
+export function loadDeviceAdvanced(): boolean {
+  try {
+    return localStorage.getItem(DEVICE_ADVANCED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveDeviceAdvanced(on: boolean) {
+  try {
+    if (on) localStorage.setItem(DEVICE_ADVANCED_KEY, "1");
+    else localStorage.removeItem(DEVICE_ADVANCED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function loadA11y(): A11yPrefs {
   try {
     const raw = localStorage.getItem(A11Y_KEY);
@@ -139,7 +167,8 @@ export function saveWatch(s: Session | null) {
 export function loadAccountIndex(): number {
   try {
     const n = Number(localStorage.getItem(ACCOUNT_KEY));
-    if (Number.isFinite(n) && n >= 0 && n < 100) return Math.floor(n);
+    if (Number.isFinite(n) && n >= 0 && n <= ACCOUNT_INDEX_MAX)
+      return Math.floor(n);
   } catch {
     /* ignore */
   }
@@ -155,18 +184,38 @@ export function saveAccountIndex(i: number) {
 }
 
 export function loadAccountCount(): number {
-  try {
-    const n = Number(localStorage.getItem(ACCOUNT_COUNT_KEY));
-    if (Number.isFinite(n) && n >= ACCOUNT_COUNT_MIN) return clampAccountCount(n);
-  } catch {
-    /* ignore */
-  }
-  return 12;
+  return loadAccountRangeSpecParsed().span;
 }
 
 export function saveAccountCount(n: number) {
+  saveAccountRangeSpec(String(clampAccountCount(n)));
+}
+
+/** Count field face: `12` or `2000-3000`. */
+export function loadAccountRangeSpec(): string {
   try {
-    localStorage.setItem(ACCOUNT_COUNT_KEY, String(clampAccountCount(n)));
+    const raw = localStorage.getItem(ACCOUNT_COUNT_KEY);
+    if (raw && parseLoadSpec(raw)) return raw.trim().replace(/\s+/g, "");
+  } catch {
+    /* ignore */
+  }
+  return "12";
+}
+
+export function loadAccountRangeSpecParsed(): {
+  from: number;
+  to: number;
+  span: number;
+} {
+  return parseLoadSpec(loadAccountRangeSpec()) ?? { from: 0, to: 11, span: 12 };
+}
+
+export function saveAccountRangeSpec(raw: string) {
+  const p = parseLoadSpec(raw);
+  if (!p) return;
+  try {
+    const s = raw.trim().replace(/\s+/g, "");
+    localStorage.setItem(ACCOUNT_COUNT_KEY, s);
   } catch {
     /* ignore */
   }
@@ -201,7 +250,13 @@ export function saveAccountList(list: ListedAccount[]) {
 
 export function loadRpcOverride(): string {
   try {
-    return (localStorage.getItem(RPC_KEY) || "").trim();
+    const t = (localStorage.getItem(RPC_KEY) || "").trim();
+    // Drop shut-down endpoints so failover / Official can run again.
+    if (t && isRetiredRpcUrl(t)) {
+      localStorage.removeItem(RPC_KEY);
+      return "";
+    }
+    return t;
   } catch {
     return "";
   }
@@ -270,4 +325,45 @@ export function saveFirstMainnetSendAcked() {
   } catch {
     /* ignore */
   }
+}
+
+/** Load path template into memory + return it (MetaMask BIP44 if unset/bad). */
+export function loadPathTemplate(): string {
+  try {
+    const raw = (localStorage.getItem(PATH_TEMPLATE_KEY) || "").trim();
+    const norm = (u: string) => u.replace(/\/$/, "").toLowerCase();
+    // Perch = Trezor + MetaMask/Suite path. Drop leftover Ledger Live templates.
+    if (raw && norm(raw) === norm(LEGACY_LEDGER_PATH_TEMPLATE)) {
+      localStorage.removeItem(PATH_TEMPLATE_KEY);
+      setPathTemplate(DEFAULT_PATH_TEMPLATE);
+      return DEFAULT_PATH_TEMPLATE;
+    }
+    if (raw) {
+      const n = normalizePathTemplate(raw);
+      if (n.ok) {
+        setPathTemplate(n.template);
+        return n.template;
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  setPathTemplate(DEFAULT_PATH_TEMPLATE);
+  return DEFAULT_PATH_TEMPLATE;
+}
+
+export function savePathTemplate(template: string): string {
+  const n = normalizePathTemplate(template);
+  if (!n.ok) throw new Error(n.error);
+  setPathTemplate(n.template);
+  try {
+    if (n.template === DEFAULT_PATH_TEMPLATE) {
+      localStorage.removeItem(PATH_TEMPLATE_KEY);
+    } else {
+      localStorage.setItem(PATH_TEMPLATE_KEY, n.template);
+    }
+  } catch {
+    /* ignore */
+  }
+  return n.template;
 }

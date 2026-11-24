@@ -1,18 +1,15 @@
 /**
- * Face explain + dry-run — same clearSign strip as Sites, for Send/custom.
+ * Face explain + dry-run — clearSign strip + Temper/RPC simulate (one-shot).
  */
 import { useState } from "react";
 import type { Address, Hex } from "viem";
+import { simulateDeskTx } from "../chain/txSimulate";
 import {
   clearSignTx,
   explainClearLines,
   worstTone,
 } from "../wc/clearSign";
-import {
-  makePublicClient,
-  type DeskChainId,
-  type RpcOverride,
-} from "../chain/client";
+import type { DeskChainId, RpcOverride } from "../chain/client";
 
 export function TxExplain(props: {
   chainId: DeskChainId;
@@ -33,9 +30,14 @@ export function TxExplain(props: {
     valueHex,
     method: "eth_sendTransaction",
     dappUrl: "pulse-perch://desk",
+    chainId: props.chainId,
   });
   const tone = worstTone(lines);
   const [sim, setSim] = useState<string | null>(null);
+  const [simTone, setSimTone] = useState<"ok" | "warn" | "danger" | null>(
+    null,
+  );
+  const [deltas, setDeltas] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
   if (!props.to) return null;
@@ -52,9 +54,28 @@ export function TxExplain(props: {
         ))}
       </ul>
       {sim ? (
-        <p className="muted fee" role="status">
+        <p
+          className={
+            simTone === "danger"
+              ? "warn-line"
+              : simTone === "warn"
+                ? "muted fee"
+                : "muted fee"
+          }
+          role="status"
+        >
           {sim}
         </p>
+      ) : null}
+      {deltas.length ? (
+        <ul className="clear-list sim-deltas" aria-label="Balance change">
+          {deltas.slice(0, 6).map((line, i) => (
+            <li key={i} className={simTone === "danger" ? "danger" : "ok"}>
+              <span className="t">Δ</span>
+              <span className="d">{line}</span>
+            </li>
+          ))}
+        </ul>
       ) : null}
       <button
         type="button"
@@ -64,20 +85,27 @@ export function TxExplain(props: {
           if (!props.account) return;
           setBusy(true);
           setSim("Simulating…");
-          void makePublicClient(props.chainId, props.rpc)
-            .estimateGas({
-              account: props.account,
-              to: props.to as Address,
-              value: props.valueWei ?? 0n,
-              data: data as Hex,
-            })
-            .then((gas) => {
-              setSim(`Dry-run OK — estimateGas ${gas.toString()}`);
+          setSimTone(null);
+          setDeltas([]);
+          void simulateDeskTx({
+            chainId: props.chainId,
+            from: props.account,
+            to: props.to as Address,
+            valueWei: props.valueWei ?? 0n,
+            data: data as Hex,
+            rpc: props.rpc,
+          })
+            .then((r) => {
+              setSimTone(r.tone);
+              setSim(r.detail);
+              setDeltas(r.balanceHints);
             })
             .catch((e) => {
+              setSimTone("danger");
               setSim(
                 `Dry-run failed — ${e instanceof Error ? e.message : String(e)}`,
               );
+              setDeltas([]);
             })
             .finally(() => setBusy(false));
         }}

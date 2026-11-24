@@ -5,7 +5,6 @@ export const en = {
   connect: "Connect",
   send: "Send",
   swap: "Swap",
-  sites: "Sites",
   approvals: "Approvals",
   apps: "Apps",
   receiveQr: "Receive QR / EIP-681",
@@ -14,7 +13,7 @@ export const en = {
   exportWatch: "Export watch addresses (JSON)",
   importWatch: "Import watch JSON",
   noCollect:
-    "We don’t collect your data. Keys stay on your Trezor — bag, send, approve, and Sites without MetaMask. lolz",
+    "We don’t collect your data. Keys stay on your Trezor — bag, send, approve, and Apps without MetaMask. lolz",
   pulseChain: "PulseChain",
 } as const;
 

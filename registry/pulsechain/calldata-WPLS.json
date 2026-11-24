@@ -1,0 +1,72 @@
+{
+  "$schema": "../../specs/erc7730-v2.schema.json",
+  "context": {
+    "$id": "pulsechain-wpls-erc20",
+    "contract": {
+      "abi": "erc20",
+      "deployments": [
+        {
+          "chainId": 369,
+          "address": "0xa1077a294dde1b09bb078844df40758a5d0f9a27"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "owner": "PulseChain community overlay (Perch)",
+    "contractName": "WPLS",
+    "info": { "url": "https://pulsechain.com" },
+    "token": {
+      "name": "Wrapped Pulse",
+      "ticker": "WPLS",
+      "decimals": 18
+    }
+  },
+  "display": {
+    "formats": {
+      "transfer(address to, uint256 value)": {
+        "intent": "Send WPLS",
+        "interpolatedIntent": "Send {value} WPLS to {to}",
+        "fields": [
+          { "path": "#.to", "label": "To", "format": "addressOrName" },
+          {
+            "path": "#.value",
+            "label": "Amount",
+            "format": "tokenAmount",
+            "params": { "decimals": 18, "ticker": "WPLS" }
+          }
+        ]
+      },
+      "approve(address spender, uint256 value)": {
+        "intent": "Approve WPLS spender",
+        "interpolatedIntent": "Allow {spender} to spend {value} WPLS",
+        "fields": [
+          { "path": "#.spender", "label": "Spender", "format": "addressOrName" },
+          {
+            "path": "#.value",
+            "label": "Allowance",
+            "format": "tokenAmount",
+            "params": { "decimals": 18, "ticker": "WPLS" }
+          }
+        ]
+      },
+      "deposit()": {
+        "intent": "Wrap PLS",
+        "interpolatedIntent": "Wrap native PLS into WPLS",
+        "fields": []
+      },
+      "withdraw(uint256 wad)": {
+        "intent": "Unwrap WPLS",
+        "interpolatedIntent": "Unwrap {wad} WPLS to PLS",
+        "fields": [
+          {
+            "path": "#.wad",
+            "label": "Amount",
+            "format": "tokenAmount",
+            "params": { "decimals": 18, "ticker": "WPLS" }
+          }
+        ]
+      }
+    }
+  }
+}

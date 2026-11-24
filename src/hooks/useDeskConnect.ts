@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { Address } from "viem";
 import {
+  acquireTrezorDevice,
   cancelTrezorConnect,
   connectTrezorFromGesture,
   detectSuiteChannel,
@@ -25,19 +26,21 @@ import {
   type SuiteChannel,
 } from "../trezor/connect";
 import {
-  loadAccountCount,
   loadAccountIndex,
   loadAccountList,
+  loadAccountRangeSpec,
+  loadPathTemplate,
   loadRpcOverride,
   loadWatch,
-  saveAccountCount,
   saveAccountIndex,
   saveAccountList,
+  savePathTemplate,
   saveWatch,
   type Session,
 } from "../ui/deskStorage";
 import type { DeskChainId, RpcOverride } from "../chain/client";
 import { trimAccountsByPlsGap } from "../trezor/accountGap";
+import { ACCOUNT_INDEX_MAX, parseLoadSpec } from "../ui/faceFormat";
 
 type SetErr = Dispatch<SetStateAction<string | null>>;
 type SetBusy = Dispatch<SetStateAction<boolean>>;
@@ -70,7 +73,11 @@ export function useDeskConnect(opts: {
   const [accountList, setAccountList] = useState<ListedAccount[]>(() =>
     loadAccountList(),
   );
-  const [accountCount, setAccountCount] = useState(() => loadAccountCount());
+  const [accountRange, setAccountRange] = useState(() => loadAccountRangeSpec());
+  const accountCount = parseLoadSpec(accountRange)?.span ?? 12;
+  const [pathTemplate, setPathTemplateState] = useState(() =>
+    loadPathTemplate(),
+  );
   const [deviceId, setDeviceId] = useState("trezor-default");
   const [listing, setListing] = useState(false);
   const [suiteChannel, setSuiteChannel] = useState<SuiteChannel>("unknown");
@@ -78,6 +85,23 @@ export function useDeskConnect(opts: {
 
   const active = session ?? watch;
   const canSign = !!session;
+
+  /** Change BIP44 template — clears listed addresses (must Reload). */
+  function applyPathTemplate(next: string) {
+    try {
+      const saved = savePathTemplate(next);
+      setPathTemplateState(saved);
+      setAccountList([]);
+      saveAccountList([]);
+      setSession(null);
+      setWatch(null);
+      saveWatch(null);
+      setErr(null);
+      onForgetExtras?.();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -169,10 +193,11 @@ export function useDeskConnect(opts: {
     setConnecting(false);
     setListing(false);
     setBusy(false);
+    // Taho: Perch only stops waiting — reject still happens on the device if prompted.
     setErr(
       suite === "ok"
-        ? "Cancelled. Suite is still linked — click Connect or Sign again when ready."
-        : "Cancelled. Open Suite, then try Connect again.",
+        ? "Stopped waiting in Perch. Suite is still linked — if a prompt is open, confirm or reject on the device, then Start connection again."
+        : "Stopped waiting in Perch. Open Suite, unlock the device, then Start connection.",
     );
   }
 
@@ -184,8 +209,8 @@ export function useDeskConnect(opts: {
     setBusy(false);
     setErr(
       suite === "ok"
-        ? "Cancelled. Suite is still linked — check Suite on other screens, then retry."
-        : "Cancelled. Open Suite, then retry.",
+        ? "Stopped waiting in Perch. Suite is still linked — finish or reject on the device if Suite still shows a prompt, then retry."
+        : "Stopped waiting in Perch. Open Suite, then retry.",
     );
   }
 
@@ -197,8 +222,6 @@ export function useDeskConnect(opts: {
     if (connectGen.current !== gen) return;
     setAccountList(accounts);
     saveAccountList(accounts);
-    setAccountCount(accounts.length);
-    saveAccountCount(accounts.length);
     setDeviceId(id);
     const prefer =
       accounts.find((a) => a.derivationIndex === accountIndex) ?? accounts[0];
@@ -213,18 +236,44 @@ export function useDeskConnect(opts: {
     void probeSuite().then(setSuite);
   }
 
-  function onLoadAccounts(opts?: { gapTrim?: boolean }) {
+  function onLoadAccounts(opts?: {
+    gapTrim?: boolean;
+    from?: number;
+    to?: number;
+  }) {
     const gapTrim = !!opts?.gapTrim;
+    const spec = parseLoadSpec(accountRange) ?? { from: 0, to: 11, span: 12 };
+    let from: number;
+    let to: number;
+    if (typeof opts?.from === "number" || typeof opts?.to === "number") {
+      // Path → Load wallet (from=to=slot) or explicit range.
+      from =
+        typeof opts.from === "number"
+          ? Math.max(0, Math.min(ACCOUNT_INDEX_MAX, Math.floor(opts.from)))
+          : spec.from;
+      to =
+        typeof opts.to === "number"
+          ? Math.max(from, Math.min(ACCOUNT_INDEX_MAX, Math.floor(opts.to)))
+          : from;
+    } else if (gapTrim) {
+      // Discover used: scan from slot 0 (at least 24).
+      from = 0;
+      to = Math.max(23, spec.span - 1);
+    } else {
+      // Count field: `20` or `2000-3000`.
+      from = spec.from;
+      to = spec.to;
+    }
+    const span = Math.max(1, to - from + 1);
     setErr(null);
     setBusy(true);
     setListing(true);
     setConnecting(true);
     const gen = ++connectGen.current;
-    const pull = gapTrim
-      ? Math.max(accountCount, 24)
-      : accountCount;
-    saveAccountCount(pull);
-    const pending = listTrezorAccountsFromGesture(pull);
+    const pull = gapTrim ? Math.max(span, 24) : span;
+    setAccountIndex(from);
+    saveAccountIndex(from);
+    const pending = listTrezorAccountsFromGesture(pull, from);
     const timeout = window.setTimeout(() => {
       if (connectGen.current !== gen) return;
       cancelTrezorConnect("timeout");
@@ -255,7 +304,7 @@ export function useDeskConnect(opts: {
         finishAccountList(trimmed, id, gen);
         if (lastUsed < 0) {
           setErr(
-            "No PLS on listed accounts — kept #1. Fund it or raise count and Load again.",
+            "No PLS on listed accounts — kept slot 0. Fund it or raise range and Load again.",
           );
         }
       })
@@ -340,10 +389,41 @@ export function useDeskConnect(opts: {
       });
   }
 
+  /** Official connect-examples: take session after CONNECT_UNACQUIRED. */
+  async function onAcquireDevice() {
+    setBusy(true);
+    setErr(null);
+    try {
+      const ok = await acquireTrezorDevice();
+      const h = await getDeviceHints();
+      setDeviceHints(h);
+      if (!ok) {
+        setErr(
+          "Could not acquire Trezor — close Suite tabs using it, unlock the device, try again.",
+        );
+      }
+    } catch (e) {
+      setErr(humanTrezorError(e instanceof Error ? e.message : String(e)));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function onDisconnect() {
     setSession(null);
     setErr(null);
     onDisconnectExtras?.();
+  }
+
+  /** Clear loaded accounts + face address (session/watch). */
+  function onClearAccounts() {
+    setAccountList([]);
+    saveAccountList([]);
+    setSession(null);
+    setWatch(null);
+    saveWatch(null);
+    setErr(null);
+    onForgetExtras?.();
   }
 
   function onForget() {
@@ -372,7 +452,8 @@ export function useDeskConnect(opts: {
     accountList,
     setAccountList,
     accountCount,
-    setAccountCount,
+    accountRange,
+    setAccountRange,
     deviceId,
     setDeviceId,
     suiteChannel,
@@ -387,8 +468,12 @@ export function useDeskConnect(opts: {
     onCancelBusy,
     onLoadAccounts,
     onConnect,
+    onAcquireDevice,
     onDisconnect,
+    onClearAccounts,
     onForget,
+    pathTemplate,
+    applyPathTemplate,
     connectGen,
   };
 }

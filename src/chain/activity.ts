@@ -3,7 +3,7 @@
  * Native txs + token transfers merged for the Activity face.
  */
 import { formatEther, formatUnits, type Address } from "viem";
-import { packFor, type DeskChainId } from "./client";
+import { nativeSymbol, packFor, type DeskChainId } from "./client";
 
 export type ActivityRow = {
   hash: `0x${string}`;
@@ -14,9 +14,11 @@ export type ActivityRow = {
   method: string | null;
   /** Counterparty for out/in; empty for self/other edge cases. */
   counterparty: string | null;
-  /** Native PLS or token symbol when known. */
+  /** Native coin or token symbol when known. */
   asset?: string;
   kind?: "native" | "token";
+  /** One-line human summary (Blockscout-style face). */
+  summary?: string;
 };
 
 function scanApiBase(chainId: DeskChainId): string | null {
@@ -30,9 +32,51 @@ function scanApiBase(chainId: DeskChainId): string | null {
   return null;
 }
 
+function shortPeer(a: string | null | undefined): string {
+  if (!a || a.length < 12) return a || "";
+  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
+
+function trimAmt(v: string): string {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return v;
+  if (Math.abs(n) >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  if (Math.abs(n) >= 1) return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  return n.toLocaleString(undefined, { maximumFractionDigits: 6 });
+}
+
+/** Dig 4b — human tx summary for Activity face (no indexer). */
+export function activitySummary(
+  row: ActivityRow,
+  nativeSym = "PLS",
+): string {
+  const peer = shortPeer(row.counterparty);
+  const amt = Number(row.valueEth);
+  const hasAmt = Number.isFinite(amt) && amt !== 0;
+  const asset =
+    row.asset && row.asset !== "PLS" && row.asset !== nativeSym
+      ? row.asset
+      : nativeSym;
+  if (row.kind === "token" || (hasAmt && !row.method)) {
+    const body = `${trimAmt(row.valueEth)} ${asset}`;
+    if (row.direction === "in")
+      return peer ? `Received ${body} from ${peer}` : `Received ${body}`;
+    if (row.direction === "out")
+      return peer ? `Sent ${body} to ${peer}` : `Sent ${body}`;
+    if (row.direction === "self") return `Self ${body}`;
+  }
+  if (row.method) {
+    return peer ? `${row.method} · ${peer}` : row.method;
+  }
+  if (row.direction === "in") return peer ? `In from ${peer}` : "In";
+  if (row.direction === "out") return peer ? `Out to ${peer}` : "Out";
+  return row.direction;
+}
+
 export function mapScanTx(
   raw: unknown,
   owner: string,
+  nativeSym = "PLS",
 ): ActivityRow | null {
   const r = raw as {
     hash?: string;
@@ -72,7 +116,7 @@ export function mapScanTx(
   if (direction === "out" && to.startsWith("0x")) counterparty = to;
   else if (direction === "in" && from.startsWith("0x")) counterparty = from;
 
-  return {
+  const row: ActivityRow = {
     hash: r.hash as `0x${string}`,
     timestamp: r.timestamp || "",
     direction,
@@ -80,9 +124,11 @@ export function mapScanTx(
     status: bad ? "error" : ok ? "ok" : "pending",
     method: r.method ?? null,
     counterparty,
-    asset: "PLS",
+    asset: nativeSym,
     kind: "native",
   };
+  row.summary = activitySummary(row, nativeSym);
+  return row;
 }
 
 export function mapScanTokenTransfer(
@@ -119,7 +165,7 @@ export function mapScanTokenTransfer(
   else if (direction === "in" && from.startsWith("0x")) counterparty = from;
   const symbol = (r.token?.symbol || r.token?.name || "token").slice(0, 12);
 
-  return {
+  const row: ActivityRow = {
     hash: hash as `0x${string}`,
     timestamp: r.timestamp || "",
     direction,
@@ -130,6 +176,8 @@ export function mapScanTokenTransfer(
     asset: symbol,
     kind: "token",
   };
+  row.summary = activitySummary(row);
+  return row;
 }
 
 function rowKey(row: ActivityRow): string {
@@ -187,6 +235,12 @@ export async function fetchAddressActivity(
 ): Promise<ActivityRow[]> {
   const base = scanApiBase(chainId);
   if (!base) return [];
+  let nativeSym = "PLS";
+  try {
+    nativeSym = nativeSymbol(chainId);
+  } catch {
+    /* pack missing — keep PLS label */
+  }
   const pages = Math.max(1, Math.min(12, Math.ceil(max / 40)));
   const nativeUrl = `${base}/api/v2/addresses/${owner}/transactions?filter=to%20%7C%20from`;
   const tokenUrl = `${base}/api/v2/addresses/${owner}/token-transfers`;
@@ -197,7 +251,7 @@ export async function fetchAddressActivity(
   const out: ActivityRow[] = [];
   const seen = new Set<string>();
   for (const raw of nativeItems) {
-    const row = mapScanTx(raw, owner);
+    const row = mapScanTx(raw, owner, nativeSym);
     if (!row) continue;
     const k = rowKey(row);
     if (seen.has(k)) continue;

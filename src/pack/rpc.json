@@ -1,6 +1,6 @@
 {
   "packId": "pulse-core",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "coreApps": ["PulseChain", "HEX", "PulseX", "ProveX"],
   "chains": [
     {
@@ -10,7 +10,6 @@
       "rpc": [
         "https://rpc.pulsechain.com",
         "https://pulsechain-rpc.publicnode.com",
-        "https://rpc-pulsechain.g4mm4.io",
         "https://rpc.swiftnodes.io/rpc/pulsechain",
         "https://rpc.hairylabs.io",
         "https://rpc.degenprotocol.io",
@@ -21,7 +20,6 @@
       "rpcOptions": [
         { "name": "Official", "url": "https://rpc.pulsechain.com" },
         { "name": "PublicNode", "url": "https://pulsechain-rpc.publicnode.com" },
-        { "name": "G4mm4", "url": "https://rpc-pulsechain.g4mm4.io" },
         { "name": "SwiftNodes", "url": "https://rpc.swiftnodes.io/rpc/pulsechain" },
         { "name": "HairyLabs", "url": "https://rpc.hairylabs.io" },
         { "name": "DegenProtocol", "url": "https://rpc.degenprotocol.io" },

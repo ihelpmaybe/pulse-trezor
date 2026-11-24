@@ -2,7 +2,8 @@
 
 **Scope:** Pulse Perch / PulseChain daily life. Not ETH L2s, Snaps, or fiat on-ramps.  
 **Law:** bag / send / approve / swap / Sites / sign **without MetaMask**.  
-**Canvas:** `mm-replacement-100.canvas.tsx` (filterable). Updated 2026-11-22.
+**Board of truth** for product punch-list status (desk gates/smoke → [TODO.md](./TODO.md)).  
+**Canvas:** `mm-replacement-100.canvas.tsx` (filterable). Updated 2026-11-24.
 
 ## Custody
 1. [x] Show PLS balance from Pulse RPC
@@ -18,7 +19,7 @@
 11. [x] Switch active account from list
 12. [x] Tx status after send (pending → confirmed) — face poll
 13. [x] Activity / history feed on face — PulseScan v2 dense + infinite scroll 2026-11-23
-14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI live; live mempool proof OPEN
+14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI + ynatm ladder + Anvil lab; device mempool proof OPEN
 15. [x] Custom gas / tip / max fee controls — Send Advanced in **beats** on 369/943 (not gwei) 2026-11-22
 16. [x] Nonce display + manual override (power)
 17. [x] Passphrase / hidden wallet callouts
@@ -56,7 +57,7 @@
 45. [x] ProveX WC / connect smoke — PASS session 2026-11-22 (`SITES-PROVEX-2026-11-22.md`; origin lookalike ack)
 46. [~] End-to-end WC sign on device — personal_sign + EIP-712 PASS 2026-11-22; eth_sendTransaction hash still soft / mainnet dust parked
 47. [x] Injected provider (window.ethereum) — this-tab lab personal_sign + EIP-712 PASS 2026-11-22
-48. [x] Browser extension shell — chain/accounts/sign/typed/dust/closed-desk + event fan-out PASS; sideload `0.1.2` (`npm run ext:pack`); CWS listing later
+48. [x] Browser extension shell — chain/accounts/sign/typed/dust/closed-desk + event fan-out; **`0.1.4`** offscreen desk bridge + session cache (`npm run ext:pack`); CWS listing later
 49. [x] Deep link open-in-Perch from Pulse sites — `?uri=` / `web+pulseperch:` → Sites
 50. [x] Concurrent multi-dapp sessions without clobber — proposal/request queues + live dual pair PASS 2026-11-22 (`wc-concurrent-sessions-lab.mjs`)
 51. [x] Per-origin permissions (accounts / methods) — remember allow/deny origin + cue on proposal

@@ -113,6 +113,7 @@ export function useDeskSwap(opts: {
       value: 0n,
       data,
       derivationIndex: session.derivationIndex,
+      derivationPath: session.derivationPath,
       rpc: effectiveRpc,
     })
       .then((broadcast) => {
@@ -155,6 +156,7 @@ export function useDeskSwap(opts: {
         value: prepared.value,
         data: prepared.data,
         derivationIndex: session.derivationIndex,
+        derivationPath: session.derivationPath,
         rpc: effectiveRpc,
       })
         .then((broadcast) => {

@@ -1,7 +1,9 @@
 /**
- * Bag card — tokens / NFTs / HEX stakes.
+ * Bag card — tokens / NFTs / activity / HEX stakes.
  */
-import { formatEther, isAddress, type Address } from "viem";
+import { formatEther, isAddress, type Address, type Hash } from "viem";
+import type { BookEntry } from "../chain/addressBook";
+import type { ActivityRow } from "../chain/activity";
 import {
   explorerAddressUrl,
   explorerNftUrl,
@@ -19,16 +21,21 @@ import type { FullBag, ScanNft } from "../chain/portfolio";
 import { formatUsdHint, type PriceHint } from "../chain/prices";
 import type { PackToken } from "../chain/tokens";
 import { t } from "../i18n/en";
+import { ActivityPanel } from "./ActivityPanel";
+
+export type BagTab = "tokens" | "nfts" | "activity" | "stakes";
 
 type TokenRow = { token: PackToken; raw: bigint; formatted: string };
 type SessionLike = { address: Address; derivationIndex: number };
+type ActFilter = "all" | "in" | "out";
+type TxStatus = "pending" | "confirmed" | "reverted" | "timeout" | null;
 
 type Props = {
   active: SessionLike | null;
   chainId: DeskChainId;
   pack: { currency: { symbol: string } };
-  bagTab: "tokens" | "nfts" | "stakes";
-  setBagTab: (t: "tokens" | "nfts" | "stakes") => void;
+  bagTab: BagTab;
+  setBagTab: (t: BagTab) => void;
   hexModule: boolean;
   acctHexStakes: Record<string, number>;
   balBusy: boolean;
@@ -57,6 +64,27 @@ type Props = {
   nftBusy: boolean;
   nftErr: string | null;
   refreshNfts: (address: Address, chainId: DeskChainId) => void | Promise<void>;
+  /** Activity tab (was standalone card). */
+  session: boolean;
+  activity: ActivityRow[];
+  actBusy: boolean;
+  actErr: string | null;
+  actFilter: ActFilter;
+  setActFilter: (f: ActFilter) => void;
+  actLimit: number;
+  setActLimit: (n: number) => void;
+  actHasMore: boolean;
+  refreshActivity: (
+    address: Address,
+    chainId: DeskChainId,
+    limit?: number,
+  ) => void | Promise<void>;
+  addressBook: BookEntry[];
+  lastTx: Hash | null;
+  txStatus: TxStatus;
+  busy: boolean;
+  onSpeedUp: () => void;
+  onCancelStuck: () => void;
 };
 
 export function BagPanel({
@@ -93,12 +121,28 @@ export function BagPanel({
   nftBusy,
   nftErr,
   refreshNfts,
+  session,
+  activity,
+  actBusy,
+  actErr,
+  actFilter,
+  setActFilter,
+  actLimit,
+  setActLimit,
+  actHasMore,
+  refreshActivity,
+  addressBook,
+  lastTx,
+  txStatus,
+  busy,
+  onSpeedUp,
+  onCancelStuck,
 }: Props) {
   return (
             <section className="card bag-card">
               <div className="bag-head">
                 <h2 title={active ? "Balances for this account" : undefined}>
-                  {active ? `Account #${active.derivationIndex + 1}` : "Balances"}
+                  {active ? `Slot #${active.derivationIndex}` : "Balances"}
                 </h2>
                 <div className="action-tabs bag-tabs" role="tablist" aria-label="Bag">
                   <button
@@ -124,6 +168,18 @@ export function BagPanel({
                     onClick={() => setBagTab("nfts")}
                   >
                     NFTs
+                  </button>
+                  <button
+                    type="button"
+                    id="bag-tab-activity"
+                    role="tab"
+                    aria-selected={bagTab === "activity"}
+                    aria-controls="bag-panel-activity"
+                    tabIndex={bagTab === "activity" ? 0 : -1}
+                    className={bagTab === "activity" ? "tab on" : "tab"}
+                    onClick={() => setBagTab("activity")}
+                  >
+                    Activity
                   </button>
                   {hexModule && chainId === 369 ? (
                     <button
@@ -570,6 +626,35 @@ export function BagPanel({
               </div>
     
               <div
+                id="bag-panel-activity"
+                role="tabpanel"
+                aria-labelledby="bag-tab-activity"
+                hidden={bagTab !== "activity"}
+              >
+                <ActivityPanel
+                  embedded
+                  active={active}
+                  session={session}
+                  chainId={chainId}
+                  activity={activity}
+                  actBusy={actBusy}
+                  actErr={actErr}
+                  actFilter={actFilter}
+                  setActFilter={setActFilter}
+                  actLimit={actLimit}
+                  setActLimit={setActLimit}
+                  actHasMore={actHasMore}
+                  refreshActivity={refreshActivity}
+                  addressBook={addressBook}
+                  lastTx={lastTx}
+                  txStatus={txStatus}
+                  busy={busy}
+                  onSpeedUp={onSpeedUp}
+                  onCancelStuck={onCancelStuck}
+                />
+              </div>
+
+              <div
                 id="bag-panel-stakes"
                 role="tabpanel"
                 aria-labelledby="bag-tab-stakes"
@@ -584,7 +669,7 @@ export function BagPanel({
                 ) : (
                   <>
                     <p className="muted fee">
-                      Clear-sign: Sites shows stakeStart hearts/days and stakeEnd
+                      Clear-sign: Apps shows stakeStart hearts/days and stakeEnd
                       index/id. Confirm on Trezor — dApp labels can lie.{" "}
                       <a
                         className="link"
@@ -637,7 +722,7 @@ export function BagPanel({
                         >
                           go.hex.com
                         </a>{" "}
-                        → Sites (WalletConnect).
+                        → Apps (WalletConnect).
                       </p>
                     )}
                   </>

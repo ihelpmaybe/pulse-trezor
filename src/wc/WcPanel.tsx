@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WalletKitTypes } from "@reown/walletkit";
 import { getSdkError } from "@walletconnect/utils";
 import {
@@ -12,12 +12,14 @@ import {
   clearSignTx,
   dangerAckLabel,
   explainClearLines,
+  hasHardDeadEnd,
   needsDangerAck,
   phishingWarn,
   worstTone,
   type ClearLine,
   type TxLike,
 } from "./clearSign";
+import { assertSiweAllowed } from "./siweGate";
 import {
   parseTypedDataParams,
   signPersonalMessage,
@@ -36,8 +38,8 @@ import {
 } from "./walletKit";
 import {
   chainLabel,
+  hasChainPack,
   isDeskChainId,
-  makePublicClient,
   parseChainRef,
   type DeskChainId,
 } from "../chain/client";
@@ -63,7 +65,7 @@ type Props = {
   chainId: DeskChainId;
   onSwitchChain?: (chainId: DeskChainId) => void;
   onError: (msg: string | null) => void;
-  /** When true, no outer card chrome (for embedding in Sites tab). */
+  /** When true, no outer card chrome (for embedding in Apps tab). */
   embedded?: boolean;
   /** Pre-fill pair URI from deep link / ?uri= */
   initialUri?: string | null;
@@ -123,6 +125,8 @@ export function WcPanel({
   const [verifyAck, setVerifyAck] = useState(false);
   const [sessionsTick, setSessionsTick] = useState(0);
   const [wired, setWired] = useState(false);
+  const addressRef = useRef(address);
+  addressRef.current = address;
 
   useEffect(() => {
     if (initialUri?.trim()) {
@@ -187,7 +191,12 @@ export function WcPanel({
           (reqParams as { chainId?: string }[])?.[0]?.chainId ??
           (reqParams as { chainId?: string })?.chainId;
         const next = parseChainRef(raw);
-        if (next && isDeskChainId(next) && method === "wallet_switchEthereumChain") {
+        if (
+          next &&
+          isDeskChainId(next) &&
+          hasChainPack(next) &&
+          method === "wallet_switchEthereumChain"
+        ) {
           onSwitchChain?.(next);
           await kit.respondSessionRequest({
             topic,
@@ -205,8 +214,10 @@ export function WcPanel({
           });
           onError(
             method === "wallet_addEthereumChain"
-              ? `Rejected add-chain ${raw ?? "?"} — Perch only uses known Pulse/EVM desk chains`
-              : `dApp asked for unsupported chain ${raw ?? "?"} — rejected`,
+              ? `Rejected add-chain ${raw ?? "?"} — add the chain ID under Network first`
+              : next && !hasChainPack(next)
+                ? `Chain ${next} not added yet — Device → Add EVM by chain ID`
+                : `dApp asked for unsupported chain ${raw ?? "?"} — rejected`,
           );
         }
         return;
@@ -224,6 +235,7 @@ export function WcPanel({
           data: tx?.data ? String(tx.data) : "0x",
           dappUrl,
           method,
+          chainId: Number(reqChain) || undefined,
         });
         lines = [
           {
@@ -248,7 +260,13 @@ export function WcPanel({
         } catch {
           preview = String(reqParams).slice(0, 400);
         }
-        lines = clearSignMessage({ method, dappUrl, preview });
+        lines = clearSignMessage({
+          method,
+          dappUrl,
+          preview,
+          address: addressRef.current,
+          chainId: reqChain,
+        });
       }
 
       lines = [
@@ -404,6 +422,18 @@ export function WcPanel({
             message = msgHexOrText;
           }
         }
+        assertSiweAllowed({
+          message,
+          dappUrl: pending.dappUrl,
+          address,
+          chainId: pending.chainId,
+        });
+        if (hasHardDeadEnd(pending.lines)) {
+          throw new Error(
+            pending.lines.find((l) => /SIWE · blocked/i.test(l.title))
+              ?.detail || "Blocked — refuse to sign",
+          );
+        }
         result = await signPersonalMessage(message, derivationIndex);
       } else if (/signTypedData/i.test(method)) {
         const { data } = parseTypedDataParams(params);
@@ -481,14 +511,20 @@ export function WcPanel({
     }
     setSimHint("Simulating…");
     try {
-      const client = makePublicClient(pending.chainId);
-      const gas = await client.estimateGas({
-        account: address,
+      const { simulateDeskTx } = await import("../chain/txSimulate");
+      const r = await simulateDeskTx({
+        chainId: pending.chainId,
+        from: address,
         to: tx.to as Address,
-        value: tx.value != null ? BigInt(valueToHex(tx.value) || "0x0") : 0n,
+        valueWei:
+          tx.value != null ? BigInt(valueToHex(tx.value) || "0x0") : 0n,
         data: (tx.data as Hex) || "0x",
       });
-      setSimHint(`Dry-run OK — estimateGas ${gas.toString()} (not a guarantee).`);
+      const deltas =
+        r.balanceHints.length > 0
+          ? ` · Δ ${r.balanceHints.slice(0, 3).join(" · ")}`
+          : "";
+      setSimHint(`${r.detail}${deltas}`);
     } catch (e) {
       setSimHint(
         `Dry-run failed — ${e instanceof Error ? e.message : String(e)}. Do not sign unless you understand why.`,
@@ -499,7 +535,7 @@ export function WcPanel({
   const body = (
     <>
       <p className="muted">
-        Pair any Pulse site. Browser PulseX ={" "}
+        Pair WalletConnect apps. Browser PulseX ={" "}
         <code>ipfs.app.pulsex.com</code> (not the desktop download page). Also
         Piteas, HEX, ProveX, Phiat, … Paste <code>wc:…</code> — Desk signs on
         Trezor.
@@ -764,7 +800,11 @@ export function WcPanel({
                   {simHint}
                 </p>
               ) : null}
-              {needsDangerAck(pending.lines) ? (
+              {hasHardDeadEnd(pending.lines) ? (
+                <p className="warn-line" role="alert">
+                  Hard block — Sign stays off. Reject and leave this site.
+                </p>
+              ) : needsDangerAck(pending.lines) ? (
                 <label className="blind-ack">
                   <input
                     type="checkbox"
@@ -788,10 +828,16 @@ export function WcPanel({
                   className="btn"
                   disabled={
                     busy ||
+                    hasHardDeadEnd(pending.lines) ||
                     (needsDangerAck(pending.lines) && !blindAck) ||
                     !!phishingWarn(pending.dappUrl)
                   }
                   onClick={() => void onApproveRequest()}
+                  title={
+                    hasHardDeadEnd(pending.lines)
+                      ? "Blocked — login domain does not match this site"
+                      : undefined
+                  }
                 >
                   Sign on Trezor
                 </button>

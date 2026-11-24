@@ -9,7 +9,7 @@ export type FaqItem = { q: string; a: string };
 export const FAQ_ITEMS: FaqItem[] = [
   {
     q: "What is Pulse Perch?",
-    a: "A PulseChain wallet face for a real Trezor. Suite talks to the device; Perch shows your bag, send, approve, swap, and Sites (WalletConnect) — without MetaMask.",
+    a: "A PulseChain wallet face for a real Trezor. Suite talks to the device; Perch shows your bag, send, approve, swap, and Apps (WalletConnect) — without MetaMask.",
   },
   {
     q: "Was this vibe coded?",
@@ -21,7 +21,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Do I need MetaMask?",
-    a: "No. That’s the point. Keep Suite open for Connect. For dApps, use Sites (WalletConnect) or the lab Chrome extension while the Perch tab stays open.",
+    a: "No. That’s the point. Keep Suite open for Connect. For dApps, use Apps (WalletConnect) or the lab Chrome extension while the Perch tab stays open.",
   },
   {
     q: "Is this official Trezor Pulse support?",
@@ -32,7 +32,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     a: "Plain sends to the HEX contract (and some other token contracts) lock funds forever. Stake via the HEX app / Stakes module — never paste the HEX contract as a normal recipient.",
   },
   {
-    q: "What are Sites?",
+    q: "What is Apps?",
     a: "WalletConnect. Paste a free Reown Cloud project id once, then paste a wc: URI from PulseX / HEX / ProveX / etc. Approve the session, then confirm each sign on the Trezor. Use Kill all sessions if something feels wrong.",
   },
   {
@@ -53,11 +53,11 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Buy / sell dollars?",
-    a: "Perch doesn’t custody fiat. Apps → Buy/sell $ opens ProveX. Use bridged USDC only — not the inherited fork copy.",
+    a: "Perch doesn’t custody fiat. Open ProveX in the browser and connect via Apps (WalletConnect). Use bridged USDC only — not the inherited fork copy.",
   },
   {
     q: "Custom contract call?",
-    a: "Power tool under Send (also linked from Apps). Paste contract + calldata. Blind selectors need extra confirm. For rescue / advanced flows — not daily sends.",
+    a: "Power tool under Send. Paste contract + calldata. Blind selectors need extra confirm. For rescue / advanced flows — not daily sends.",
   },
   {
     q: "Is my seed ever in this app?",
@@ -65,11 +65,11 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Testnet vs mainnet?",
-    a: "Lab default is Pulse testnet 943. Switch the network control to PulseChain 369 for real funds. First mainnet send asks for an extra ack. Fee quotes on testnets can look wild — that’s the network, not your bag.",
+    a: "Default is PulseChain mainnet (369). Switch to testnet V4 (943) only for practice. First mainnet send asks for an extra ack. Fee quotes on testnets can look wild — that’s the network, not your bag.",
   },
   {
     q: "Chrome extension?",
-    a: "Lab sideload only (not Chrome Web Store yet). Download the release zip, check the SHA256, Load unpacked, keep Perch Connected. Account/network changes on the desk should update open dApp tabs without a reload. Prefer Sites when the dApp supports WalletConnect.",
+    a: "Lab sideload only (not Chrome Web Store yet). Download the release zip, check the SHA256, Load unpacked, keep Perch Connected. Account/network changes on the desk should update open dApp tabs without a reload. Prefer Apps (WalletConnect) when the dApp supports it.",
   },
   {
     q: "Something looks phishing-y — what do I do?",

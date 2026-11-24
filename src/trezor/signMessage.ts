@@ -1,22 +1,29 @@
 /**
  * ethereumSignMessage / ethereumSignTypedData via Connect 10 → Suite → device.
+ *
+ * Typed data: official Connect 10 recipe (connect-plugin-ethereum deprecated) —
+ * pass `data` + metamask_v4_compat + show_message_hash; Connect computes hashes.
+ * Viem hash fallback only when Connect rejects (T1-style blind-sign path).
  */
-import type { Hex } from "viem";
+import { hashDomain, hashStruct, type Hex } from "viem";
 import {
   TrezorConnect,
+  enqueueHw,
   ensureTrezorInit,
-  humanTrezorError,
+  messageFromTrezorPayload,
   resetTrezorInit,
 } from "./connect";
 import { ethAddressPath } from "./paths";
 
 function failMsg(res: unknown): string {
   const fail = res as {
-    payload?: { error?: string };
+    payload?: { error?: string; code?: string };
     error?: { message?: string } | string;
   };
+  if (fail.payload && (fail.payload.error || fail.payload.code)) {
+    return messageFromTrezorPayload(fail.payload, "Trezor sign failed");
+  }
   return (
-    fail.payload?.error ||
     (typeof fail.error === "string" ? fail.error : fail.error?.message) ||
     "Trezor sign failed"
   );
@@ -44,18 +51,21 @@ async function withInitRetry<T extends { success: boolean }>(
 export async function signPersonalMessage(
   message: string,
   derivationIndex: number,
+  derivationPath?: string,
 ): Promise<Hex> {
-  const path = ethAddressPath(derivationIndex);
+  const path = derivationPath?.trim() || ethAddressPath(derivationIndex);
   const res = await withInitRetry(async () => {
     await ensureTrezorInit();
-    return TrezorConnect.ethereumSignMessage({
-      path,
-      message,
-      hex: false,
-    });
+    return enqueueHw(() =>
+      TrezorConnect.ethereumSignMessage({
+        path,
+        message,
+        hex: false,
+      }),
+    );
   });
   if (!res.success) {
-    throw new Error(humanTrezorError(failMsg(res)));
+    throw new Error(failMsg(res));
   }
   return asSig(res.payload);
 }
@@ -103,21 +113,86 @@ export function parseTypedDataParams(params: unknown): {
   return { address, data };
 }
 
+/** Official Connect 10 typed-data params (+ optional T1 hash fallback). */
+export function buildTypedDataConnectParams(
+  data: Eip712TypedData,
+  hashes?: { domain_separator_hash: Hex; message_hash: Hex } | null,
+): {
+  data: Eip712TypedData;
+  metamask_v4_compat: true;
+  show_message_hash: true;
+  domain_separator_hash?: Hex;
+  message_hash?: Hex;
+} {
+  return {
+    data,
+    metamask_v4_compat: true,
+    // Official explorer: also show message hash on modern models.
+    show_message_hash: true,
+    ...(hashes?.domain_separator_hash && hashes.message_hash
+      ? {
+          domain_separator_hash: hashes.domain_separator_hash,
+          message_hash: hashes.message_hash,
+        }
+      : {}),
+  };
+}
+
+function tryTypedHashes(data: Eip712TypedData): {
+  domain_separator_hash: Hex;
+  message_hash: Hex;
+} | null {
+  try {
+    const typesForMessage = { ...data.types };
+    delete typesForMessage.EIP712Domain;
+    return {
+      domain_separator_hash: hashDomain({
+        domain: data.domain,
+        types: data.types,
+      } as never) as Hex,
+      message_hash: hashStruct({
+        primaryType: data.primaryType,
+        types: typesForMessage,
+        data: data.message,
+      } as never) as Hex,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function needsHashFallback(err: string): boolean {
+  return /domain_separator|message_hash|hash|T1B1|Model One|blind/i.test(err);
+}
+
 export async function signTypedData(
   data: Eip712TypedData,
   derivationIndex: number,
+  derivationPath?: string,
 ): Promise<Hex> {
-  const path = ethAddressPath(derivationIndex);
-  const res = await withInitRetry(async () => {
-    await ensureTrezorInit();
-    return TrezorConnect.ethereumSignTypedData({
-      path,
-      data: data as never,
-      metamask_v4_compat: true,
+  const path = derivationPath?.trim() || ethAddressPath(derivationIndex);
+
+  const run = (withHashes: boolean) =>
+    withInitRetry(async () => {
+      await ensureTrezorInit();
+      const hashes = withHashes ? tryTypedHashes(data) : null;
+      const params = buildTypedDataConnectParams(data, hashes);
+      // Connect overloads: data-only vs hash path — cast keeps both recipes.
+      return enqueueHw(() =>
+        TrezorConnect.ethereumSignTypedData({
+          path,
+          ...params,
+        } as never),
+      );
     });
-  });
+
+  // Official Connect 10: data only first (plugin deprecated).
+  let res = await run(false);
+  if (!res.success && needsHashFallback(failMsg(res))) {
+    res = await run(true);
+  }
   if (!res.success) {
-    throw new Error(humanTrezorError(failMsg(res)));
+    throw new Error(failMsg(res));
   }
   return asSig(res.payload);
 }

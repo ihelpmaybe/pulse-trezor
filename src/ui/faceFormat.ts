@@ -10,8 +10,61 @@ export function gasUnitLabel(chainId: DeskChainId): "beats" | "gwei" {
 }
 
 export const ACCOUNT_COUNT_MIN = 1;
-/** Suite address-pull headroom (not Blsx monthly product cap). */
-export const ACCOUNT_COUNT_MAX = 2000;
+/**
+ * BIP32 non-hardened child index max (2^31 − 1).
+ * Path slots + Load count share this — no fake 2000 product cap.
+ */
+export const ACCOUNT_INDEX_MAX = 2_147_483_647;
+/** Same as index max — Count may request any legal BIP32 span. */
+export const ACCOUNT_COUNT_MAX = ACCOUNT_INDEX_MAX;
+
+/** Parse `20-40` → inclusive BIP44 indices (single digit → that slot only). */
+export function parseAccountRange(
+  raw: string,
+): { from: number; to: number } | null {
+  const s = raw.trim().replace(/\s+/g, "");
+  if (!s) return null;
+  const m = /^(\d+)(?:[-–—](\d+))?$/.exec(s);
+  if (!m) return null;
+  let from = Number(m[1]);
+  let to = m[2] != null ? Number(m[2]) : from;
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return null;
+  from = Math.floor(from);
+  to = Math.floor(to);
+  if (from > to) return null;
+  from = Math.max(0, Math.min(ACCOUNT_INDEX_MAX, from));
+  to = Math.max(0, Math.min(ACCOUNT_INDEX_MAX, to));
+  if (from > to) return null;
+  if (to - from + 1 > ACCOUNT_COUNT_MAX) {
+    to = from + ACCOUNT_COUNT_MAX - 1;
+  }
+  return { from, to };
+}
+
+/**
+ * Device Count field: `20` = load 20 wallets from slot 0;
+ * `2000-3000` = load that inclusive index range.
+ */
+export function parseLoadSpec(
+  raw: string,
+): { from: number; to: number; span: number } | null {
+  const s = raw.trim().replace(/\s+/g, "");
+  if (!s) return null;
+  if (/^\d+$/.test(s)) {
+    const count = clampAccountCount(Number(s));
+    return { from: 0, to: count - 1, span: count };
+  }
+  if (!/^\d+[-–—]\d+$/.test(s)) return null;
+  const r = parseAccountRange(s);
+  if (!r) return null;
+  return { from: r.from, to: r.to, span: r.to - r.from + 1 };
+}
+
+export function formatAccountRange(from: number, to: number): string {
+  const a = Math.max(0, Math.floor(from));
+  const b = Math.max(0, Math.floor(to));
+  return a === b ? String(a) : `${a}-${b}`;
+}
 
 /** Compact PLS for account cards (not full wei string). */
 export function shortNative(wei: bigint): string {

@@ -25,6 +25,11 @@ export {
   type BroadcastResult,
   type FeeOverride,
 } from "./trezor/signPulseTx";
+export {
+  bumpFeesAtStep,
+  RBF_BUMP_PERCENTS,
+  nextPendingNonce,
+} from "./trezor/rbf";
 export { ethAddressPath, SCHEME_ID } from "./trezor/paths";
 export {
   loadAiPrefs,

@@ -181,7 +181,7 @@ export function SwapPanel({
           ) : (
             <p className="muted fee">
               Quote uses PulseX V2. Token→token hops via WPLS. Confirm path on
-              Trezor. Prefer Sites for the full PulseX UI:{" "}
+              Trezor. Prefer Apps for the full PulseX UI:{" "}
               <a
                 className="link"
                 href="https://ipfs.app.pulsex.com"

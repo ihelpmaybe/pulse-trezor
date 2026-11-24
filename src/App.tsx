@@ -11,11 +11,11 @@ export function App() {
         >
           <h1>Pulse Perch</h1>
           <p className="tag">
-            Pull up a perch — bag, sign, Sites. MetaMask can fly off.
+            Pull up a perch — bag, sign, Apps. MetaMask can fly off.
           </p>
         </div>
       </header>
-      <PulseTrezor defaultChainId={943} showTestnet />
+      <PulseTrezor showTestnet />
     </div>
   );
 }

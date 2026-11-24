@@ -1,0 +1,55 @@
+{
+  "$schema": "../../specs/erc7730-v2.schema.json",
+  "context": {
+    "$id": "pulsechain-pulsex-v2-router",
+    "contract": {
+      "deployments": [
+        {
+          "chainId": 369,
+          "address": "0x165c3410fc91ef562c50559f7d2289febed552d9"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "owner": "PulseX (Perch local overlay → upstream PR)",
+    "contractName": "PulseXRouterV2",
+    "info": { "url": "https://app.pulsex.com" }
+  },
+  "display": {
+    "formats": {
+      "swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline)": {
+        "intent": "Swap tokens (PulseX)",
+        "interpolatedIntent": "Swap {amountIn} for at least {amountOutMin} via PulseX",
+        "fields": [
+          { "path": "#.amountIn", "label": "Amount in", "format": "raw" },
+          { "path": "#.amountOutMin", "label": "Min out", "format": "raw" },
+          { "path": "#.path", "label": "Path", "format": "raw" },
+          { "path": "#.to", "label": "Recipient", "format": "addressOrName" },
+          { "path": "#.deadline", "label": "Deadline", "format": "raw" }
+        ]
+      },
+      "swapExactETHForTokens(uint256 amountOutMin, address[] path, address to, uint256 deadline)": {
+        "intent": "Swap PLS for tokens (PulseX)",
+        "interpolatedIntent": "Swap PLS for at least {amountOutMin}",
+        "fields": [
+          { "path": "#.amountOutMin", "label": "Min out", "format": "raw" },
+          { "path": "#.path", "label": "Path", "format": "raw" },
+          { "path": "#.to", "label": "Recipient", "format": "addressOrName" },
+          { "path": "#.deadline", "label": "Deadline", "format": "raw" }
+        ]
+      },
+      "swapExactTokensForETH(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline)": {
+        "intent": "Swap tokens for PLS (PulseX)",
+        "interpolatedIntent": "Swap {amountIn} for at least {amountOutMin} PLS",
+        "fields": [
+          { "path": "#.amountIn", "label": "Amount in", "format": "raw" },
+          { "path": "#.amountOutMin", "label": "Min PLS out", "format": "raw" },
+          { "path": "#.path", "label": "Path", "format": "raw" },
+          { "path": "#.to", "label": "Recipient", "format": "addressOrName" },
+          { "path": "#.deadline", "label": "Deadline", "format": "raw" }
+        ]
+      }
+    }
+  }
+}

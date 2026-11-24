@@ -76,7 +76,7 @@ export function AiPolicyPanel({ hideTitle = false, className }: Props) {
       {!hideTitle ? <h4 className="settings-section">Agent policy</h4> : null}
       <p className="muted settings-hint">
         Allow-list for agents via window.__pulsePerchAi. Denied calls throw.
-        Your Send button and Sites are separate. Keys stay on the device.
+        Your Send button and Apps are separate. Keys stay on the device.
       </p>
       <div className="vision-grid" role="group" aria-label="Agent policy">
         {OPTIONS.map((opt) => {

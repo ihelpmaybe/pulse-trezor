@@ -1,7 +1,59 @@
+/**
+ * Operator-facing Connect / Suite errors.
+ * MetaMask eth-trezor-keyring: map Connect `code` + payload.error (not a second keyring).
+ */
 export type SuiteProbe = "ok" | "missing" | "unknown" | "…";
+
+/** Connect unsuccessful payload — MM `createErrorFromTrezorResponse`. */
+export type TrezorFailPayload = {
+  error?: string;
+  code?: string;
+};
+
+/**
+ * Prefer Connect machine `code` (Method_Cancel, Device_Disconnected, …)
+ * then human error string — MM bridge-error pattern.
+ */
+export function messageFromTrezorPayload(
+  payload?: TrezorFailPayload | null,
+  fallback = "Trezor not available",
+): string {
+  const code = (payload?.code || "").trim();
+  const err = (payload?.error || "").trim();
+  const raw = [code, err].filter(Boolean).join(" ") || fallback;
+  return humanTrezorError(raw);
+}
 
 export function humanTrezorError(raw: string): string {
   const s = raw.toLowerCase();
+
+  // —— MetaMask keyring Connect codes (TREZOR_ERROR_MAPPINGS peers) ——
+  if (
+    s.includes("method_permissionsnotgranted") ||
+    s.includes("permissionsnotgranted")
+  ) {
+    return "Suite did not Allow Pulse Perch — open Suite, Allow this app, then retry.";
+  }
+  if (s.includes("method_interrupted") || s.includes("method interrupted")) {
+    return "Suite call interrupted — another prompt may be open. Finish or Stop waiting, then retry.";
+  }
+  if (
+    s.includes("method_cancel") ||
+    (s.includes("method_") && s.includes("cancel") && !s.includes("failure_"))
+  ) {
+    // MM: Method_Cancel = user closed Connect UI — not device reject (Taho).
+    return "Connect cancelled (Suite prompt closed). Suite can stay linked — click Connect again.";
+  }
+  if (
+    s.includes("device_disconnected") ||
+    (s.includes("device_disconnect") && !s.includes("unacquired"))
+  ) {
+    return "Trezor disconnected from Suite. Plug in, unlock in Suite, then retry.";
+  }
+  if (s.includes("device_usedelsewhere") || s.includes("used elsewhere")) {
+    return "Trezor is busy in another app/tab — Acquire device or close the other session, then retry.";
+  }
+
   if (s.includes("manifest")) {
     return "Trezor Connect failed to init (manifest). Reload the page.";
   }
@@ -24,12 +76,27 @@ export function humanTrezorError(raw: string): string {
   ) {
     return "Browser blocked Local Network Access to Trezor Suite. Allow local network, then retry.";
   }
+  // Taho law: UI abort ≠ device reject. Only the device can reject a HW prompt.
   if (
-    s.includes("cancel") ||
-    s.includes("rejected") ||
-    s.includes("user denied")
+    s.includes("user-cancel") ||
+    s.includes("stopped waiting") ||
+    (s.includes("cancel") && (s.includes("perch") || s.includes("ui")))
   ) {
-    return "Cancelled on Trezor — try again when ready.";
+    return "Stopped waiting in Perch. If Suite still shows a prompt, confirm or reject on the device.";
+  }
+  if (
+    s.includes("rejected") ||
+    s.includes("user denied") ||
+    s.includes("failure_actioncancelled") ||
+    s.includes("failure_action_cancelled") ||
+    s.includes("actioncancelled") ||
+    (s.includes("cancel") && s.includes("device"))
+  ) {
+    return "Rejected on the Trezor — try again when ready.";
+  }
+  if (s.includes("cancel")) {
+    // Ambiguous Connect cancel — do not claim the device rejected.
+    return "Stopped waiting. Check Suite / the device if a prompt is still open, then retry.";
   }
   if (
     s.includes("device") &&

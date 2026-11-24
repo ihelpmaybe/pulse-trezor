@@ -11,13 +11,14 @@ import {
 import {
   bookLabel,
   isKnownRecipient,
-  lookalikePoison,
+  sendLookalikePoison,
   upsertAddressBook,
   type BookEntry,
 } from "../chain/addressBook";
 import type { ActivityRow } from "../chain/activity";
 import {
   explorerTxUrl,
+  isNativeAsset,
   type DeskChainId,
   type RpcOverride,
 } from "../chain/client";
@@ -26,13 +27,18 @@ import {
   deadEndNativeSend,
   deadEndTokenTransfer,
 } from "../chain/deadEndRecipients";
+import { GAS_TIER_PILLS, type GasSpeed } from "../chain/gasOracle";
 import type { FullBag } from "../chain/portfolio";
 import {
   encodeErc20Transfer,
   parseTokenAmount,
   type PackToken,
 } from "../chain/tokens";
-import type { FeePreview } from "../trezor/signPulseTx";
+import {
+  sendPhaseLabel,
+  type FeePreview,
+  type SendPhase,
+} from "../trezor/signPulseTx";
 import { gasUnitLabel, shortAddr } from "./faceFormat";
 import { TxExplain } from "./TxExplain";
 
@@ -43,7 +49,6 @@ type SelectedToken = {
   decimals: number;
 } | null;
 type TxStatus = "pending" | "confirmed" | "reverted" | "timeout" | null;
-type GasSpeed = "normal" | "faster" | "fastest";
 
 export type SendPanelProps = {
   canSign: boolean;
@@ -80,9 +85,13 @@ export type SendPanelProps = {
   applyGasSpeed: (preview: FeePreview | null, speed: GasSpeed) => void;
   effectiveRpc: RpcOverride | undefined;
   busy: boolean;
+  /** MEW-style: prepare → confirm on device → broadcast (signed ≠ sent). */
+  sendPhase?: SendPhase | null;
   mainnetSendAcked: boolean;
   mainnetSendAck: boolean;
   setMainnetSendAck: (v: boolean) => void;
+  poisonAck: boolean;
+  setPoisonAck: (v: boolean) => void;
   onSend: () => void;
   customCallOpen: boolean;
   setCustomCallOpen: Dispatch<SetStateAction<boolean>>;
@@ -136,9 +145,12 @@ export function SendPanel({
   applyGasSpeed,
   effectiveRpc,
   busy,
+  sendPhase = null,
   mainnetSendAcked,
   mainnetSendAck,
   setMainnetSendAck,
+  poisonAck,
+  setPoisonAck,
   onSend,
   customCallOpen,
   setCustomCallOpen,
@@ -169,7 +181,7 @@ export function SendPanel({
       {chainId === 369 &&
       balance != null &&
       balance === 0n &&
-      asset === "PLS" ? (
+      isNativeAsset(asset, chainId) ? (
         <p className="muted empty-teach">
           Bag is 0 PLS on mainnet — bridge or receive first (Apps → Bridge), or
           switch to testnet for lab dust.
@@ -259,7 +271,7 @@ export function SendPanel({
       {to && isAddress(to)
         ? (() => {
             const dead =
-              asset === "PLS"
+              isNativeAsset(asset, chainId)
                 ? deadEndNativeSend(to, "0x")
                 : selectedToken
                   ? deadEndTokenTransfer(selectedToken.address, to)
@@ -271,13 +283,26 @@ export function SendPanel({
                 </p>
               );
             }
-            const poison = lookalikePoison(to, addressBook);
+            const poison = sendLookalikePoison(to, addressBook, activity);
             return poison ? (
-              <p className="warn-line" role="alert">
-                Lookalike of “{poison.label}” — same start/end, different
-                middle. Clipboard scams do this. Check every character on
-                Trezor.
-              </p>
+              <div className="poison-ack-box" role="alert">
+                <p className="warn-line">
+                  Lookalike of “{poison.label}” — same start/end, different
+                  middle. Clipboard / history scams plant twins like this.
+                  Check every character on Trezor.
+                </p>
+                <label className="blind-ack">
+                  <input
+                    type="checkbox"
+                    checked={poisonAck}
+                    onChange={(e) => setPoisonAck(e.target.checked)}
+                  />
+                  <span>
+                    I compared the full address to “{poison.label}” — this is
+                    not that contact.
+                  </span>
+                </label>
+              </div>
             ) : null;
           })()
         : null}
@@ -320,7 +345,7 @@ export function SendPanel({
           <button
             type="button"
             className="btn ghost gas-pill"
-            disabled={asset === "PLS" ? balance == null : !selectedToken}
+            disabled={isNativeAsset(asset, chainId) ? balance == null : !selectedToken}
             onClick={onMaxSend}
           >
             Max
@@ -330,7 +355,7 @@ export function SendPanel({
       {amount.trim() &&
       (() => {
         try {
-          if (asset === "PLS" && balance != null) {
+          if (isNativeAsset(asset, chainId) && balance != null) {
             return parseEther(amount.trim()) > balance;
           }
           if (selectedToken) {
@@ -387,20 +412,14 @@ export function SendPanel({
       {feeHint ? <p className="muted fee">{feeHint}</p> : null}
       <div className="gas-speed" role="group" aria-label="Send speed">
         <span className="gas-speed-label">Speed</span>
-        {(
-          [
-            ["normal", "Normal"],
-            ["faster", "Faster"],
-            ["fastest", "Fastest"],
-          ] as const
-        ).map(([id, label]) => (
+        {GAS_TIER_PILLS.map(({ id, label }) => (
           <button
             key={id}
             type="button"
             className={
               gasSpeed === id ? "btn gas-pill on" : "btn ghost gas-pill"
             }
-            disabled={!feePreview && id !== "normal"}
+            disabled={!feePreview && id !== "standard"}
             onClick={() => applyGasSpeed(feePreview, id)}
           >
             {label}
@@ -408,15 +427,21 @@ export function SendPanel({
         ))}
       </div>
       <p className="muted fee gas-explain">
-        {gasSpeed === "normal"
-          ? "Normal uses the network quote. Want it mined sooner? Pick Faster — that raises the priority tip validators earn."
-          : gasSpeed === "faster"
-            ? `Priority tip raised (~1.5×). You’re paying validators more to pick you sooner.${
+        {gasSpeed === "standard"
+          ? feePreview?.tiers
+            ? "Standard = Valve mempool percentile. Slow saves; Fast/Instant pay more tip for sooner inclusion."
+            : "Standard uses the network quote. Fast/Instant raise the tip if the oracle is offline."
+          : gasSpeed === "slow"
+            ? `Cheapest tier — may wait longer in a busy mempool.${
                 tipGwei ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.` : ""
               }`
-            : `Highest tip (~2×). Use when a tx is urgent or the mempool is busy.${
-                tipGwei ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.` : ""
-              }`}
+            : gasSpeed === "fast"
+              ? `Fast tier — higher tip for sooner inclusion.${
+                  tipGwei ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.` : ""
+                }`
+              : `Instant — top of the ladder for urgent sends.${
+                  tipGwei ? ` Tip ${tipGwei} ${gasUnitLabel(chainId)}.` : ""
+                }`}
       </p>
       <details className="gas-details">
         <summary>Advanced ({gasUnitLabel(chainId)})</summary>
@@ -427,7 +452,7 @@ export function SendPanel({
               value={tipGwei}
               onChange={(e) => {
                 setTipGwei(e.target.value);
-                setGasSpeed(e.target.value.trim() ? "faster" : "normal");
+                setGasSpeed(e.target.value.trim() ? "fast" : "standard");
               }}
               placeholder="auto"
               inputMode="decimal"
@@ -441,7 +466,7 @@ export function SendPanel({
               value={maxFeeGwei}
               onChange={(e) => {
                 setMaxFeeGwei(e.target.value);
-                if (e.target.value.trim()) setGasSpeed("faster");
+                if (e.target.value.trim()) setGasSpeed("fast");
               }}
               placeholder="auto"
               inputMode="decimal"
@@ -463,10 +488,10 @@ export function SendPanel({
           chainId={chainId}
           account={sessionAddress}
           to={
-            asset === "PLS" ? to : (selectedToken?.address as string) || to
+            isNativeAsset(asset, chainId) ? to : (selectedToken?.address as string) || to
           }
           data={
-            asset === "PLS"
+            isNativeAsset(asset, chainId)
               ? "0x"
               : selectedToken
                 ? encodeErc20Transfer(
@@ -476,7 +501,7 @@ export function SendPanel({
                 : "0x"
           }
           valueWei={
-            asset === "PLS" && amount.trim()
+            isNativeAsset(asset, chainId) && amount.trim()
               ? (() => {
                   try {
                     return parseEther(amount.trim());
@@ -498,14 +523,17 @@ export function SendPanel({
           !amount ||
           (chainId === 369 && !mainnetSendAcked && !mainnetSendAck) ||
           (isAddress(to) &&
-            !!(asset === "PLS"
+            !!sendLookalikePoison(to, addressBook, activity) &&
+            !poisonAck) ||
+          (isAddress(to) &&
+            !!(isNativeAsset(asset, chainId)
               ? deadEndNativeSend(to, "0x")
               : selectedToken
                 ? deadEndTokenTransfer(selectedToken.address, to)
                 : null)) ||
           (() => {
             try {
-              if (asset === "PLS" && balance != null) {
+              if (isNativeAsset(asset, chainId) && balance != null) {
                 return parseEther(amount.trim()) > balance;
               }
               if (selectedToken) {
@@ -539,8 +567,14 @@ export function SendPanel({
         }
         onClick={onSend}
       >
-        {busy ? "Signing…" : "Sign & send"}
+        {busy ? sendPhaseLabel(sendPhase) : "Sign & send"}
       </button>
+      {busy && sendPhase === "broadcast" ? (
+        <p className="muted fee" role="status">
+          Device already signed — now broadcasting. Funds leave only after this
+          lands on Pulse.
+        </p>
+      ) : null}
       {chainId === 369 && !mainnetSendAcked ? (
         <label className="blind-ack">
           <input

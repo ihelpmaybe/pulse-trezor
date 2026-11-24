@@ -7,6 +7,8 @@ import {
   deadEndNativeSend,
   deadEndTokenTransfer,
 } from "../chain/deadEndRecipients";
+import { resolveErc7730 } from "./erc7730Resolve";
+import { checkSiweGate } from "./siweGate";
 
 export type ClearTone = "ok" | "warn" | "danger";
 
@@ -377,6 +379,7 @@ export function clearSignTx(opts: {
   data?: string | null;
   dappUrl?: string | null;
   method?: string | null;
+  chainId?: number | null;
 }): ClearLine[] {
   const lines: ClearLine[] = [];
   const to = (opts.to || "").toLowerCase();
@@ -384,6 +387,22 @@ export function clearSignTx(opts: {
   const method = opts.method || "eth_sendTransaction";
 
   lines.push({ tone: "ok", title: "Method", detail: method });
+
+  const erc7730 = resolveErc7730({
+    chainId: opts.chainId ?? undefined,
+    to: opts.to,
+    data: opts.data,
+  });
+  if (erc7730) {
+    lines.push({
+      tone: erc7730.kind === "clear" ? "ok" : "warn",
+      title:
+        erc7730.kind === "clear"
+          ? `Clear-sign · ${erc7730.intent}`
+          : `Clear-sign fallback · ${erc7730.intent}`,
+      detail: erc7730.detail,
+    });
+  }
 
   const phish = phishingWarn(opts.dappUrl);
   if (phish) lines.push(phish);
@@ -530,6 +549,9 @@ export function clearSignMessage(opts: {
   method: string;
   dappUrl?: string | null;
   preview: string;
+  /** Connected wallet — SIWE address must match when present. */
+  address?: string | null;
+  chainId?: number;
 }): ClearLine[] {
   const lines: ClearLine[] = [
     { tone: "warn", title: "Sign message", detail: opts.method },
@@ -551,6 +573,29 @@ export function clearSignMessage(opts: {
     title: "Preview",
     detail: preview.slice(0, 280) || "(empty)",
   });
+
+  // Login (SIWE) — domain must equal requesting origin; mismatch = hard refuse.
+  const siwe = checkSiweGate({
+    message: preview,
+    dappUrl: opts.dappUrl,
+    address: opts.address,
+    chainId: opts.chainId,
+  });
+  if (siwe.status === "blocked") {
+    lines.push({
+      tone: "danger",
+      title: "SIWE · blocked",
+      detail: siwe.reason,
+    });
+  } else if (siwe.status === "ok") {
+    lines.push({
+      tone: "ok",
+      title: "SIWE login",
+      detail: siwe.statement
+        ? `Domain ${siwe.domain} matches origin · ${siwe.statement.slice(0, 120)}`
+        : `Domain ${siwe.domain} matches origin`,
+    });
+  }
 
   const method = opts.method || "";
   const hexOpaque =
@@ -663,9 +708,9 @@ export function needsDangerAck(lines: ClearLine[]): boolean {
   );
 }
 
-/** Desk Sign & send should refuse (no override) when clear-sign shows a hard dead-end. */
+/** Desk / WC Sign should refuse (no override) — dead-end recipient or SIWE phishing. */
 export function hasHardDeadEnd(lines: ClearLine[]): boolean {
-  return lines.some((l) => /Dead-end/i.test(l.title));
+  return lines.some((l) => /Dead-end|SIWE · blocked/i.test(l.title));
 }
 
 export function dangerAckLabel(lines: ClearLine[]): string {

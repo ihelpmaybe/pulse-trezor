@@ -1,6 +1,7 @@
 /**
- * Activity card — PulseScan feed, poison flags, stuck-tx shortcuts.
+ * Activity feed — PulseScan, poison flags, stuck-tx shortcuts.
  * Dense grid on wide panels (ui-real-estate) + infinite scroll.
+ * Prefer embedded inside BagPanel tabs; standalone card kept for tests.
  */
 import { useEffect, useRef } from "react";
 import type { Address, Hash } from "viem";
@@ -21,6 +22,8 @@ type ActFilter = "all" | "in" | "out";
 type TxStatus = "pending" | "confirmed" | "reverted" | "timeout" | null;
 
 type Props = {
+  /** When true, render as bag tab body (no outer card / h2). */
+  embedded?: boolean;
   active: { address: Address } | null;
   session: boolean;
   chainId: DeskChainId;
@@ -53,6 +56,7 @@ function shortPeer(addr: string | null | undefined): string | null {
 }
 
 export function ActivityPanel({
+  embedded = false,
   active,
   session,
   chainId,
@@ -130,10 +134,10 @@ export function ActivityPanel({
     setActLimit,
   ]);
 
-  return (
-    <section className="card activity">
+  const body = (
+    <>
       <div className="device-head activity-head">
-        <h2>Activity</h2>
+        {embedded ? null : <h2>Activity</h2>}
         {active ? (
           <div className="row activity-tools">
             <div className="gas-speed" role="group" aria-label="Activity filter">
@@ -267,7 +271,11 @@ export function ActivityPanel({
                   <button
                     type="button"
                     className={`activity-dir ${row.direction}`}
-                    title={`Copy ${row.hash}`}
+                    title={
+                      row.summary
+                        ? `${row.summary} · copy ${row.hash}`
+                        : `Copy ${row.hash}`
+                    }
                     onClick={() => {
                       void navigator.clipboard.writeText(row.hash);
                     }}
@@ -277,9 +285,10 @@ export function ActivityPanel({
                   <span
                     className="activity-amt"
                     title={
-                      row.asset || row.method
+                      row.summary ||
+                      (row.asset || row.method
                         ? `${row.asset || row.method} · ${row.valueEth}`
-                        : row.valueEth
+                        : row.valueEth)
                     }
                   >
                     {parts ? (
@@ -340,6 +349,11 @@ export function ActivityPanel({
           {actBusy ? "…" : "More"}
         </button>
       ) : null}
-    </section>
+    </>
   );
+
+  if (embedded) {
+    return <div className="bag-activity">{body}</div>;
+  }
+  return <section className="card activity">{body}</section>;
 }

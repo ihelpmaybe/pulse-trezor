@@ -22,8 +22,10 @@ describe("a11y contract smoke", () => {
     expect(t).toMatch(/role="alert"/);
     expect(t).toMatch(/trapTabKey/);
     expect(t).toMatch(/settingsBtnRef/);
-    expect(t).toMatch(/Copied address \$\{active\.address\}/);
-    expect(t).toMatch(/Address hidden/);
+    expect(t).toMatch(/TopStrip/);
+    const strip = src("ui/TopStrip.tsx");
+    expect(strip).toMatch(/Copied address \$\{activeAddress\}/);
+    expect(strip).toMatch(/Address hidden/);
     expect(t).toMatch(/privacyHide/);
     expect(t).toMatch(/role="tabpanel"/);
     expect(t).toMatch(/aria-controls="perch-panel-send"/);

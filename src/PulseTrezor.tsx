@@ -18,6 +18,7 @@ import {
 import {
   makePublicClient,
   chainLabel,
+  nativeSymbol,
   type DeskChainId,
   type RpcOverride,
 } from "./chain/client";
@@ -29,19 +30,21 @@ import { type ScanToken } from "./chain/portfolio";
 import { type PackToken } from "./chain/tokens";
 import { reconcileErrWithSuite } from "./trezor/errors";
 import { WcPanel } from "./wc/WcPanel";
-import { loadFavorites } from "./chain/favorites";
+import { loadFavorites, loadWalletFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
 import { decodeSyncPayload } from "./chain/syncPair";
 import { FaqModal } from "./ui/FaqModal";
 import { OtherSoftwareModal } from "./ui/OtherSoftwareModal";
 import { CoreFooter } from "./ui/CoreFooter";
-import { AppsPanel } from "./ui/AppsPanel";
-import { ActivityPanel } from "./ui/ActivityPanel";
 import { SwapPanel } from "./ui/SwapPanel";
 import { SendPanel } from "./ui/SendPanel";
-import { BagPanel } from "./ui/BagPanel";
+import { BagPanel, type BagTab } from "./ui/BagPanel";
 import { ApprovePanel } from "./ui/ApprovePanel";
 import { DevicePanel } from "./ui/DevicePanel";
+import {
+  shouldOfferFirmwareHelp,
+  TREZOR_FIRMWARE_HELP,
+} from "./ui/DeviceConnectFace";
 import { TopStrip } from "./ui/TopStrip";
 import { DeskTools } from "./ui/DeskTools";
 import { SettingsModal } from "./ui/SettingsModal";
@@ -65,7 +68,7 @@ import { t } from "./i18n/en";
 import { getFocusable, trapTabKey } from "./a11y/focusTrap";
 
 export type PulseTrezorProps = {
-  /** Default 369. Standalone App uses 943. */
+  /** Default PulseChain mainnet (369). */
   defaultChainId?: DeskChainId;
   /** Network select (Pulse + test + ETH peers). Lab: true. */
   showTestnet?: boolean;
@@ -85,7 +88,13 @@ export function PulseTrezor({
   className,
 }: PulseTrezorProps) {
   const [busy, setBusy] = useState(false);
-  const bagRef = useRef<{ clearBagFace: () => void } | null>(null);
+  const bagRef = useRef<{
+    clearBagFace: () => void;
+    clearLocalBagData: (opts?: {
+      face?: boolean;
+      addressOnly?: boolean;
+    }) => number;
+  } | null>(null);
   const sendRef = useRef<{
     clearSendDraft: () => void;
     clearSendHard: () => void;
@@ -100,6 +109,9 @@ export function PulseTrezor({
   const [hexModule, setHexModule] = useState(() => loadHexModule());
   const [mascotOn, setMascotOn] = useState(() => loadMascot());
   const [favs, setFavs] = useState<string[]>(() => loadFavorites(369));
+  const [walletFavs, setWalletFavs] = useState<string[]>(() =>
+    loadWalletFavorites(),
+  );
   const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
   const [deepWcUri, setDeepWcUri] = useState<string | null>(null);
   const settingsRef = useRef<HTMLDivElement | null>(null);
@@ -113,9 +125,9 @@ export function PulseTrezor({
   );
   const [bookLabelDraft, setBookLabelDraft] = useState("");
   const [actionTab, setActionTab] = useState<
-    "send" | "swap" | "sites" | "approve" | "apps"
+    "send" | "swap" | "approve" | "apps"
   >("send");
-  const [bagTab, setBagTab] = useState<"tokens" | "nfts" | "stakes">("tokens");
+  const [bagTab, setBagTab] = useState<BagTab>("tokens");
 
   const bagRefreshRef = useRef<
     | ((addr: Address, cid: DeskChainId) => void | Promise<void>)
@@ -134,7 +146,8 @@ export function PulseTrezor({
     setAccountIndex,
     accountList,
     accountCount,
-    setAccountCount,
+    accountRange,
+    setAccountRange,
     deviceId,
     suiteChannel,
     deviceHints,
@@ -145,8 +158,12 @@ export function PulseTrezor({
     onCancelBusy,
     onLoadAccounts,
     onConnect,
+    onAcquireDevice,
     onDisconnect,
+    onClearAccounts,
     onForget: onForgetSession,
+    pathTemplate,
+    applyPathTemplate,
   } = useDeskConnect({
     setErr,
     setBusy,
@@ -156,7 +173,7 @@ export function PulseTrezor({
       sendRef.current?.clearSendDraft();
     },
     onForgetExtras: () => {
-      bagRef.current?.clearBagFace();
+      bagRef.current?.clearLocalBagData({ face: true });
       sendRef.current?.clearSendHard();
     },
   });
@@ -192,7 +209,6 @@ export function PulseTrezor({
 
   const bag = useDeskBag({
     active,
-    accountList,
     chainId,
     effectiveRpc,
     bagTab,
@@ -232,6 +248,8 @@ export function PulseTrezor({
     refreshActivity,
     refreshNfts,
     onLoadFullBag,
+    clearLocalBagData,
+    applyImportedBag,
   } = bag;
   bagRefreshRef.current = refreshBalances;
 
@@ -290,6 +308,8 @@ export function PulseTrezor({
     tokenRows,
     customRows,
     fullBag,
+    addressBook,
+    activity,
     setBusy,
     setErr,
     refreshBalances,
@@ -301,6 +321,7 @@ export function PulseTrezor({
     setTo,
     amount,
     setAmount,
+    sendPhase,
     feeHint,
     feePreview,
     gasSpeed,
@@ -327,6 +348,8 @@ export function PulseTrezor({
     mainnetSendAcked,
     mainnetSendAck,
     setMainnetSendAck,
+    poisonAck,
+    setPoisonAck,
     applyGasSpeed,
     onMaxSend,
     onSend,
@@ -343,33 +366,22 @@ export function PulseTrezor({
     apprErr,
     revokeSel,
     setRevokeSel,
-    approveMaxAck,
-    setApproveMaxAck,
-    spender,
-    setSpender,
-    approveAmt,
-    setApproveAmt,
     approvalKey,
     refreshApprovals,
     onRevokeNft,
     onRevoke,
     onBulkRevoke,
-    onApprove,
   } = useDeskApprovals({
     active,
     session,
     chainId,
     effectiveRpc,
     fullBag,
-    asset,
-    selectedToken,
-    selectedCustom: selectedCustom ?? null,
     setBusy,
     setErr,
     setLastTx,
     setStuckTx,
     setTxStatus,
-    refreshBalances,
     refreshActivity,
   });
 
@@ -411,6 +423,7 @@ export function PulseTrezor({
     exportBagSnapshot,
     applyWatchImportText,
     onImportWatchFile,
+    onImportBagFile,
   } = useDeskWatch({
     active,
     session,
@@ -422,11 +435,17 @@ export function PulseTrezor({
     tokenRows,
     customRows,
     fullBag,
+    activity,
+    nfts,
+    nftsTruncated,
+    acctHexStakes,
     setWatch,
     setAccountIndex,
     setAddressBook,
+    setChainId,
     setErr,
     refreshBalances,
+    applyImportedBag,
   });
 
   const { injectEth, setInjectEth } = useDeskInject({
@@ -544,7 +563,7 @@ export function PulseTrezor({
         const idx = raw.indexOf("wc:");
         const uri = idx >= 0 ? raw.slice(idx) : raw;
         setDeepWcUri(uri);
-        setActionTab("sites");
+        setActionTab("apps");
       }
     } catch {
       /* ignore */
@@ -644,16 +663,24 @@ export function PulseTrezor({
 
   const suiteCue = connecting
     ? listing
-      ? `Suite Allow — exporting Account #1–#${accountCount}.`
+      ? `Suite Allow — exporting slots 0–${Math.max(0, accountCount - 1)}.`
       : suite === "ok"
         ? "Suite is up — look for Allow in Suite (may be on another screen)."
         : "Waiting on Suite — unlock Trezor and confirm."
     : null;
 
   /* Errors use role=alert separately — keep this polite region for cues only. */
+  const sendCue =
+    busy && sendPhase === "broadcast"
+      ? "Device signed — broadcasting. Funds leave only after this lands."
+      : busy && sendPhase === "sign"
+        ? "Confirm on Trezor — signed is not sent yet."
+        : busy
+          ? "Preparing send…"
+          : null;
   const a11yLive = [
     suiteCue,
-    busy ? "Signing — confirm on your Trezor if prompted." : null,
+    sendCue,
     copied ? "Address copied to clipboard." : null,
   ]
     .filter(Boolean)
@@ -698,6 +725,11 @@ export function PulseTrezor({
           deviceHints={deviceHints}
           exportWatchJson={exportWatchJson}
           exportBagSnapshot={exportBagSnapshot}
+          onImportBagFile={onImportBagFile}
+          onClearBagCache={() => {
+            clearLocalBagData({ face: true });
+            setErr(null);
+          }}
           active={active}
           watchImportBusy={watchImportBusy}
           onImportWatchFile={onImportWatchFile}
@@ -752,6 +784,18 @@ export function PulseTrezor({
           {faceErr ? (
             <p className="err banner err-top" role="alert">
               {faceErr}
+              {shouldOfferFirmwareHelp(faceErr, !!deviceHints?.outdated) ? (
+                <>
+                  {" "}
+                  <a
+                    href={TREZOR_FIRMWARE_HELP}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Check firmware updates
+                  </a>
+                </>
+              ) : null}
             </p>
           ) : null}
         </div>
@@ -772,8 +816,9 @@ export function PulseTrezor({
           chainId={chainId}
           setChainId={setChainId}
           setAsset={setAsset}
-          accountCount={accountCount}
-          setAccountCount={setAccountCount}
+          setErr={setErr}
+          accountRange={accountRange}
+          setAccountRange={setAccountRange}
           connecting={connecting}
           listing={listing}
           busy={busy}
@@ -781,11 +826,14 @@ export function PulseTrezor({
           active={active}
           canSign={canSign}
           onLoadAccounts={onLoadAccounts}
+          onClearAccounts={onClearAccounts}
           onConnect={onConnect}
+          onAcquireDevice={onAcquireDevice}
           onCancelConnect={onCancelConnect}
           onCancelBusy={onCancelBusy}
           onDisconnect={onDisconnect}
           accountIndex={accountIndex}
+          setAccountIndex={setAccountIndex}
           suiteCue={suiteCue}
           suiteChannel={suiteChannel}
           deviceHints={deviceHints}
@@ -797,6 +845,10 @@ export function PulseTrezor({
           hexModule={hexModule}
           selectListedAccount={selectListedAccount}
           setBagTab={setBagTab}
+          pathTemplate={pathTemplate}
+          applyPathTemplate={applyPathTemplate}
+          walletFavs={walletFavs}
+          setWalletFavs={setWalletFavs}
         />
 
         <BagPanel
@@ -833,12 +885,7 @@ export function PulseTrezor({
           nftBusy={nftBusy}
           nftErr={nftErr}
           refreshNfts={refreshNfts}
-        />
-
-        <ActivityPanel
-          active={active}
           session={!!session}
-          chainId={chainId}
           activity={activity}
           actBusy={actBusy}
           actErr={actErr}
@@ -887,18 +934,6 @@ export function PulseTrezor({
               }
             >
               Swap
-            </button>
-            <button
-              type="button"
-              id="perch-tab-sites"
-              role="tab"
-              aria-selected={actionTab === "sites"}
-              aria-controls="perch-panel-sites"
-              tabIndex={actionTab === "sites" ? 0 : -1}
-              className={actionTab === "sites" ? "tab on" : "tab"}
-              onClick={() => setActionTab("sites")}
-            >
-              Sites
             </button>
             <button
               type="button"
@@ -969,9 +1004,12 @@ export function PulseTrezor({
                 applyGasSpeed={applyGasSpeed}
                 effectiveRpc={effectiveRpc}
                 busy={busy}
+                sendPhase={sendPhase}
                 mainnetSendAcked={mainnetSendAcked}
                 mainnetSendAck={mainnetSendAck}
                 setMainnetSendAck={setMainnetSendAck}
+                poisonAck={poisonAck}
+                setPoisonAck={setPoisonAck}
                 onSend={onSend}
                 customCallOpen={customCallOpen}
                 setCustomCallOpen={setCustomCallOpen}
@@ -1025,28 +1063,6 @@ export function PulseTrezor({
           </div>
 
           <div
-            id="perch-panel-sites"
-            role="tabpanel"
-            aria-labelledby="perch-tab-sites"
-            hidden={actionTab !== "sites"}
-          >
-            {actionTab === "sites" ? (
-              <WcPanel
-                embedded
-                address={canSign && session ? session.address : null}
-                derivationIndex={session?.derivationIndex ?? 0}
-                chainId={chainId}
-                initialUri={deepWcUri}
-                onSwitchChain={(id) => {
-                  setChainId(id);
-                  setAsset("PLS");
-                }}
-                onError={(msg) => setErr(msg)}
-              />
-            ) : null}
-          </div>
-
-          <div
             id="perch-panel-approve"
             role="tabpanel"
             aria-labelledby="perch-tab-approve"
@@ -1069,14 +1085,6 @@ export function PulseTrezor({
                 onRevoke={onRevoke}
                 nftApprovals={nftApprovals}
                 onRevokeNft={onRevokeNft}
-                selectedToken={selectedToken}
-                spender={spender}
-                setSpender={setSpender}
-                approveAmt={approveAmt}
-                setApproveAmt={setApproveAmt}
-                approveMaxAck={approveMaxAck}
-                setApproveMaxAck={setApproveMaxAck}
-                onApprove={onApprove}
               />
             ) : null}
           </div>
@@ -1088,15 +1096,21 @@ export function PulseTrezor({
             hidden={actionTab !== "apps"}
           >
             {actionTab === "apps" ? (
-              <AppsPanel
+              <WcPanel
+                embedded
+                address={canSign && session ? session.address : null}
+                derivationIndex={session?.derivationIndex ?? 0}
                 chainId={chainId}
-                active={!!active}
-                tokenRows={tokenRows}
-                onActionTab={setActionTab}
-                onOpenCustomCall={() => {
-                  setCustomCallOpen(true);
-                  setActionTab("send");
+                initialUri={deepWcUri}
+                onSwitchChain={(id) => {
+                  setChainId(id);
+                  try {
+                    setAsset(nativeSymbol(id));
+                  } catch {
+                    setAsset("PLS");
+                  }
                 }}
+                onError={(msg) => setErr(msg)}
               />
             ) : null}
           </div>

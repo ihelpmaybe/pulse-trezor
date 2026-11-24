@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { bumpFees } from "./signPulseTx";
+import { bumpFees, sendPhaseLabel } from "./signPulseTx";
+
+describe("sendPhaseLabel", () => {
+  it("separates device sign from broadcast", () => {
+    expect(sendPhaseLabel("sign")).toMatch(/Trezor/i);
+    expect(sendPhaseLabel("broadcast")).toMatch(/Broadcast/i);
+    expect(sendPhaseLabel(null)).toBe("Sign & send");
+  });
+});
 
 describe("bumpFees", () => {
   it("bumps eip1559 fees by 25%", () => {

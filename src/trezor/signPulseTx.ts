@@ -10,8 +10,10 @@ import {
 } from "viem";
 import {
   TrezorConnect,
+  enqueueHw,
   ensureTrezorInit,
   humanTrezorError,
+  messageFromTrezorPayload,
   isTrezorInited,
 } from "./connect";
 import { ethAddressPath } from "./paths";
@@ -21,6 +23,7 @@ import {
   type RpcOverride,
   viemChain,
 } from "../chain/client";
+import { fetchGasTiers, type GasTiers } from "../chain/gasOracle";
 
 function toHexQuantity(n: bigint): string {
   return `0x${n.toString(16)}`;
@@ -28,15 +31,36 @@ function toHexQuantity(n: bigint): string {
 
 type TrezorSig = { v: string | number; r: string; s: string };
 
-function normalizeSig(payload: unknown): { r: Hex; s: Hex; v: bigint } {
+/** Boltz-style: viem serialize wants yParity for type-2 txs. */
+function yParityFromV(v: bigint): number {
+  if (v === 0n || v === 1n) return Number(v);
+  if (v === 27n || v === 28n) return Number(v - 27n);
+  // EIP-155: v = chainId*2 + 35|36 → yParity 0|1
+  return Number((v - 35n) & 1n);
+}
+
+function normalizeSig(payload: unknown): {
+  r: Hex;
+  s: Hex;
+  v: bigint;
+  yParity: number;
+} {
   const p = payload as TrezorSig;
   if (p?.r == null || p?.s == null || p?.v == null) {
     throw new Error("Trezor returned no signature.");
   }
   const r = (p.r.startsWith("0x") ? p.r : `0x${p.r}`) as Hex;
   const s = (p.s.startsWith("0x") ? p.s : `0x${p.s}`) as Hex;
-  const v = typeof p.v === "number" ? BigInt(p.v) : BigInt(p.v);
-  return { r, s, v };
+  const rawV = p.v;
+  const v =
+    typeof rawV === "number"
+      ? BigInt(rawV)
+      : BigInt(
+          typeof rawV === "string" && !rawV.startsWith("0x")
+            ? `0x${rawV}`
+            : rawV,
+        );
+  return { r, s, v, yParity: yParityFromV(v) };
 }
 
 export type FeeOverride = {
@@ -54,13 +78,35 @@ export type SendPlsArgs = {
   value: bigint;
   data?: Hex;
   derivationIndex?: number;
+  /** Prefer session path — safer than rebuilding from index after template edits. */
+  derivationPath?: string;
   /** Custom RPC (own node). Defaults to pack public RPC. */
   rpc?: RpcOverride;
   /** Optional manual fee / gas — empty means network preview. */
   fee?: FeeOverride;
   /** Force nonce (speed-up / cancel replace-by-fee). */
   nonce?: number;
+  /**
+   * MEW-style phases: device sign ≠ broadcast.
+   * prepare → fees/nonce · sign → Suite/device · broadcast → raw tx leaves.
+   */
+  onPhase?: (phase: SendPhase) => void;
 };
+
+export type SendPhase = "prepare" | "sign" | "broadcast";
+
+export function sendPhaseLabel(phase: SendPhase | null | undefined): string {
+  switch (phase) {
+    case "prepare":
+      return "Preparing…";
+    case "sign":
+      return "Confirm on Trezor…";
+    case "broadcast":
+      return "Broadcasting…";
+    default:
+      return "Sign & send";
+  }
+}
 
 export type FeePreview = {
   gas: bigint;
@@ -68,6 +114,8 @@ export type FeePreview = {
   maxPriorityFeePerGas?: bigint;
   gasPrice?: bigint;
   eip1559: boolean;
+  /** Valve slow/standard/fast/instant when oracle poll succeeded. */
+  tiers?: GasTiers;
 };
 
 export type BroadcastResult = {
@@ -125,6 +173,26 @@ export async function previewFees(
   } catch {
     gas = data === "0x" ? 21_000n : 100_000n;
   }
+  const tiers = await fetchGasTiers(chainId, rpc);
+  if (tiers?.standard) {
+    const std = tiers.standard;
+    const eip1559 = std.maxFeePerGas > 0n;
+    if (eip1559) {
+      return {
+        gas,
+        eip1559: true,
+        maxFeePerGas: std.maxFeePerGas,
+        maxPriorityFeePerGas: std.maxPriorityFeePerGas,
+        tiers,
+      };
+    }
+    return {
+      gas,
+      eip1559: false,
+      gasPrice: std.gasPrice > 0n ? std.gasPrice : 1_000_000_000n,
+      tiers,
+    };
+  }
   const fees = await client.estimateFeesPerGas().catch(() => null);
   const legacyGasPrice =
     (await client.getGasPrice().catch(() => null)) ?? 1_000_000_000n;
@@ -177,11 +245,13 @@ export async function sendPlsWithTrezor(
   }
 
   const index = args.derivationIndex ?? 0;
-  const path = ethAddressPath(index);
+  const path = args.derivationPath?.trim() || ethAddressPath(index);
   const client = makePublicClient(args.chainId, args.rpc);
   const chain = viemChain(args.chainId);
   const data = (args.data ?? "0x") as Hex;
+  const phase = args.onPhase;
 
+  phase?.("prepare");
   const nonce =
     args.nonce ??
     (await client.getTransactionCount({
@@ -221,18 +291,25 @@ export async function sendPlsWithTrezor(
     trezorTx.gasPrice = toHexQuantity(gasPrice!);
   }
 
-  const signed = await TrezorConnect.ethereumSignTransaction({
-    path,
-    transaction: trezorTx as never,
-  });
+  phase?.("sign");
+  const signed = await enqueueHw(() =>
+    TrezorConnect.ethereumSignTransaction({
+      path,
+      transaction: trezorTx as never,
+    }),
+  );
 
   if (!signed.success) {
     const fail = signed as unknown as {
-      payload?: { error?: string };
+      payload?: { error?: string; code?: string };
       error?: { message?: string } | string;
     };
+    if (fail.payload && (fail.payload.error || fail.payload.code)) {
+      throw new Error(
+        messageFromTrezorPayload(fail.payload, "Trezor sign failed"),
+      );
+    }
     const err =
-      fail.payload?.error ||
       (typeof fail.error === "string" ? fail.error : fail.error?.message) ||
       "Trezor sign failed";
     throw new Error(humanTrezorError(String(err)));
@@ -269,6 +346,8 @@ export async function sendPlsWithTrezor(
         sig,
       );
 
+  // Device confirmed — funds still on-chain until this broadcast lands (MEW lesson).
+  phase?.("broadcast");
   const hash = await client.sendRawTransaction({
     serializedTransaction: serialized,
   });

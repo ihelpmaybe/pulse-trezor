@@ -1,22 +1,11 @@
 /**
- * Approvals tab — scan / revoke ERC-20 + NFT operators + grant.
+ * Approvals tab — scan + revoke open allowances (past grants).
+ * New approve txs arrive via Apps (WalletConnect clear-sign) — not guessed here.
  */
 import type { Dispatch, SetStateAction } from "react";
-import { isAddress, type Address } from "viem";
-import { bookLabel } from "../chain/addressBook";
-import {
-  KNOWN_SPENDERS,
-  type ApprovalRow,
-  type ApprovalScanMeta,
-} from "../chain/approvals";
+import type { ApprovalRow, ApprovalScanMeta } from "../chain/approvals";
 import type { NftApprovalRow } from "../chain/nftApprovals";
 import { shortAddr } from "./faceFormat";
-
-type SelectedToken = {
-  address: Address | string;
-  symbol: string;
-  decimals: number;
-} | null;
 
 type Props = {
   active: boolean;
@@ -34,14 +23,6 @@ type Props = {
   onRevoke: (row: ApprovalRow) => void;
   nftApprovals: NftApprovalRow[];
   onRevokeNft: (row: NftApprovalRow) => void;
-  selectedToken: SelectedToken;
-  spender: string;
-  setSpender: (v: string) => void;
-  approveAmt: string;
-  setApproveAmt: (v: string) => void;
-  approveMaxAck: boolean;
-  setApproveMaxAck: (v: boolean) => void;
-  onApprove: (unlimited: boolean) => void;
 };
 
 export function ApprovePanel({
@@ -60,14 +41,6 @@ export function ApprovePanel({
   onRevoke,
   nftApprovals,
   onRevokeNft,
-  selectedToken,
-  spender,
-  setSpender,
-  approveAmt,
-  setApproveAmt,
-  approveMaxAck,
-  setApproveMaxAck,
-  onApprove,
 }: Props) {
   if (!active) {
     return <p className="muted">Connect to load approvals.</p>;
@@ -75,6 +48,10 @@ export function ApprovePanel({
 
   return (
     <>
+      <p className="muted fee">
+        Already-granted spenders on chain. New ones come from Apps when a dApp
+        asks — confirm on Trezor, then revoke here later.
+      </p>
       <div className="row nft-toolbar">
         <p className="muted nft-status">
           {apprBusy
@@ -83,7 +60,7 @@ export function ApprovePanel({
               ? apprErr
               : approvals.length
                 ? `${approvals.length} open approval${approvals.length === 1 ? "" : "s"}`
-                : "No open allowances in coverage."}
+                : "No open allowances found — nothing to revoke."}
         </p>
         <button
           type="button"
@@ -173,7 +150,7 @@ export function ApprovePanel({
         {apprMeta
           ? `Checked ${apprMeta.tokensChecked} tokens · ${apprMeta.pairsChecked} pairs · via ${apprMeta.sources.join(" + ")}. `
           : ""}
-        Live allowance on your RPC. Revoke = approve(spender, 0) on Trezor.
+        Revoke = approve(spender, 0) on Trezor.
       </p>
 
       {nftApprovals.length ? (
@@ -204,112 +181,6 @@ export function ApprovePanel({
           </ul>
         </>
       ) : null}
-
-      <h3 className="approve-grant-h">Grant</h3>
-      {!canSign ? (
-        <p className="muted">Connect Trezor to grant approve.</p>
-      ) : (
-        <>
-          <p className="muted">
-            Token:{" "}
-            <strong>
-              {selectedToken ? selectedToken.symbol : "pick from balances"}
-            </strong>
-          </p>
-          <label className="field">
-            Spender
-            <input
-              value={spender}
-              onChange={(e) => setSpender(e.target.value.trim())}
-              placeholder="0x… or PulseX router"
-              spellCheck={false}
-            />
-          </label>
-          <div className="book-chips" role="list">
-            {KNOWN_SPENDERS.map((s) => (
-              <button
-                key={s.address}
-                type="button"
-                role="listitem"
-                className={
-                  spender.toLowerCase() === s.address.toLowerCase()
-                    ? "btn gas-pill on"
-                    : "btn ghost gas-pill"
-                }
-                onClick={() => setSpender(s.address)}
-                title={s.address}
-              >
-                {s.name}
-              </button>
-            ))}
-          </div>
-          {spender && isAddress(spender) ? (
-            <p
-              className={
-                KNOWN_SPENDERS.some(
-                  (s) => s.address.toLowerCase() === spender.toLowerCase(),
-                )
-                  ? "muted fee"
-                  : "warn-line"
-              }
-            >
-              Clear-sign: spender {shortAddr(spender)}
-              {KNOWN_SPENDERS.find(
-                (s) => s.address.toLowerCase() === spender.toLowerCase(),
-              )
-                ? ` · ${
-                    KNOWN_SPENDERS.find(
-                      (k) =>
-                        k.address.toLowerCase() === spender.toLowerCase(),
-                    )!.name
-                  }`
-                : " · unknown — read Trezor"}
-              {bookLabel(spender) ? ` · book: ${bookLabel(spender)}` : ""}
-            </p>
-          ) : null}
-          <label className="field">
-            Amount
-            <input
-              value={approveAmt}
-              onChange={(e) => setApproveAmt(e.target.value)}
-              placeholder="exact amount"
-              inputMode="decimal"
-            />
-          </label>
-          <div className="row">
-            <button
-              type="button"
-              className="btn"
-              disabled={busy || !spender || !selectedToken}
-              onClick={() => onApprove(false)}
-            >
-              Approve amount
-            </button>
-            <button
-              type="button"
-              className="btn ghost"
-              disabled={busy || !spender || !selectedToken || !approveMaxAck}
-              onClick={() => onApprove(true)}
-            >
-              Approve max
-            </button>
-          </div>
-          <label className="blind-ack">
-            <input
-              type="checkbox"
-              checked={approveMaxAck}
-              onChange={(e) => setApproveMaxAck(e.target.checked)}
-            />
-            <span>
-              Unlimited approve — this spender can drain the whole token
-              balance until I revoke. I will read the Trezor screen.
-            </span>
-          </label>
-          <p className="warn-line">
-            Prefer exact amount when you can. Max = unlimited.
-          </p>
-        </>
-      )}
     </>
   );
 }

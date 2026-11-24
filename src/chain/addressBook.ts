@@ -104,6 +104,47 @@ export function lookalikePoison(
   );
 }
 
+/**
+ * Peers for send-face poison: address book + prior Out counterparties
+ * (history is where dust twins get planted).
+ */
+export function sendPoisonPeers(
+  book: BookEntry[] = loadRaw(),
+  activity: readonly {
+    direction: string;
+    counterparty: string | null;
+  }[] = [],
+): { address: string; label: string }[] {
+  const peers: { address: string; label: string }[] = book.map((b) => ({
+    address: b.address,
+    label: b.label,
+  }));
+  const seen = new Set(peers.map((p) => p.address.toLowerCase()));
+  for (const row of activity) {
+    if (row.direction !== "out" || !row.counterparty) continue;
+    const a = row.counterparty.trim().toLowerCase();
+    if (!/^0x[a-f0-9]{40}$/.test(a) || seen.has(a)) continue;
+    seen.add(a);
+    peers.push({
+      address: row.counterparty,
+      label: bookLabel(row.counterparty) || short(a),
+    });
+  }
+  return peers;
+}
+
+/** Send confirm: lookalike vs book + prior outs. */
+export function sendLookalikePoison(
+  address: string,
+  book: BookEntry[] = loadRaw(),
+  activity: readonly {
+    direction: string;
+    counterparty: string | null;
+  }[] = [],
+): LookalikeHit | null {
+  return lookalikeAgainst(address, sendPoisonPeers(book, activity));
+}
+
 /** Tiny inbound used to plant a lookalike in history (PLS / native). */
 export const POISON_DUST_ETH = 0.05;
 

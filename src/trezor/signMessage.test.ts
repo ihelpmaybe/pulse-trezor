@@ -1,32 +1,43 @@
 import { describe, expect, it } from "vitest";
-import { parseTypedDataParams } from "./signMessage";
+import { buildTypedDataConnectParams, parseTypedDataParams } from "./signMessage";
 
 const sample = {
   types: {
-    EIP712Domain: [
-      { name: "name", type: "string" },
-      { name: "version", type: "string" },
-      { name: "chainId", type: "uint256" },
-    ],
+    EIP712Domain: [{ name: "name", type: "string" }],
     Mail: [{ name: "contents", type: "string" }],
   },
   primaryType: "Mail",
-  domain: { name: "Pulse Perch", version: "1", chainId: 943 },
-  message: { contents: "inject smoke" },
+  domain: { name: "example.trezor.io" },
+  message: { contents: "Hello" },
 };
 
-describe("parseTypedDataParams", () => {
-  it("parses [address, object]", () => {
-    const { address, data } = parseTypedDataParams([
-      "0x73d0385F4d8E00C5e6504C6030F47BF6212736A8",
-      sample,
-    ]);
-    expect(address?.toLowerCase()).toContain("0x73d0");
-    expect(data.primaryType).toBe("Mail");
+describe("official Connect 10 typed-data params", () => {
+  it("builds data-only recipe with show_message_hash", () => {
+    const p = buildTypedDataConnectParams(sample);
+    expect(p.metamask_v4_compat).toBe(true);
+    expect(p.show_message_hash).toBe(true);
+    expect(p.data).toEqual(sample);
+    expect(p.domain_separator_hash).toBeUndefined();
+    expect(p.message_hash).toBeUndefined();
   });
 
-  it("parses JSON string", () => {
-    const { data } = parseTypedDataParams([JSON.stringify(sample)]);
-    expect(data.message.contents).toBe("inject smoke");
+  it("attaches hash fallback when provided", () => {
+    const p = buildTypedDataConnectParams(sample, {
+      domain_separator_hash:
+        "0x1111111111111111111111111111111111111111111111111111111111111111",
+      message_hash:
+        "0x2222222222222222222222222222222222222222222222222222222222222222",
+    });
+    expect(p.domain_separator_hash?.startsWith("0x")).toBe(true);
+    expect(p.message_hash?.startsWith("0x")).toBe(true);
+  });
+
+  it("parses WC [address, json] order", () => {
+    const { address, data } = parseTypedDataParams([
+      "0x00000000000000000000000000000000000000a1",
+      JSON.stringify(sample),
+    ]);
+    expect(address?.toLowerCase()).toContain("a1");
+    expect(data.primaryType).toBe("Mail");
   });
 });

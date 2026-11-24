@@ -1,6 +1,6 @@
 /**
  * Official Pulse sites + Suite · Community = ihelpmaybe projects.
- * Compact logo / monogram tiles (no gray ghost dump).
+ * Logos imported so Vite always bundles them (public/ path was falling back to mono).
  */
 import { useEffect, useRef, useState } from "react";
 import type { Address } from "viem";
@@ -8,20 +8,21 @@ import { trapTabKey } from "../a11y/focusTrap";
 import { explorerAddressUrl } from "../chain/client";
 import deeplinks from "../pack/deeplinks.json";
 import { FOOTER_CORE_IDS } from "./CoreFooter";
+import perchIcon from "../assets/sw-brands/perch-icon.svg";
+import tipWalletIcon from "../assets/sw-brands/tip-wallet-purple.svg";
+import heartsArchiveIcon from "../assets/sw-brands/hearts-archive-ha.jpg";
+import justTheTipIcon from "../assets/sw-brands/just-the-tip.png";
+import hexWatchIcon from "../assets/sw-brands/hex-watch-192.png";
 
 type Tone = "pulse" | "violet" | "green" | "amber" | "sky" | "rose" | "ink";
 
 type CommunityItem = {
   name: string;
-  /** Short face line under the mark. */
   tag: string;
   href: string;
-  /** Monogram when no iconSrc. */
   mark: string;
   tone: Tone;
   iconSrc?: string;
-  /** Favicon domain when using live mark (Suite). */
-  domain?: string;
 };
 
 const COMMUNITY: CommunityItem[] = [
@@ -31,7 +32,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://github.com/ihelpmaybe/pulse-trezor",
     mark: "PP",
     tone: "pulse",
-    iconSrc: "/perch-icon.svg",
+    iconSrc: perchIcon,
   },
   {
     name: "Tip wallet",
@@ -39,7 +40,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://github.com/ihelpmaybe/Tip-wallet",
     mark: "Tip",
     tone: "violet",
-    iconSrc: "/sw-brands/tip-wallet.svg",
+    iconSrc: tipWalletIcon,
   },
   {
     name: "Hearts Archive",
@@ -47,7 +48,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://ihelpmaybe.github.io/hearts-archive/",
     mark: "♥",
     tone: "rose",
-    iconSrc: "/sw-brands/hearts-archive-ha.jpg",
+    iconSrc: heartsArchiveIcon,
   },
   {
     name: "Just The Tip",
@@ -55,7 +56,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://github.com/ihelpmaybe/Just-The-Tip",
     mark: "JT",
     tone: "amber",
-    iconSrc: "/sw-brands/just-the-tip.png",
+    iconSrc: justTheTipIcon,
   },
   {
     name: "Free Super chat",
@@ -77,7 +78,7 @@ const COMMUNITY: CommunityItem[] = [
     href: "https://github.com/ihelpmaybe/HEX-watch",
     mark: "HW",
     tone: "ink",
-    iconSrc: "/sw-brands/hex-watch.svg",
+    iconSrc: hexWatchIcon,
   },
 ];
 
@@ -114,7 +115,6 @@ function FavMark({ domain, name }: { domain: string; name: string }) {
           alt=""
           width={28}
           height={28}
-          loading="lazy"
           decoding="async"
           onError={() => setOk(false)}
         />
@@ -126,18 +126,18 @@ function FavMark({ domain, name }: { domain: string; name: string }) {
 }
 
 function CommunityMark({ item }: { item: CommunityItem }) {
-  const [ok, setOk] = useState(true);
-  if (item.iconSrc && ok) {
+  const [failed, setFailed] = useState(false);
+  if (item.iconSrc && !failed) {
     return (
       <span className={`sw-mark tone-${item.tone}`} aria-hidden="true">
         <img
+          className="sw-mark-img"
           src={item.iconSrc}
           alt=""
-          width={28}
-          height={28}
-          loading="lazy"
+          width={36}
+          height={36}
           decoding="async"
-          onError={() => setOk(false)}
+          onError={() => setFailed(true)}
         />
       </span>
     );

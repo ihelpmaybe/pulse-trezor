@@ -1,11 +1,27 @@
 /**
  * Settings dialog — About, install, device, RPC, display, modules, a11y, inject.
  */
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import {
+  useState,
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
+} from "react";
 import { AiPolicyPanel } from "../ai/AiPolicyPanel";
 import type { DeskChainId } from "../chain/client";
+import {
+  loadTemperBaseUrl,
+  saveTemperBaseUrl,
+  temperStatus,
+} from "../chain/temperClient";
 import type { DeviceHints, ListedAccount, SuiteChannel } from "../trezor/connect";
+import {
+  LAB_USER_ENV_CHECKLIST,
+  probeLabUserEnv,
+  type LabUserEnvStatus,
+} from "../trezor/labUserEnv";
 import { t } from "../i18n/en";
+import type { BagTab } from "./BagPanel";
 import { InstallPwa } from "./InstallPwa";
 import { SyncPair } from "./SyncPair";
 import {
@@ -29,6 +45,8 @@ type Props = {
   deviceHints: DeviceHints | null;
   exportWatchJson: () => void;
   exportBagSnapshot: () => void;
+  onImportBagFile: (file: File) => void;
+  onClearBagCache: () => void;
   active: Session | null;
   watchImportBusy: boolean;
   onImportWatchFile: (file: File) => void;
@@ -56,8 +74,8 @@ type Props = {
   setMascotOn: (on: boolean) => void;
   hexModule: boolean;
   setHexModule: (on: boolean) => void;
-  bagTab: "tokens" | "nfts" | "stakes";
-  setBagTab: (t: "tokens" | "nfts" | "stakes") => void;
+  bagTab: BagTab;
+  setBagTab: (t: BagTab) => void;
   privacyHide: boolean;
   togglePrivacyHide: () => void;
   a11y: A11yPrefs;
@@ -67,6 +85,9 @@ type Props = {
 };
 
 export function SettingsModal(p: Props) {
+  const [temperDraft, setTemperDraft] = useState(() => loadTemperBaseUrl());
+  const [lab, setLab] = useState<LabUserEnvStatus | null>(null);
+  const [labBusy, setLabBusy] = useState(false);
   return (
     <div
       className="rpc-modal-root"
@@ -214,14 +235,6 @@ export function SettingsModal(p: Props) {
         <button type="button" className="btn ghost" onClick={p.exportWatchJson}>
           {t("exportWatch")}
         </button>
-        <button
-          type="button"
-          className="btn ghost"
-          disabled={!p.active}
-          onClick={p.exportBagSnapshot}
-        >
-          Export bag snapshot
-        </button>
         <label className="btn ghost watch-import">
           {p.watchImportBusy ? "…" : t("importWatch")}
           <input
@@ -236,6 +249,51 @@ export function SettingsModal(p: Props) {
             }}
           />
         </label>
+
+        <h4 className="settings-section">Bag data</h4>
+        <p className="muted fee">
+          Balances, activity, and HEX stakes stay on this PC after you close the
+          desk. Cheap refresh on open; stake rows reuse the cache when the count
+          has not changed. Download a file to move machines, or clear when you
+          want this browser wiped.
+        </p>
+        <button
+          type="button"
+          className="btn ghost"
+          disabled={!p.active}
+          onClick={p.exportBagSnapshot}
+        >
+          Download bag
+        </button>
+        <label className="btn ghost watch-import">
+          {p.watchImportBusy ? "…" : "Upload bag"}
+          <input
+            type="file"
+            accept="application/json,.json"
+            hidden
+            disabled={p.watchImportBusy}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (f) p.onImportBagFile(f);
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          className="btn ghost"
+          onClick={() => {
+            if (
+              window.confirm(
+                "Clear cached bag data on this PC? Addresses stay until you hit Forget.",
+              )
+            ) {
+              p.onClearBagCache();
+            }
+          }}
+        >
+          Clear bag cache
+        </button>
         <SyncPair
           accounts={p.accountList.map((a) => ({
             address: a.address,
@@ -330,6 +388,83 @@ export function SettingsModal(p: Props) {
         <p className="muted fee">
           How often Perch pings the node for the latency chip. Off = once when
           the desk loads or RPC changes.
+        </p>
+
+        <h4 className="settings-section">Lab (trezor-user-env)</h4>
+        <p className="muted fee">
+          Official emu — same wire as a real device (Connect → Suite → Bridge/emu).
+          Not a software wallet.
+        </p>
+        <button
+          type="button"
+          className="btn ghost"
+          disabled={labBusy}
+          onClick={() => {
+            setLabBusy(true);
+            void probeLabUserEnv()
+              .then(setLab)
+              .finally(() => setLabBusy(false));
+          }}
+        >
+          {labBusy ? "Probing…" : "Probe lab"}
+        </button>
+        {lab ? (
+          <p
+            className={lab.controller === "ok" ? "muted fee" : "warn-line"}
+            role="status"
+          >
+            {lab.detail}
+          </p>
+        ) : null}
+        <details className="settings">
+          <summary>Lab checklist</summary>
+          <ol className="muted fee">
+            {LAB_USER_ENV_CHECKLIST.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ol>
+        </details>
+
+        <h4 className="settings-section">Dry-run (Temper)</h4>
+        <label className="field">
+          Temper URL
+          <input
+            value={temperDraft}
+            onChange={(e) => setTemperDraft(e.target.value)}
+            placeholder="http://127.0.0.1:8080"
+            spellCheck={false}
+            autoComplete="off"
+          />
+        </label>
+        <div className="row gap">
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => {
+              saveTemperBaseUrl(temperDraft);
+              setTemperDraft(loadTemperBaseUrl());
+            }}
+          >
+            Save Temper URL
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => {
+              saveTemperBaseUrl(temperDraft);
+              setTemperDraft(loadTemperBaseUrl());
+              void temperStatus({ baseUrl: loadTemperBaseUrl() }).then((s) => {
+                window.alert(s.detail);
+              });
+            }}
+          >
+            Probe Temper
+          </button>
+        </div>
+        <p className="muted fee">
+          Optional self-host — EnsoBuild/Temper (+ Anvil fork via{" "}
+          <code>scripts/temper-pulse.ps1</code>). Dry-run uses it when up; else
+          one-shot RPC eth_call (no portfolio polling).
         </p>
 
         <h4 className="settings-section">Display</h4>

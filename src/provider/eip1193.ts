@@ -4,7 +4,11 @@
  * Signs still go Connect → Suite → device (dont-pretend).
  */
 
-import { DESK_CHAIN_IDS, isDeskChainId } from "../chain/client";
+import {
+  DESK_CHAIN_IDS,
+  hasChainPack,
+  isDeskChainId,
+} from "../chain/client";
 
 export type Eip1193Request = {
   method: string;
@@ -179,10 +183,10 @@ export class PulsePerchProvider {
       case "wallet_switchEthereumChain": {
         const obj = (params[0] || {}) as { chainId?: string };
         const id = parseChainIdParam(obj.chainId);
-        if (!Number.isFinite(id) || !isDeskChainId(id)) {
+        if (!Number.isFinite(id) || !isDeskChainId(id) || !hasChainPack(id)) {
           throw new ProviderRpcError(
             4902,
-            `Unrecognized chain ${obj.chainId}. Perch supports ${DESK_CHAIN_IDS.join(", ")}`,
+            `Unrecognized chain ${obj.chainId}. Add it under Network (chain ID), or use builtins ${DESK_CHAIN_IDS.join(", ")}`,
             { chainId: obj.chainId },
           );
         }
@@ -194,14 +198,15 @@ export class PulsePerchProvider {
       case "wallet_addEthereumChain": {
         const obj = (params[0] || {}) as { chainId?: string };
         const id = parseChainIdParam(obj.chainId);
-        if (Number.isFinite(id) && isDeskChainId(id)) {
+        // Only switch onto packs already resolved (Device → Add EVM). No silent RPC install.
+        if (Number.isFinite(id) && isDeskChainId(id) && hasChainPack(id)) {
           await this.host.switchChain(id);
           this.notifyChainChanged(id);
           return null;
         }
         throw new ProviderRpcError(
           4902,
-          `Rejected add-chain ${obj.chainId ?? "?"}. Perch does not install arbitrary RPCs.`,
+          `Rejected add-chain ${obj.chainId ?? "?"}. Add the chain ID under Network first.`,
           { chainId: obj.chainId },
         );
       }

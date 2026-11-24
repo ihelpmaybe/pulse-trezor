@@ -33,6 +33,7 @@ import {
   registerAgentHandlers,
   type AgentTxDraft,
 } from "../ai/hooks";
+import { assertSiweAllowed } from "../wc/siweGate";
 import {
   PulsePerchProvider,
   attachInjectedProvider,
@@ -81,6 +82,7 @@ export function useDeskInject(opts: {
     }
     const account = session.address;
     const derivationIndex = session.derivationIndex;
+    const derivationPath = session.derivationPath;
     registerAgentHandlers({
       sign: async (draft: AgentTxDraft) => {
         const value =
@@ -94,6 +96,7 @@ export function useDeskInject(opts: {
           value,
           data: draft.data,
           derivationIndex,
+          derivationPath,
           rpc: draft.rpc ?? effectiveRpc,
         });
         return broadcast.hash;
@@ -111,8 +114,18 @@ export function useDeskInject(opts: {
           note: `Prepared for ${account} — unsigned. Sign only via requestSign if policy allows.`,
         };
       },
+      simulate: async (draft: AgentTxDraft) => {
+        const { simulateForAgent } = await import("../chain/txSimulate");
+        return simulateForAgent({
+          ...draft,
+          from: account,
+          chainId: draft.chainId ?? chainId,
+          rpc: draft.rpc ?? effectiveRpc,
+        });
+      },
     });
-    return () => registerAgentHandlers({ sign: null, prepare: null });
+    return () =>
+      registerAgentHandlers({ sign: null, prepare: null, simulate: null });
   }, [session, chainId, effectiveRpc]);
 
   /**
@@ -225,6 +238,7 @@ export function useDeskInject(opts: {
           value,
           data,
           derivationIndex: session.derivationIndex,
+          derivationPath: session.derivationPath,
           rpc: effectiveRpc,
         });
         return broadcast.hash;
@@ -239,7 +253,19 @@ export function useDeskInject(opts: {
             text = message;
           }
         }
-        return signPersonalMessage(text, session.derivationIndex);
+        // Page origin = requesting site for in-tab inject.
+        assertSiweAllowed({
+          message: text,
+          dappUrl:
+            typeof window !== "undefined" ? window.location.href : null,
+          address: session.address,
+          chainId,
+        });
+        return signPersonalMessage(
+          text,
+          session.derivationIndex,
+          session.derivationPath,
+        );
       },
       signTypedData: async (params) => {
         if (!session) throw new Error("Connect Trezor first");
@@ -250,7 +276,11 @@ export function useDeskInject(opts: {
         ) {
           throw new Error("Typed-data address mismatch");
         }
-        return signTypedData(data, session.derivationIndex);
+        return signTypedData(
+          data,
+          session.derivationIndex,
+          session.derivationPath,
+        );
       },
       watchAsset: async (asset) => {
         if (!isDeskChainId(chainId)) return false;

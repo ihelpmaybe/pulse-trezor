@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   conflictsWithSuiteLinked,
   humanTrezorError,
+  messageFromTrezorPayload,
   reconcileErrWithSuite,
 } from "./errors";
 
@@ -11,13 +12,35 @@ describe("humanTrezorError", () => {
     expect(humanTrezorError("Bridge not running on 21325")).toMatch(/Suite/i);
   });
 
-  it("maps user cancel", () => {
-    expect(humanTrezorError("Cancelled by user")).toMatch(/Cancelled/i);
+  it("maps UI stop-waiting without claiming device reject (Taho)", () => {
+    expect(humanTrezorError("user-cancel")).toMatch(/Stopped waiting/i);
+    expect(humanTrezorError("user-cancel")).not.toMatch(/Rejected on the Trezor/i);
+    expect(humanTrezorError("Cancelled by user")).toMatch(/Stopped waiting|Check Suite/i);
+    expect(humanTrezorError("Cancelled by user")).not.toMatch(/Rejected on the Trezor/i);
+  });
+
+  it("maps MM Connect codes (Method_* / Device_*)", () => {
+    expect(humanTrezorError("Method_Cancel")).toMatch(/cancelled|Connect/i);
+    expect(humanTrezorError("Method_Cancel")).not.toMatch(/Rejected on the Trezor/i);
+    expect(humanTrezorError("Method_PermissionsNotGranted")).toMatch(/Allow/i);
+    expect(humanTrezorError("Method_Interrupted")).toMatch(/interrupted/i);
+    expect(humanTrezorError("Device_Disconnected")).toMatch(/disconnected/i);
+  });
+
+  it("maps payload code via messageFromTrezorPayload", () => {
+    expect(
+      messageFromTrezorPayload({ code: "Method_Cancel", error: "Cancelled" }),
+    ).toMatch(/cancelled|Connect/i);
+  });
+
+  it("maps true device reject separately", () => {
+    expect(humanTrezorError("Failure_ActionCancelled")).toMatch(/Rejected on the Trezor/i);
+    expect(humanTrezorError("user denied")).toMatch(/Rejected on the Trezor/i);
   });
 
   it("maps popup closed without claiming Suite is down", () => {
     const msg = humanTrezorError("Popup closed by user");
-    expect(msg).toMatch(/cancelled|Connect/i);
+    expect(msg).toMatch(/cancelled|Connect|Stopped/i);
     expect(msg).not.toMatch(/not reachable/i);
     expect(conflictsWithSuiteLinked(msg)).toBe(false);
   });

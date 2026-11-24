@@ -1,17 +1,12 @@
 /**
- * Approve / revoke inventory for the desk.
+ * Approval inventory + revoke for the desk (grants arrive via Apps / WC).
  */
 import {
   useState,
   type Dispatch,
   type SetStateAction,
 } from "react";
-import {
-  isAddress,
-  maxUint256,
-  type Address,
-  type Hash,
-} from "viem";
+import { type Address, type Hash } from "viem";
 import {
   fetchApprovalInventory,
   type ApprovalRow,
@@ -24,10 +19,7 @@ import {
   type NftApprovalRow,
 } from "../chain/nftApprovals";
 import type { FullBag } from "../chain/portfolio";
-import {
-  encodeErc20Approve,
-  parseTokenAmount,
-} from "../chain/tokens";
+import { encodeErc20Approve } from "../chain/tokens";
 import { humanTrezorError } from "../trezor/connect";
 import {
   sendPlsWithTrezor,
@@ -37,11 +29,6 @@ import { waitForTxStatus } from "../chain/client";
 import type { Session } from "../ui/deskStorage";
 
 type TxStatus = "pending" | "confirmed" | "reverted" | "timeout" | null;
-type SelectedToken = {
-  address: Address | string;
-  symbol: string;
-  decimals: number;
-} | null;
 
 export function useDeskApprovals(opts: {
   active: Session | null;
@@ -49,15 +36,11 @@ export function useDeskApprovals(opts: {
   chainId: DeskChainId;
   effectiveRpc: RpcOverride | undefined;
   fullBag: FullBag | null;
-  asset: "PLS" | string;
-  selectedToken: SelectedToken;
-  selectedCustom: { address: string } | null | undefined;
   setBusy: Dispatch<SetStateAction<boolean>>;
   setErr: Dispatch<SetStateAction<string | null>>;
   setLastTx: Dispatch<SetStateAction<Hash | null>>;
   setStuckTx: Dispatch<SetStateAction<BroadcastResult | null>>;
   setTxStatus: Dispatch<SetStateAction<TxStatus>>;
-  refreshBalances: (addr: Address, cid: DeskChainId) => void | Promise<void>;
   refreshActivity: (addr: Address, cid: DeskChainId) => void | Promise<void>;
 }) {
   const {
@@ -66,15 +49,11 @@ export function useDeskApprovals(opts: {
     chainId,
     effectiveRpc,
     fullBag,
-    asset,
-    selectedToken,
-    selectedCustom,
     setBusy,
     setErr,
     setLastTx,
     setStuckTx,
     setTxStatus,
-    refreshBalances,
     refreshActivity,
   } = opts;
 
@@ -84,9 +63,6 @@ export function useDeskApprovals(opts: {
   const [apprBusy, setApprBusy] = useState(false);
   const [apprErr, setApprErr] = useState<string | null>(null);
   const [revokeSel, setRevokeSel] = useState<Set<string>>(() => new Set());
-  const [approveMaxAck, setApproveMaxAck] = useState(false);
-  const [spender, setSpender] = useState("");
-  const [approveAmt, setApproveAmt] = useState("");
 
   function approvalKey(row: ApprovalRow): string {
     return `${row.token}:${row.spender}`;
@@ -143,6 +119,7 @@ export function useDeskApprovals(opts: {
       value: 0n,
       data,
       derivationIndex: session.derivationIndex,
+      derivationPath: session.derivationPath,
       rpc: effectiveRpc,
     });
     setLastTx(broadcast.hash);
@@ -169,6 +146,7 @@ export function useDeskApprovals(opts: {
       value: 0n,
       data,
       derivationIndex: session.derivationIndex,
+      derivationPath: session.derivationPath,
       rpc: effectiveRpc,
     })
       .then((broadcast) => {
@@ -240,73 +218,6 @@ export function useDeskApprovals(opts: {
     })();
   }
 
-  function onApprove(unlimited: boolean) {
-    if (!session) return;
-    setErr(null);
-    setLastTx(null);
-    setTxStatus(null);
-    if (chainId !== 369 && !selectedCustom) {
-      setErr(
-        "Pack-token approve is mainnet only — import a custom token on testnet.",
-      );
-      return;
-    }
-    if (!selectedToken || asset === "PLS") {
-      setErr("Pick a token from balances.");
-      return;
-    }
-    if (!isAddress(spender)) {
-      setErr("Spender must be a valid 0x address.");
-      return;
-    }
-    let raw: bigint;
-    try {
-      raw = unlimited
-        ? maxUint256
-        : parseTokenAmount(approveAmt, selectedToken.decimals);
-    } catch {
-      setErr("Approve amount invalid.");
-      return;
-    }
-    if (!unlimited && raw < 0n) {
-      setErr("Approve amount invalid.");
-      return;
-    }
-    setBusy(true);
-    const data = encodeErc20Approve(spender as Address, raw);
-    void sendPlsWithTrezor({
-      chainId,
-      account: session.address,
-      to: selectedToken.address as Address,
-      value: 0n,
-      data,
-      derivationIndex: session.derivationIndex,
-      rpc: effectiveRpc,
-    })
-      .then((broadcast) => {
-        setLastTx(broadcast.hash);
-        setStuckTx(broadcast);
-        setTxStatus("pending");
-        void refreshBalances(session.address, chainId);
-        void waitForTxStatus(chainId, broadcast.hash, effectiveRpc).then(
-          (st) => {
-            setTxStatus(st);
-            if (st === "confirmed" || st === "reverted") {
-              setStuckTx(null);
-              void refreshBalances(session.address, chainId);
-              void refreshActivity(session.address, chainId);
-            }
-          },
-        );
-      })
-      .catch((e) => {
-        setErr(humanTrezorError(e instanceof Error ? e.message : String(e)));
-        setTxStatus(null);
-        setStuckTx(null);
-      })
-      .finally(() => setBusy(false));
-  }
-
   return {
     nftApprovals,
     approvals,
@@ -315,17 +226,10 @@ export function useDeskApprovals(opts: {
     apprErr,
     revokeSel,
     setRevokeSel,
-    approveMaxAck,
-    setApproveMaxAck,
-    spender,
-    setSpender,
-    approveAmt,
-    setApproveAmt,
     approvalKey,
     refreshApprovals,
     onRevokeNft,
     onRevoke,
     onBulkRevoke,
-    onApprove,
   };
 }

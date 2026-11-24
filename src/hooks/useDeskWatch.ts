@@ -8,6 +8,14 @@ import {
 } from "react";
 import type { Address } from "viem";
 import { loadAddressBook, type BookEntry } from "../chain/addressBook";
+import {
+  bagCacheCount,
+  buildBagCacheEntry,
+  decodeBagCacheEntry,
+  parseBagSnapshotJson,
+  saveBagCache,
+  type BagFaceSnapshot,
+} from "../chain/bagCache";
 import type { DeskChainId } from "../chain/client";
 import type { CustomToken } from "../chain/customTokens";
 import type { FullBag } from "../chain/portfolio";
@@ -33,11 +41,21 @@ export function useDeskWatch(opts: {
   tokenRows: TokenRow[];
   customRows: { token: CustomToken; raw: bigint; formatted: string }[];
   fullBag: FullBag | null;
+  activity: BagFaceSnapshot["activity"];
+  nfts: BagFaceSnapshot["nfts"];
+  nftsTruncated: number;
+  acctHexStakes: Record<string, number>;
   setWatch: Dispatch<SetStateAction<Session | null>>;
   setAccountIndex: Dispatch<SetStateAction<number>>;
   setAddressBook: Dispatch<SetStateAction<BookEntry[]>>;
+  setChainId: Dispatch<SetStateAction<DeskChainId>>;
   setErr: Dispatch<SetStateAction<string | null>>;
   refreshBalances: (addr: Address, cid: DeskChainId) => void | Promise<void>;
+  applyImportedBag: (
+    face: BagFaceSnapshot,
+    addr: Address,
+    cid: DeskChainId,
+  ) => void;
 }) {
   const {
     active,
@@ -50,11 +68,17 @@ export function useDeskWatch(opts: {
     tokenRows,
     customRows,
     fullBag,
+    activity,
+    nfts,
+    nftsTruncated,
+    acctHexStakes,
     setWatch,
     setAccountIndex,
     setAddressBook,
+    setChainId,
     setErr,
     refreshBalances,
+    applyImportedBag,
   } = opts;
 
   const [watchImportBusy, setWatchImportBusy] = useState(false);
@@ -95,37 +119,23 @@ export function useDeskWatch(opts: {
 
   function exportBagSnapshot() {
     if (!active) return;
+    const stakeCount =
+      fullBag?.stakeCount ??
+      acctHexStakes[active.address.toLowerCase()] ??
+      0;
+    const entry = buildBagCacheEntry(chainId, active.address, {
+      pls: balance,
+      stakeCount,
+      tokenRows,
+      customRows,
+      fullBag,
+      activity,
+      nfts,
+      nftsTruncated,
+    });
     const payload = {
-      kind: "pulse-perch-bag-snapshot",
-      exportedAt: new Date().toISOString(),
-      chainId,
-      address: active.address,
-      pls: balance != null ? balance.toString() : null,
-      tokens: tokenRows.map((r) => ({
-        address: r.token.address,
-        symbol: r.token.symbol,
-        raw: r.raw.toString(),
-        formatted: r.formatted,
-        tags: r.token.tags ?? [],
-      })),
-      custom: customRows.map((r) => ({
-        address: r.token.address,
-        symbol: r.token.symbol,
-        raw: r.raw.toString(),
-        formatted: r.formatted,
-      })),
-      fullBag: fullBag
-        ? {
-            tokenCount: fullBag.tokens.length,
-            stakeCount: fullBag.stakeCount,
-            stakes: fullBag.stakes.map((s) => ({
-              stakeId: s.stakeId,
-              hex: s.formattedHex,
-              days: s.stakedDays,
-              unlockedDay: s.unlockedDay,
-            })),
-          }
-        : null,
+      ...entry,
+      exportedAt: entry.savedAt,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
@@ -184,6 +194,40 @@ export function useDeskWatch(opts: {
       .finally(() => setWatchImportBusy(false));
   }
 
+  function onImportBagFile(file: File) {
+    setWatchImportBusy(true);
+    setErr(null);
+    void file
+      .text()
+      .then((text) => {
+        const parsed = parseBagSnapshotJson(text);
+        if (!parsed.ok) {
+          setErr(parsed.error);
+          return;
+        }
+        saveBagCache(parsed.entry);
+        const face = decodeBagCacheEntry(parsed.entry);
+        const addr = parsed.entry.address;
+        const cid = parsed.entry.chainId;
+        if (cid !== chainId) setChainId(cid);
+        // Point watch at the imported address so the face can show it.
+        const sess: Session = {
+          address: addr,
+          derivationIndex: 0,
+          derivationPath: `m/44'/60'/0'/0/0`,
+          deviceId: "imported-bag",
+        };
+        setWatch(sess);
+        saveWatch(sess);
+        applyImportedBag(face, addr, cid);
+        setErr(null);
+      })
+      .catch((e) => {
+        setErr(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => setWatchImportBusy(false));
+  }
+
   return {
     watchImportBusy,
     setWatchImportBusy,
@@ -191,5 +235,7 @@ export function useDeskWatch(opts: {
     exportBagSnapshot,
     applyWatchImportText,
     onImportWatchFile,
+    onImportBagFile,
+    bagCacheCount,
   };
 }

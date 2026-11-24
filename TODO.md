@@ -2,21 +2,25 @@
 
 This repo only. Program-wide map: [ROADMAP.md](./ROADMAP.md) · [END-TO-END.md](./END-TO-END.md) · **[TESTING.md](./TESTING.md)** · [ACCEPTANCE.md](./ACCEPTANCE.md)
 
-Legend: `[ ]` todo · `[x]` done
+**Board of truth:** MM product punch list → [MM-REPLACEMENT-100.md](./MM-REPLACEMENT-100.md). This file = desk gates / smoke / ship. Don’t duplicate long status here.
 
-## MM gap → Perch (MetaMask replacement punch list)
+Legend: `[ ]` todo · `[x]` done · `[~]` partial
 
-What MetaMask can do that Perch still can’t (or hasn’t proven). Product law: bag / send / approve / Sites / sign without MetaMask.
+## MM gap → Perch (summary — detail in MM-REPLACEMENT-100)
 
-1. [~] **Sites pair smoke** — Piteas + PulseX session + **live WC personal_sign** (`SITES-WC-PERSONAL-SIGN-2026-11-22.md`) · tx/swap sign still needs 369 dust
-2. [x] **Injected provider** — this-tab + MV3 cross-origin request path PASS (`EXT-MV3-2026-11-22.md`); `0.1.2` fans `accountsChanged` / `chainChanged` to dapp tabs
-3. [x] **Activity / history** — dense grid + paged PulseScan (48) + infinite scroll 2026-11-23
-4. [~] **Gas controls** — custom max fee / tip + Speed up / Cancel stuck (RBF) — UI + fee math; live stuck-tx proof OPEN
+Product law: bag / send / approve / Sites / sign without MetaMask.
+
+1. [~] **Sites pair smoke** — live WC personal_sign PASS · tx/swap on 369 still needs dust
+2. [x] **Injected provider** — this-tab + MV3; **`0.1.4`** offscreen bridge + session cache (reload unpacked)
+3. [x] **Activity / history** — dense grid + paged PulseScan + infinite scroll
+4. [~] **Gas / RBF** — UI + ynatm ladder + Anvil harness; **device** stuck-tx proof OPEN
 5. [x] **Token UX** — custom import + hide zeros + favorites
-6. [x] **Convenience swap** — in-face PulseX (Sites remains MM-replacement path)
-7. [~] **Ship surfaces** — MV3 sideload `0.1.2` + CWS-ready docs; Store listing + mobile later
-8. [x] **Softer first-run** — Cancel while Connecting/Signing; Suite other-screen cue; fee wild-testnet note; reconcile Suite-linked vs err; empty-teach + FAQ (2026-11-23)
-9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts — not Pulse daily-life blockers. **EVM peers in pack:** ETH / Sepolia / Holesky + Pulse test (same BIP44); Pulse remains product center.
+6. [x] **Convenience swap** — in-face PulseX
+7. [~] **Ship surfaces** — MV3 sideload **`0.1.4`** + CWS-ready docs; Store listing + mobile later
+8. [x] **Softer first-run** — Cancel / Suite cues / FAQ
+9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts. **EVM peers in pack** OK; Pulse remains center.
+
+**Also landed (wraps):** valve gas tiers · SIWE gate · local ERC-7730 + upstream `registry/pulsechain/` · Temper dry-run + balance Δ · Connect 10 typed-data / TRANSPORT cues · trezor-user-env lab scripts.
 
 Already covered enough for law path: bag, send, approve, multi-account load, WC methods (tx / personal_sign / typed data / switch 369), Trezor clear-sign, Pulse RPC.
 

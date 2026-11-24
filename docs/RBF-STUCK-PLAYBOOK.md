@@ -1,22 +1,33 @@
 # Stuck-tx RBF proof (Speed up / Cancel)
 
-**Code:** `bumpFees` (≥12.5% / default 1.25×) + `onSpeedUp` / `onCancelStuck` in `useDeskSend` — unit-tested in `signPulseTx.fee.test.ts`.
+**Code:** `bumpFees` / `bumpFeesAtStep` (ynatm ladder 125→150→200→300→500%) + local pending-nonce track (`src/trezor/rbf.ts`) + `onSpeedUp` / `onCancelStuck` in `useDeskSend`. Units: `signPulseTx.fee.test.ts` · `rbf.test.ts`.
 
-**Live proof status (this lab):** OPEN until a real pending tx is observed and replaced. Prefer **v4testnet (943)** so mainnet dust is not required.
+**Live proof status (this lab):**
+- **Anvil (software):** run `scripts/rbf-anvil-proof.mjs` → `docs/RBF-ANVIL-EVIDENCE.md` (not a Trezor claim).
+- **Device / Suite:** OPEN until a real pending tx is observed and replaced. Prefer **v4testnet (943)**.
 
 ## Prove it (device or emu + Suite)
 
 1. Desk on **943** · Connect · note derivation index.
 2. Send a tiny self-transfer with **very low** maxFee (Advanced fees if exposed, or flood the mempool until one sticks pending). Goal: Status = pending, Speed up / Cancel visible on Activity.
-3. **Speed up** → Suite confirm → new hash, same nonce, higher fee → wait confirmed. Or **Cancel** → 0-value self, same nonce.
+3. **Speed up** → Suite confirm → new hash, same nonce, higher fee → wait confirmed. Or **Cancel** → 0-value self, same nonce. Repeat Speed up to climb the ladder.
 4. Record: chainId · from · nonce · oldHash · newHash · which button · date.
 5. Paste one line under **Evidence** below. Mark Gate checklist RBF live = done.
 
-## Evidence
+## Lab Anvil (no device)
+
+```powershell
+anvil --port 8545
+# other window:
+$env:ANVIL_URL='http://127.0.0.1:8545'; node scripts/rbf-anvil-proof.mjs
+# or: .\scripts\anvil-pulse.ps1 -Action rbf-lab
+```
+
+## Evidence (device)
 
 | Date | Chain | Path | Result |
 |------|-------|------|--------|
-| — | — | — | OPEN — fee math green; live replace not run |
+| — | — | — | OPEN — fee math + Anvil lab green; device replace not run |
 
 ## Not pretending
-Unit bump ≠ live RBF. UI wiring exists; mempool replace needs a stuck tx on a real wire.
+Unit / Anvil bump ≠ Trezor mempool RBF. Device row stays OPEN until Suite + stuck wire.

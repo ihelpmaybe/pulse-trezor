@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mapScanTokenTransfer, mapScanTx } from "./activity";
+import {
+  activitySummary,
+  mapScanTokenTransfer,
+  mapScanTx,
+} from "./activity";
 
 const owner = "0x73d0385F4d8E00C5e6504C6030F47BF6212736A8";
 
@@ -57,5 +61,25 @@ describe("mapScanTx", () => {
     expect(row?.asset).toBe("HEX");
     expect(row?.kind).toBe("token");
     expect(row?.valueEth).toBe("1");
+    expect(row?.summary).toMatch(/Sent 1 HEX/);
+  });
+
+  it("activitySummary for eth receive", () => {
+    expect(
+      activitySummary(
+        {
+          hash: "0x" + "ab".repeat(32),
+          timestamp: "",
+          direction: "in",
+          valueEth: "0.5",
+          status: "ok",
+          method: null,
+          counterparty: owner,
+          asset: "ETH",
+          kind: "native",
+        },
+        "ETH",
+      ),
+    ).toMatch(/Received 0\.5 ETH from 0x73d0/);
   });
 });

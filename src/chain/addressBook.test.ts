@@ -3,6 +3,8 @@ import {
   activityPoison,
   lookalikeAgainst,
   lookalikePoison,
+  sendLookalikePoison,
+  sendPoisonPeers,
   upsertAddressBook,
   type BookEntry,
 } from "./addressBook";
@@ -83,6 +85,36 @@ describe("activityPoison", () => {
   it("lookalikeAgainst needs head+tail", () => {
     expect(lookalikeAgainst(fake, peers)?.known.toLowerCase()).toBe(
       known.toLowerCase(),
+    );
+  });
+});
+
+describe("sendLookalikePoison", () => {
+  const known = "0x73d0385F4d8E00C5e6504C6030F47BF6212736A8";
+  const fake =
+    known.slice(0, 6) +
+    "deadbeefdeadbeefdeadbeefdeadbeef" +
+    known.slice(-4);
+
+  it("flags twin of prior Out even with empty book", () => {
+    const hit = sendLookalikePoison(fake, [], [
+      { direction: "out", counterparty: known },
+    ]);
+    expect(hit?.known.toLowerCase()).toBe(known.toLowerCase());
+  });
+
+  it("sendPoisonPeers dedupes book + outs", () => {
+    const book: BookEntry[] = [
+      { address: known as `0x${string}`, label: "me", addedAt: "" },
+    ];
+    const peers = sendPoisonPeers(book, [
+      { direction: "out", counterparty: known },
+      { direction: "in", counterparty: fake },
+    ]);
+    expect(peers.filter((p) => p.address.toLowerCase() === known.toLowerCase()))
+      .toHaveLength(1);
+    expect(peers.some((p) => p.address.toLowerCase() === fake.toLowerCase())).toBe(
+      false,
     );
   });
 });
