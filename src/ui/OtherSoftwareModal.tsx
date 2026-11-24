@@ -11,7 +11,7 @@ import { FOOTER_CORE_IDS } from "./CoreFooter";
 import perchIcon from "../assets/sw-brands/perch-icon.svg";
 import tipWalletIcon from "../assets/sw-brands/tip-wallet-purple.svg";
 import heartsArchiveIcon from "../assets/sw-brands/hearts-archive-ha.jpg";
-import justTheTipIcon from "../assets/sw-brands/just-the-tip.png";
+import justTheTipIcon from "../assets/sw-brands/just-the-tip-app.png";
 import hexWatchIcon from "../assets/sw-brands/hex-watch-192.png";
 
 type Tone = "pulse" | "violet" | "green" | "amber" | "sky" | "rose" | "ink";

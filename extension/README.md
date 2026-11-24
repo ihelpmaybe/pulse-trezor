@@ -19,7 +19,8 @@ Current pack: **0.1.4** SHA256 `68a6acd19a0df9c9596d99c4ece6f6283c27f4b6045d339f
 1. `npm run dev` (desk on `:5174`) — or open your hosted Perch build
 2. Chrome → **Extensions** → Developer mode → **Load unpacked** → this `extension/` folder  
    (or unzip the release pack and load that folder)
-3. Lab shortcut: `scripts\chrome-ext-lab.ps1` (CDP `:9233`)
+3. Lab shortcut: `scripts\chrome-ext-lab.ps1` (CDP `:9233`, profile `tmp-chrome-ext-lab2`)  
+   Chrome 157+ often ignores `--load-extension` — if Pulse Perch is missing, **Load unpacked** once on `chrome://extensions`.
 4. Open Perch → Connect Trezor once (seeds storage + offscreen iframe)
 5. You may close the visible desk tab — reads stay cached; signs use offscreen or re-open desk
 6. Open a Pulse dapp → Connect wallet should see Perch

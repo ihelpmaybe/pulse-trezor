@@ -5,7 +5,8 @@
 $ErrorActionPreference = "Stop"
 $repo = Split-Path $PSScriptRoot -Parent
 $ext = Join-Path $repo "extension"
-$profile = Join-Path $repo "tmp-chrome-ext-lab"
+# lab2: Preferences-seeded unpacked (Chrome 157 ignores --load-extension)
+$profile = if ($env:CHROME_PROFILE) { $env:CHROME_PROFILE } else { Join-Path $repo "tmp-chrome-ext-lab2" }
 $port = if ($env:CDP_PORT) { [int]$env:CDP_PORT } else { 9233 }
 
 $chromeCandidates = @(
@@ -19,8 +20,14 @@ if (-not (Test-Path $ext)) { throw "Missing extension folder: $ext" }
 
 New-Item -ItemType Directory -Force -Path $profile | Out-Null
 
-# Fresh profile + only our ext. Chrome 137+ needs DisableLoadExtensionCommandLineSwitch off.
-# If Perch still missing after launch: chrome://extensions → Developer mode → Load unpacked → extension/
+# Chrome must be closed for this profile when seeding. Prefer existing seed script.
+$env:CHROME_PROFILE = $profile
+$env:EXT_DIR = $ext
+node (Join-Path $PSScriptRoot "ext-seed-unpacked-prefs.mjs")
+if ($LASTEXITCODE -ne 0) { throw "ext-seed-unpacked-prefs failed" }
+
+# load-extension flags are belt-and-suspenders (often ignored on Chrome 157+).
+# If still missing: chrome://extensions → Load unpacked → extension/
 $chromeArgs = @(
   "--user-data-dir=$profile",
   "--remote-debugging-port=$port",
@@ -35,6 +42,9 @@ $chromeArgs = @(
 
 Write-Host "Chrome: $chrome"
 Write-Host "Ext:    $ext"
+Write-Host "Profile:$profile"
 Write-Host "CDP:    http://127.0.0.1:$port"
-Write-Host "If Pulse Perch is missing on chrome://extensions → Load unpacked → $ext"
+Write-Host "Chrome 157+ often ignores --load-extension and wipes Preference seeds."
+Write-Host "One-time: chrome://extensions → Developer mode → Load unpacked → $ext"
+Write-Host "Then: `$env:CDP_PORT=$port; node scripts/ext-cdp-smoke.mjs"
 Start-Process -FilePath $chrome -ArgumentList $chromeArgs
