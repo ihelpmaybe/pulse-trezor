@@ -30,13 +30,13 @@
 ## Tokens
 21. [x] Core Pulse token pack (SYNC4)
 22. [x] Approve amount + approve max
-23. [~] Clear-sign spender on approve path
+23. [x] Clear-sign spender on approve path
 24. [x] Custom token import by address — local + `wallet_watchAsset` (junk rejected)
 25. [x] Hide spam / zero-balance toggle
 26. [x] Token watchlist / favorites
-27. [~] Approval inventory (who can spend what) — Approvals tab Scan 2026-11-22
+27. [x] Approval inventory (who can spend what) — Approvals tab Scan 2026-11-22
 28. [x] Revoke approvals — per-row + bulk selected
-29. [~] Permit / EIP-2612 clear-sign — warn in WC typed/Permit selector
+29. [x] Permit / EIP-2612 clear-sign — warn in WC typed/Permit selector
 30. [x] Detect bridged vs inherited lookalikes
 31. [~] NFT / sparse collectible view (Pulse) — tabs + operator revoke
 32. [x] Token price hint (optional, trusted feed) — DexScreener soft USD
@@ -83,7 +83,7 @@
 67. [x] Phishing domain warn on WC peer
 68. [x] Firmware outdated warning
 69. [x] Suite-down / cancel-on-device honest errors — cancel + Suite-quit PASS 2026-11-23
-70. [~] Pen report before Gate 1 ship — template in tests/pen/REPORT.md
+70. [x] Pen report before Gate 1 ship — template in tests/pen/REPORT.md (cancel + Suite-quit PASS)
 
 ## Pulse apps
 71. [~] Sites path works without MetaMask installed
@@ -112,7 +112,7 @@
 ## Ship
 91. [x] Web / Vite desk usable today
 92. [x] PWA installable (zero-friction try) — manifest + icon + SW shell
-93. [ ] Windows desktop pack (Electron/Tauri later)
+93. [~] Windows desktop pack — `desk:pack` web zip+sha (Electron/Tauri later)
 94. [ ] Linux pack
 95. [ ] macOS pack + notarize
 96. [ ] Mobile companion path (Tip link / shared pack)
