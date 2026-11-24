@@ -13,7 +13,7 @@ Product law: bag / send / approve / Sites / sign without MetaMask.
 1. [~] **Sites pair smoke** — live WC personal_sign PASS · tx/swap on 369 still needs dust
 2. [x] **Injected provider** — this-tab + MV3; **`0.1.4`** offscreen bridge + session cache (reload unpacked)
 3. [x] **Activity / history** — dense grid + paged PulseScan + infinite scroll
-4. [~] **Gas / RBF** — UI + ynatm ladder + Anvil harness; **device** stuck-tx proof OPEN
+4. [~] **Gas / RBF** — UI + ynatm ladder + Anvil lab **PASS** (2026-11-24); **device** stuck-tx proof OPEN
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX
 7. [~] **Ship surfaces** — MV3 sideload **`0.1.4`** + CWS-ready docs; Store listing + mobile later
@@ -85,7 +85,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Send ERC-20
 - [x] Approve / revoke UI (spender, amount / max clear)
 - [x] **Approval inventory + revoke** — Scan + per-row + bulk Revoke
-- [~] **EIP-712 / typed data / Permit** clear-sign path — WC strip + Permit warn
+- [x] **EIP-712 / typed data / Permit** clear-sign path — WC strip + Permit warn + danger ack
 - [x] **Custom contract call** (hex assist) for power/rescue
 - [x] **Address book** (label + warn new recipient)
 

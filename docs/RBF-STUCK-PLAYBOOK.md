@@ -27,6 +27,7 @@ $env:ANVIL_URL='http://127.0.0.1:8545'; node scripts/rbf-anvil-proof.mjs
 
 | Date | Chain | Path | Result |
 |------|-------|------|--------|
+| 2026-11-24 | 943 | Desk→Suite “Confirm on Trezor” (self 0.0001 tPLS, addr 0x73d0…36A8, nonce 39) | OPEN — Suite prompt reached; device button never completed; no Speed up evidence |
 | — | — | — | OPEN — fee math + Anvil lab green; device replace not run |
 
 ## Not pretending

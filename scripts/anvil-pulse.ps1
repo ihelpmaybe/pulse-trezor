@@ -1,5 +1,5 @@
 ﻿# Anvil fork of Pulse — Temper FORK_URL fallback when Temper lacks chain 369.
-# Requires foundry (anvil) on PATH: https://book.getfoundry.sh/getting-started/installation
+# Requires foundry (anvil). Prefers PATH, else %USERPROFILE%\.foundry\bin\anvil.exe
 param(
   [ValidateSet("hint", "run", "rbf-lab")]
   [string]$Action = "hint",
@@ -10,6 +10,14 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+function Resolve-Anvil {
+  $cmd = Get-Command anvil -ErrorAction SilentlyContinue
+  if ($cmd) { return $cmd.Source }
+  $fallback = Join-Path $env:USERPROFILE ".foundry\bin\anvil.exe"
+  if (Test-Path $fallback) { return $fallback }
+  throw "anvil not found — install Foundry or add ~/.foundry/bin to PATH"
+}
 
 switch ($Action) {
   "hint" {
@@ -27,19 +35,27 @@ Kill_if: calling Anvil a Trezor proof — device proof stays in RBF-STUCK-PLAYBO
 "@
   }
   "run" {
+    $anvil = Resolve-Anvil
     $args = @(
       "--fork-url", $ForkUrl,
       "--chain-id", "$ChainId",
       "--port", "$Port"
     )
     if ($BlockTime -gt 0) { $args += @("--block-time", "$BlockTime") }
-    Write-Host "anvil $($args -join ' ')"
-    & anvil @args
+    Write-Host "$anvil $($args -join ' ')"
+    & $anvil @args
   }
   "rbf-lab" {
-    Write-Host "Start anvil in another window if needed, then:"
-    Write-Host "  `$env:ANVIL_URL='http://127.0.0.1:$Port'; node scripts/rbf-anvil-proof.mjs"
-    $env:ANVIL_URL = "http://127.0.0.1:$Port"
-    node "$PSScriptRoot\rbf-anvil-proof.mjs"
+    $anvil = Resolve-Anvil
+    Write-Host "Starting $anvil --port $Port --no-mining (background)…"
+    $proc = Start-Process -FilePath $anvil -ArgumentList @("--port", "$Port", "--no-mining") -PassThru -WindowStyle Hidden
+    Start-Sleep -Seconds 1
+    try {
+      $env:ANVIL_URL = "http://127.0.0.1:$Port"
+      node "$PSScriptRoot\rbf-anvil-proof.mjs"
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+      if ($proc -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
+    }
   }
 }

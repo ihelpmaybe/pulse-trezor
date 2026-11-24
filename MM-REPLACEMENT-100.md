@@ -19,7 +19,7 @@
 11. [x] Switch active account from list
 12. [x] Tx status after send (pending → confirmed) — face poll
 13. [x] Activity / history feed on face — PulseScan v2 dense + infinite scroll 2026-11-23
-14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI + ynatm ladder + Anvil lab; device mempool proof OPEN
+14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI + ynatm ladder + Anvil lab PASS; device mempool proof OPEN
 15. [x] Custom gas / tip / max fee controls — Send Advanced in **beats** on 369/943 (not gwei) 2026-11-22
 16. [x] Nonce display + manual override (power)
 17. [x] Passphrase / hidden wallet callouts

@@ -6,6 +6,10 @@ Rules: [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) · [CORE-APPS.md](./CORE-APP
 
 **Before coding:** wrap OSS (OPEN-SOURCE-INFRA); feature must serve a **core app**.
 
+## Law — desktop first (operator 2026-11-24)
+**Finish `pulse-trezor` (Perch desk) before Tip / mobile / new companion apps.**  
+One finished desktop product teaches what Tip’s QR+SKU face should carry. Do **not** spin up 2–3 mobile apps and bounce back to desk. Tip stays QR+SKU only until Desk Gate ship is real.
+
 Legend: **Solo** = one agent · **Parallel OK** = different rows same band only if no file conflict
 
 ---
@@ -21,7 +25,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | 5 | ~~Desk A1 receive + PLS balance + send (testnet) + fees~~ **DONE** | `pulse-trezor` | A1 | 943 default · fee preview · Trezor sign |
 | 6 | ~~Indexer decision note (scan API vs self-host)~~ **DONE** | `pulse-trezor-platform` | SYNC7 | public PulseScan; self-host deferred |
 | 7 | ~~TIP0 locate Tip source / face-vs-code decision~~ **DONE** (interim) | `Tip-wallet` | TIP0 | face-only; code path unknown |
-| 8 | TIP1 consume SYNC4 pack + RPC align | `Tip-wallet` | TIP1 | After #2+#7 |
+| 8 | TIP1 Tip = QR + exact divisibility→SKUs (not full wallet; pack align only if it serves that) | `Tip-wallet` | TIP1 | After #2+#7 · see Tip NOTES |
 | 9 | ~~Desk A2 tokens HEX/PLSX + approve (use SYNC4)~~ **DONE** | `pulse-trezor` | A2 | balances · ERC-20 send · approve |
 | 10 | ~~Guides: Suite/Connect + Desk receive thin~~ **DONE** | `pulse-trezor-guides` | G1/G5 | suite-connect · pls-on-trezor · desk-install |
 | 11 | ~~Gate T: Desk smoke green + pen draft~~ **DONE** (pen Suite-quit 2026-11-23) | `pulse-trezor` | TEST | — |
@@ -54,15 +58,15 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 | # | Task | Repo | TODO id | Parallel |
 |---|------|------|---------|----------|
 | 24 | ~~Desk C HEX companion thin~~ **DONE** (modular stakes; possession nudge) | `pulse-trezor` | C | — |
-| 25 | Desk B **PulseX** swap (quote → Trezor sign) | `pulse-trezor` | B | After A2 |
+| 25 | ~~Desk B **PulseX** swap (quote → Trezor sign)~~ **DONE** | `pulse-trezor` | B | face Swap tab |
 | 25b | ~~ProveX deep link / USDC flow (guide + Desk entry)~~ **DONE** (guide; Desk Apps already) | guides + Desk | G6/ProveX | — |
 | 26 | ~~PLAT-WC WalletConnect → Desk~~ **DONE v0** (EIP-712 still open) | `pulse-trezor` | PLAT-WC | After A1 |
 | 27 | Rescue R1 deploy + R2 thin UI | `hexican-rescue` | R1–R2 | After R0 |
 | 28 | SYNC3 bunker deeplink | `pulse-trezor-platform` | SYNC3 | After R1 |
-| 29 | EIP-712 / Permit / bulk revoke | `pulse-trezor` | A2 extras | After A2 |
+| 29 | ~~EIP-712 / Permit / bulk revoke~~ **DONE** (WC strips + Approvals bulk; deepen later) | `pulse-trezor` | A2 extras | — |
 | 30 | FW2 token pack + FW3 emu e2e | `pulse-trezor-firmware` | FW2–FW3 | After FW1 |
 | 31 | Suite SU4 upstream ask | `pulse-trezor-suite` | SU4 | After SU2 |
-| 32 | AI0–AI1 explain/prepare (Desk) | platform + Desk | AI0–AI1 | After A1 |
+| 32 | ~~AI0–AI1 explain/prepare (Desk)~~ **DONE** | platform + Desk | AI0–AI1 | TxExplain + policy tiles |
 | 33 | ~~Growth: Works-on-Pulse badge~~ **DONE** · tip kit later | platform + guides | GR0/G6 | — |
 | 34 | PLAT-Ext wire Internetmoney681 | `pulse-trezor-platform` | PLAT-Ext | Parallel OK |
 | 35 | ~~Guides status + migrate-ETH~~ **DONE** | `pulse-trezor-guides` | G6 | — |
@@ -114,11 +118,12 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ```
 1. Open PRIORITY.md (this file)
-2. Find lowest # still unchecked
-3. If Parallel OK and another agent owns a conflicting row, skip to next free row
-4. Clone/open that Repo → AGENTS.md → TODO.md → implement that id only
-5. Tick repo TODO + this PRIORITY row in the same PR
-6. Stop (no “while I’m here” BONUS)
+2. Prefer unfinished Desk (`pulse-trezor`) rows over Tip/mobile/guides-only
+3. Skip Tip TIP1+ / new Android apps until Desk finish band is closed (desktop-first law)
+4. Find lowest # still unchecked that you can own under that law
+5. Clone/open that Repo → AGENTS.md → TODO.md → implement that id only
+6. Tick repo TODO + this PRIORITY row in the same PR
+7. Stop (no “while I’m here” BONUS / no new mobile repo)
 ```
 
 **Spare / end-of-month tokens / non-Trezor Pulse work / blocked here:** open **[PULSE-HIVE.md](./PULSE-HIVE.md)** and claim an **H#**. Hive = **all PulseChain**, not just Trezor.
@@ -137,5 +142,6 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 
 ## Current focus (update when claiming)
 
-**Active band: P0.** Next: **#10 guides** or **#11 Gate T pen** (device smoke manual). #8 Tip blocked.  
-Say: `Taking PRIORITY #10 …`
+**Active band: finish Desk.** Tip/mobile parked.  
+Desk leftovers: hygiene commit · device RBF · mainnet Sites tx dust · Win desktop pack · ext smoke · EIP-712/Permit polish (#29) · migrate Advanced (#36).  
+Say: `Taking Desk …` (not Tip).

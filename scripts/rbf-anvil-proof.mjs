@@ -97,6 +97,16 @@ const hash2 = await wallet.sendTransaction({
 });
 console.log("newHash", hash2);
 
+// If anvil was started with --no-mining / automine off, advance one block.
+try {
+  await publicClient.request({
+    method: "anvil_mine",
+    params: ["0x1"],
+  });
+} catch {
+  /* auto-mine anvil: ignore */
+}
+
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: hash2,
   timeout: 15_000,

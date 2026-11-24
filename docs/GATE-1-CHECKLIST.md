@@ -7,7 +7,7 @@ Maps to [ACCEPTANCE.md](./ACCEPTANCE.md) Gate 1 + [TESTING.md](./TESTING.md).
 - [x] A0–A2: Connect · bag · send PLS/ERC-20 · approve/revoke · fees/RBF · Activity
 - [x] Sites WC: personal_sign · EIP-712 (live smokes 2026-11-22)
 - [ ] Sites WC: **tx / swap** on Pulse mainnet 369 (needs dust)
-- [x] Inject / MV3 cross-origin + event fan-out (`0.1.2`)
+- [x] Inject / MV3 cross-origin + event fan-out (`0.1.4` offscreen + session cache)
 - [x] First-run / Suite cues / Cancel
 - [x] Testnet 943 toggle
 
