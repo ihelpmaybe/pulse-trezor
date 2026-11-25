@@ -24,6 +24,7 @@ import {
 } from "../chain/favorites";
 import {
   ACCOUNT_INDEX_MAX,
+  FACE_LOAD_SOFT_MAX,
   parseLoadSpec,
   shortAddr,
   shortNative,
@@ -177,6 +178,7 @@ export function DevicePanel({
   const loadSpec = parseLoadSpec(rangeDraft) ?? parseLoadSpec(accountRange);
   const loadSpan = loadSpec?.span ?? 12;
   const loadFrom = loadSpec?.from ?? 0;
+  const loadTooBig = loadSpan > FACE_LOAD_SOFT_MAX;
   const favSet = new Set(walletFavs.map((a) => a.toLowerCase()));
 
   function setBranch(nextAccount: number, nextChange: number) {
@@ -450,19 +452,21 @@ export function DevicePanel({
         <button
           type="button"
           className="btn"
-          disabled={connecting || !loadSpec}
+          disabled={connecting || !loadSpec || loadTooBig}
           title={
-            accountList.length
-              ? advanced
-                ? `Add / reload ${loadSpan} addresses under …/${pathKnobs.account}'/${pathKnobs.change}/N (${loadFrom}–${loadSpec?.to ?? loadFrom}) — Rabby-style “add more from Trezor”`
-                : `Add / reload ${loadSpan} addresses from Trezor (change Count/range for more)`
-              : advanced
-                ? `Load ${loadSpan} wallets under …/${pathKnobs.account}'/${pathKnobs.change}/N (${loadFrom}–${loadSpec?.to ?? loadFrom})`
-                : `Load ${loadSpan} wallets (default path)`
+            loadTooBig
+              ? `Count ${loadSpan} is too big for one click (max ${FACE_LOAD_SOFT_MAX}). Lower Advanced Count / range.`
+              : accountList.length
+                ? advanced
+                  ? `Add / reload ${loadSpan} addresses under …/${pathKnobs.account}'/${pathKnobs.change}/N (${loadFrom}–${loadSpec?.to ?? loadFrom}) — Rabby-style “add more from Trezor”`
+                  : `Add / reload ${loadSpan} addresses from Trezor (change Count/range for more)`
+                : advanced
+                  ? `Load ${loadSpan} wallets under …/${pathKnobs.account}'/${pathKnobs.change}/N (${loadFrom}–${loadSpec?.to ?? loadFrom})`
+                  : `Load ${loadSpan} wallets (default path)`
           }
           onClick={() => {
             const p = parseLoadSpec(rangeDraft);
-            if (!p) return;
+            if (!p || p.span > FACE_LOAD_SOFT_MAX) return;
             const normalized = rangeDraft.trim().replace(/\s+/g, "");
             setRangeDraft(normalized);
             setAccountRange(normalized);
@@ -472,9 +476,11 @@ export function DevicePanel({
         >
           {listing
             ? "Loading…"
-            : accountList.length
-              ? `Add more addresses (${loadSpan})`
-              : `Load ${loadSpan} address${loadSpan === 1 ? "" : "es"}`}
+            : loadTooBig
+              ? `Lower Count (max ${FACE_LOAD_SOFT_MAX})`
+              : accountList.length
+                ? `Add more addresses (${loadSpan})`
+                : `Load ${loadSpan} address${loadSpan === 1 ? "" : "es"}`}
         </button>
         {advanced ? (
           <button

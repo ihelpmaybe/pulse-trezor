@@ -4,6 +4,7 @@
 import { isAddress, type Address } from "viem";
 import {
   ACCOUNT_INDEX_MAX,
+  FACE_LOAD_ABSURD_SPAN,
   clampAccountCount,
   parseLoadSpec,
 } from "./faceFormat";
@@ -238,7 +239,16 @@ export function saveAccountCount(n: number) {
 export function loadAccountRangeSpec(): string {
   try {
     const raw = localStorage.getItem(ACCOUNT_COUNT_KEY);
-    if (raw && parseLoadSpec(raw)) return raw.trim().replace(/\s+/g, "");
+    const p = raw ? parseLoadSpec(raw) : null;
+    if (p) {
+      const s = raw!.trim().replace(/\s+/g, "");
+      // Absurd millions on the Load button = typo/corrupt — don't brick the face.
+      if (p.span >= FACE_LOAD_ABSURD_SPAN) {
+        localStorage.setItem(ACCOUNT_COUNT_KEY, "12");
+        return "12";
+      }
+      return s;
+    }
   } catch {
     /* ignore */
   }

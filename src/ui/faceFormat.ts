@@ -17,6 +17,10 @@ export const ACCOUNT_COUNT_MIN = 1;
 export const ACCOUNT_INDEX_MAX = 2_147_483_647;
 /** Same as index max — Count may request any legal BIP32 span. */
 export const ACCOUNT_COUNT_MAX = ACCOUNT_INDEX_MAX;
+/** One-click Load on the Device face — keep the button honest. */
+export const FACE_LOAD_SOFT_MAX = 200;
+/** Corrupt / typo Count (e.g. millions) — reset to default on read. */
+export const FACE_LOAD_ABSURD_SPAN = 5_000;
 
 /** Parse `20-40` → inclusive BIP44 indices (single digit → that slot only). */
 export function parseAccountRange(
