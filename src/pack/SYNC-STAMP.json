@@ -1,7 +1,7 @@
 {
   "syncedAt": "2026-11-25T00:47:36.002Z",
-  "desk": "C:\\Users\\punki\\Desktop\\pulse-trezor-org\\pulse-trezor\\src\\pack",
-  "platform": "C:\\Users\\punki\\Desktop\\pulse-trezor-org\\pulse-trezor-platform\\packs\\pulse-core\\v1",
+  "desk": "src/pack",
+  "platform": "pulse-trezor-platform/packs/pulse-core/v1",
   "actions": [
     "copied indexer.json platform → desk",
     "tokenlist.json already aligned",

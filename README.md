@@ -7,7 +7,7 @@ Suite hosts the device; Perch is the Pulse UI.
 
 **Wholesome defaults:** no phone-home telemetry · no seed in the browser · keys stay on the Trezor · clear-sign before Suite · local prefs only. Details → [PRIVACY.md](./PRIVACY.md) · [SECURITY.md](./SECURITY.md).
 
-**Normies → [INSTALL.md](./INSTALL.md)** (browser link or Windows zip · no `npm`) · Builders → [TRY.md](./TRY.md) · In-app **?** FAQ
+**Install (no coding) → [INSTALL.md](./INSTALL.md)** · Builders → [TRY.md](./TRY.md) · In-app **?** FAQ
 
 ---
 
@@ -32,7 +32,7 @@ Open **http://127.0.0.1:5174/** · Lab default = **Pulse testnet 943**. Guides: 
 
 | Artifact | Link |
 |----------|------|
-| Install (normie) | [INSTALL.md](./INSTALL.md) · [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) |
+| Install | [INSTALL.md](./INSTALL.md) · [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) |
 | Live desk | https://ihelpmaybe.github.io/pulse-trezor/ |
 | Builder try | [TRY.md](./TRY.md) |
 | Extension sideload | [TRY.md](./TRY.md) · `npm run ext:pack` → `dist-ext/` (**0.1.5**) |
@@ -60,7 +60,7 @@ Open **http://127.0.0.1:5174/** · Lab default = **Pulse testnet 943**. Guides: 
 | Repo | Role |
 |------|------|
 | [pulse-trezor](https://github.com/ihelpmaybe/pulse-trezor) | Desk (this repo) |
-| [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie guides |
+| [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | End-user guides |
 | [pulse-trezor-platform](https://github.com/ihelpmaybe/pulse-trezor-platform) | Watch registry / badge packs |
 | [pulse-trezor-suite](https://github.com/ihelpmaybe/pulse-trezor-suite) | Suite gap study |
 | [Tip-wallet](https://github.com/ihelpmaybe/Tip-wallet) | Soft Android (separate lane) |

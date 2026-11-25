@@ -6,7 +6,7 @@
 
 **What this is not:** a new DEX · lending protocol · analytics dashboard · second soft Android wallet · fake “official Suite” · AI custody.
 
-**Follow + adopt map:** vault `memory/crypto/2026-11-21-pulse-builders-follow-gaps.md` (and section **0** below).
+**Follow + adopt map:** section **0** below (builders + already-shipped table).
 
 | Queue | When |
 |-------|------|
@@ -38,7 +38,7 @@ Legend: `[ ]` open · `[~]` partial · `[x]` done
 
 ## 0 — Follow builders · adopt · fill gaps (don’t redo)
 
-### Follow on X (pump account)
+### Follow on X (community)
 **Official:** @PulsechainCom · @HEXcrypto · @PulseXcom · @ProveXCom · @RichardHeartWin  
 
 **Builders (ship product):** @sinofrebellion · @piteasio · @9mm_pro · @joltdotbuild · @StarfireDV · @phiatcrypto · @liquidloansio · @POWERCITYio · @IMPLSfinance · OpenPulsechain / Peplord (PulseTickers)  

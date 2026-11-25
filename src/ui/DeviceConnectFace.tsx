@@ -26,7 +26,7 @@ export function suiteAllowCue(opts: {
     return `Suite Allow — exporting addresses 0–${Math.max(0, opts.accountCount - 1)}. Check the Suite window (taskbar / other monitor).`;
   }
   if (opts.suiteDesktop) {
-    return "Look at Trezor Suite now — Allow Pulse Perch. It may be behind Cursor or on your other monitor (taskbar: Trezor Suite).";
+    return "Look at Trezor Suite now — Allow Pulse Perch. It may be behind another window or on your other monitor (taskbar: Trezor Suite).";
   }
   return "Waiting on Suite — unlock the Trezor in Suite, then Allow Pulse Perch (other screen OK).";
 }

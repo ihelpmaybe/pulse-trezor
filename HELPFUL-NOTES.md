@@ -43,7 +43,7 @@ m/44'/60'/0'/0/{index}
 - Product copy must say: pairing = **watch the same addresses**, not “your Tip seed is on the Trezor.”
 - Isolated stake paths (mHEX/pqq): `m/44'/60'/1'/0/{index}` — persist `derivationPath`; never assume index-only.
 
-Existing portable layer: `@hex/pqq-wallet` patterns in the operator vault (mHEX / HEX trees).
+Existing portable layer: `@hex/pqq-wallet` patterns (mHEX / HEX trees) when that package is available locally.
 
 ---
 
@@ -93,7 +93,7 @@ Don’t greenfield what already works:
 | Connect warm + Pulse sign | `demos/pulse-publish/src/trezor/` |
 | Studio Trezor bar | `demos/pulse-publish/src/TrezorBar.tsx` |
 | pqq derivation + Connect adapter | `**/pqq-wallet` under HEX/mhex trees |
-| Rescue registry + forge | `hexican-rescue/` in windows-clone vault |
+| Rescue registry + forge | sibling `hexican-rescue` repo when present |
 | EIP-681 | `Internetmoney681-Chrome` · `Internetmoney681-Android` · Tip |
 | Pulse MCP reads | Cursor PulseChain MCP (balances, swaps, etc.) |
 
@@ -166,7 +166,7 @@ Copy/adapt into private repos; don’t bind Desk forever to vault paths.
 | [pulse-trezor-firmware](https://github.com/ihelpmaybe/pulse-trezor-firmware) | GPL device |
 | [pulse-trezor-suite](https://github.com/ihelpmaybe/pulse-trezor-suite) | T-RSL study |
 | [hexican-rescue](https://github.com/ihelpmaybe/hexican-rescue) | Bunker |
-| [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | Normie docs |
+| [pulse-trezor-guides](https://github.com/ihelpmaybe/pulse-trezor-guides) | End-user docs |
 
 ---
 

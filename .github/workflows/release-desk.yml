@@ -42,7 +42,7 @@ jobs:
           cat > "$NOTES" <<EOF
           ## Pulse Perch desk ${VER}
 
-          **Normie install:** [INSTALL.md](https://github.com/ihelpmaybe/pulse-trezor/blob/main/INSTALL.md)
+          **Install (no coding):** [INSTALL.md](https://github.com/ihelpmaybe/pulse-trezor/blob/main/INSTALL.md)
 
           - Live desk: https://ihelpmaybe.github.io/pulse-trezor/
           - Windows: unzip \`pulse-perch-${VER}-web.zip\` → double-click \`Open-Pulse-Perch.cmd\`

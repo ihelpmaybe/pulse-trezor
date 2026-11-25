@@ -145,5 +145,5 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 **Active band: finish Desk.** Tip/mobile parked.  
 Desk leftovers: product gaps · device RBF / mainnet dust parked. Connect e2e harness **DONE** (`npm run connect:e2e`).  
 **Not priority:** Chrome Web Store · Play Store · store listing theater.  
-Offline GitHub mirrors: `E:\vault\github`.  
+Offline mirrors: keep local clones of the sibling GitHub repos if you work offline.  
 Say: `Taking Desk …` (not Tip / not stores).
