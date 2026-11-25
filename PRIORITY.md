@@ -143,6 +143,7 @@ Legend: **Solo** = one agent · **Parallel OK** = different rows same band only 
 ## Current focus (update when claiming)
 
 **Active band: finish Desk.** Tip/mobile parked.  
-Desk leftovers: device RBF (parked) · mainnet Sites tx dust · signed native packs · ext smoke.  
-Offline GitHub mirrors (not for public GH): `E:\vault\github` (`mirrors\private` · `mirrors\public` · `releases`).  
-Say: `Taking Desk …` (not Tip).
+Desk leftovers: product gaps · device RBF / mainnet dust parked. Connect e2e harness **DONE** (`npm run connect:e2e`).  
+**Not priority:** Chrome Web Store · Play Store · store listing theater.  
+Offline GitHub mirrors: `E:\vault\github`.  
+Say: `Taking Desk …` (not Tip / not stores).

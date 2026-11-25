@@ -16,7 +16,7 @@ Product law: bag / send / approve / Sites / sign without MetaMask.
 4. [~] **Gas / RBF** — UI + ynatm ladder + Anvil lab **PASS** (2026-11-24); **device** stuck-tx proof OPEN
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX
-7. [~] **Ship surfaces** — MV3 sideload **`0.1.4`** + CWS-ready docs; Store listing + mobile later
+7. [~] **Ship surfaces** — MV3 sideload **`0.1.4`** + pack/sha enough; **CWS/Play listing = not a goal** (operator 2026-11-24)
 8. [x] **Softer first-run** — Cancel / Suite cues / FAQ
 9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts. **EVM peers in pack** OK; Pulse remains center.
 
@@ -112,7 +112,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 ## E — Power tools
 - [x] Portfolio snapshot helpers — export bag snapshot JSON
 - [x] Migrate walks → product Advanced mode — Apps → Migrate card (Device Advanced)
-- [ ] Connect e2e harness (fakes + device checklist)
+- [x] Connect e2e harness (fakes + device checklist) — `npm run connect:e2e` · docs/CONNECT-E2E.md
 
 ## G — Ecosystem (desk-owned bits)
 - [x] Link Suite gap / upstream status from Desk UI or about page
