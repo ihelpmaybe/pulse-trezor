@@ -1056,6 +1056,31 @@ body {
   color: var(--lime-dim);
 }
 
+.suite-allow-callout {
+  margin: 0.35rem 0 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #6a3060;
+  border-radius: 8px;
+  background: #1a0e18;
+}
+
+.suite-allow-callout-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--accent, #ff2bd6);
+}
+
+.suite-allow-callout-body {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.suite-allow-callout-hint {
+  margin: 0.35rem 0 0;
+}
+
 .device-connect-face {
   display: grid;
   gap: 0.55rem;

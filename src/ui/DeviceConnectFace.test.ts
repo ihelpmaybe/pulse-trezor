@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   connectSteps,
   shouldOfferFirmwareHelp,
+  suiteAllowCue,
 } from "./DeviceConnectFace";
 
 describe("connectSteps", () => {
@@ -44,5 +45,29 @@ describe("shouldOfferFirmwareHelp", () => {
       shouldOfferFirmwareHelp("Trezor Suite not reachable. Open Suite…", false),
     ).toBe(true);
     expect(shouldOfferFirmwareHelp("Amount must be > 0.", false)).toBe(false);
+  });
+});
+
+describe("suiteAllowCue", () => {
+  it("is null when not connecting", () => {
+    expect(
+      suiteAllowCue({
+        connecting: false,
+        listing: false,
+        suiteDesktop: true,
+        accountCount: 1,
+      }),
+    ).toBeNull();
+  });
+
+  it("points at Suite / other monitor when desktop is up", () => {
+    const cue = suiteAllowCue({
+      connecting: true,
+      listing: false,
+      suiteDesktop: true,
+      accountCount: 1,
+    });
+    expect(cue).toMatch(/Trezor Suite/i);
+    expect(cue).toMatch(/other monitor|taskbar/i);
   });
 });

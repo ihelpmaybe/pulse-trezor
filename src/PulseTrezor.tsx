@@ -44,6 +44,7 @@ import { ApprovePanel } from "./ui/ApprovePanel";
 import { DevicePanel } from "./ui/DevicePanel";
 import {
   shouldOfferFirmwareHelp,
+  suiteAllowCue,
   TREZOR_FIRMWARE_HELP,
 } from "./ui/DeviceConnectFace";
 import { TopStrip } from "./ui/TopStrip";
@@ -662,13 +663,12 @@ export function PulseTrezor({
       </p>
     );
 
-  const suiteCue = connecting
-    ? listing
-      ? `Suite Allow — exporting slots 0–${Math.max(0, accountCount - 1)}.`
-      : suite === "ok"
-        ? "Suite is up — look for Allow in Suite (may be on another screen)."
-        : "Waiting on Suite — unlock Trezor and confirm."
-    : null;
+  const suiteCue = suiteAllowCue({
+    connecting,
+    listing,
+    suiteDesktop: suite === "ok",
+    accountCount,
+  });
 
   /* Errors use role=alert separately — keep this polite region for cues only. */
   const sendCue =

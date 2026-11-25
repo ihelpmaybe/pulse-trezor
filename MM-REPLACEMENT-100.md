@@ -102,7 +102,7 @@
 82. [x] Settings: RPC + display prefs
 83. [x] Silent a11y: live regions, focus trap, labels
 84. [x] Softer first-run: detect Suite Desktop vs Web
-85. [~] Clear Allow-in-Suite coaching (other monitor)
+85. [x] Clear Allow-in-Suite coaching (other monitor) — suite-allow callout 2026-11-24
 86. [~] Onboarding: connect → bag → first Sites pair — face cue + empty teaches
 87. [x] Empty states that teach next click
 88. [~] Locale strings (EN first, then more) — en.ts map started

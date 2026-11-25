@@ -11,6 +11,25 @@ export const TREZOR_SUITE_WEB = "https://suite.trezor.io/web/";
 
 export type ConnectStepId = "suite" | "allow" | "ready";
 
+/**
+ * Short cue while Suite Allow is pending — other-monitor / taskbar is the usual miss.
+ */
+export function suiteAllowCue(opts: {
+  connecting: boolean;
+  listing: boolean;
+  suiteDesktop: boolean;
+  accountCount: number;
+}): string | null {
+  if (!opts.connecting) return null;
+  if (opts.listing) {
+    return `Suite Allow — exporting addresses 0–${Math.max(0, opts.accountCount - 1)}. Check the Suite window (taskbar / other monitor).`;
+  }
+  if (opts.suiteDesktop) {
+    return "Look at Trezor Suite now — Allow Pulse Perch. It may be behind Cursor or on your other monitor (taskbar: Trezor Suite).";
+  }
+  return "Waiting on Suite — unlock the Trezor in Suite, then Allow Pulse Perch (other screen OK).";
+}
+
 export function connectSteps(opts: {
   suiteChannel: SuiteChannel;
   connecting: boolean;
@@ -116,13 +135,20 @@ export function DeviceConnectFace({
               USB / Bluetooth stay inside Suite — Perch never owns the cable.
             </span>
           </p>
-          {connecting && suiteCue ? (
-            <p className="muted" role="status">
-              {suiteCue}
-            </p>
-          ) : null}
         </div>
       </div>
+
+      {connecting && suiteCue ? (
+        <div className="suite-allow-callout" role="status">
+          <p className="suite-allow-callout-title">Allow in Trezor Suite</p>
+          <p className="suite-allow-callout-body">{suiteCue}</p>
+          <p className="muted fee suite-allow-callout-hint">
+            Perch cannot click Allow for you. Stuck?{" "}
+            <strong>Stop waiting</strong>, bring Suite to the front, then Start
+            connection again.
+          </p>
+        </div>
+      ) : null}
 
       <ol className="device-connect-steps" aria-label="Connect steps">
         {steps.map((s, i) => (
@@ -205,10 +231,10 @@ export function DeviceConnectFace({
           <a href={TREZOR_SUITE_WEB} target="_blank" rel="noreferrer">
             Trezor Suite
           </a>
-          , unlock it, then <strong>Start connection</strong> → Allow in Suite
-          (other screen OK). PIN stays on the device. Stuck?{" "}
-          <strong>Stop waiting</strong>, then start again — that does not reject
-          on the device.
+          , unlock it, then <strong>Start connection</strong>. The Allow prompt
+          is in <strong>Suite</strong> — often on another monitor or under the
+          taskbar. PIN stays on the device. Stuck? <strong>Stop waiting</strong>
+          , then start again — that does not reject on the device.
         </p>
       ) : null}
     </div>
