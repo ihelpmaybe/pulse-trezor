@@ -148,7 +148,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 See [ADOPTION.md](./ADOPTION.md) P1–P2 · [BUILD-EFFICIENCY.md](./BUILD-EFFICIENCY.md) other-wallets.
 
 - [ ] Locales after English (UI strings)
-- [ ] Public Desk **PWA** polish (zero-install try) — beyond bare Web
+- [x] Public Desk **PWA** polish (zero-install try) — shell-v4 · offline.html · banner · Apple meta
 - [ ] Opt-in light metrics (first-send) — no seed telemetry
 - [ ] Safe{Wallet} / multisig connect path (optional power users)
 - [ ] Account-abstraction / smart-EOA spike (only if Pulse ecosystem needs it)

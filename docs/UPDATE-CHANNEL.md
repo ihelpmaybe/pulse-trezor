@@ -4,7 +4,7 @@
 
 ## How updates work today
 - **Desk:** pull git → `npm run build` / `npm run dev`. No auto-updater.
-- **PWA:** Chrome “Install Pulse Perch” from the desk origin; hard-refresh or unregister service worker if a shell cache sticks. Manifest: `public/manifest.webmanifest`. SW `shell-v3` caches shell + `/assets/*` only — never RPC/scan.
+- **PWA:** Chrome “Install Pulse Perch” from the desk origin (Settings → Install, or address-bar icon). Hard-refresh or unregister SW if a shell cache sticks. Manifest: `public/manifest.webmanifest`. SW `shell-v4` caches shell + `/offline.html` + `/assets/*` only — never RPC/scan. Offline banner warns Suite/RPC need a network.
 - **Portable zip:** `npm run build && npm run desk:pack` → `release/*.zip` + `.sha256` ([DESKTOP-PACK.md](./DESKTOP-PACK.md)).
 - **Extension:** `npm run ext:pack` → `dist-ext/pulse-perch-extension-<ver>.zip` + `.sha256`; reload unpacked / sideload zip. See [EXT-CWS-READY.md](./EXT-CWS-READY.md).
 

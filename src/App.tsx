@@ -1,9 +1,11 @@
 import { PulseTrezor } from "./PulseTrezor";
+import { OfflineBanner } from "./ui/OfflineBanner";
 
 /** Thin standalone shell. Embedders import `PulseTrezor` instead. */
 export function App() {
   return (
     <div className="page">
+      <OfflineBanner />
       <header className="hdr">
         <div
           className="hdr-head"

@@ -7,7 +7,7 @@
 | Windows 10/11 | PASS (lab 2026-11) | OPEN | OPEN | OPEN | PASS (lab) | Primary |
 | Linux | OPEN | OPEN | OPEN | OPEN | OPEN | Connect-web same path |
 | macOS | OPEN | OPEN | OPEN | OPEN | OPEN | Notarize later — see DESKTOP-PACK |
-| Web / PWA only | PASS (desk) | — | — | — | via Suite | Installable; SW shell-v3 |
+| Web / PWA only | PASS (desk) | — | — | — | via Suite | Installable; SW shell-v4 + offline face |
 
 ## Journeys to tick per cell
 Receive · send PLS · ERC-20 · approve · Sites personal_sign · (mainnet tx when dust) · Speed up / Cancel stuck (943 RBF playbook)

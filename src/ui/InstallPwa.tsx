@@ -8,14 +8,25 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+function isStandalone(): boolean {
+  try {
+    if (window.matchMedia("(display-mode: standalone)").matches) return true;
+    const nav = window.navigator as Navigator & { standalone?: boolean };
+    return !!nav.standalone;
+  } catch {
+    return false;
+  }
+}
+
 export function InstallPwa() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(
     null,
   );
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(() => isStandalone());
   const [hint, setHint] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isStandalone()) setDone(true);
     const onPrompt = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BeforeInstallPromptEvent);
@@ -33,7 +44,12 @@ export function InstallPwa() {
   }, []);
 
   if (done) {
-    return <p className="muted fee">Installed as an app on this device.</p>;
+    return (
+      <p className="muted fee">
+        Installed as an app on this device. Suite still needs a network when you
+        sign.
+      </p>
+    );
   }
 
   return (
@@ -55,7 +71,7 @@ export function InstallPwa() {
       </button>
       <p className="muted fee">
         {deferred
-          ? "Adds a desktop / home-screen app — no MetaMask, no store."
+          ? "Adds a desktop / home-screen app — no MetaMask, no store. Chain calls still need Suite + network."
           : "Chrome/Edge on localhost or HTTPS may offer install after a visit. Or: npm run build && npm run preview, then Install."}
       </p>
       {hint ? <p className="muted fee">{hint}</p> : null}
@@ -66,7 +82,7 @@ export function InstallPwa() {
           onClick={() =>
             setHint(
               typeof window !== "undefined" && "serviceWorker" in navigator
-                ? "SW supported — open in Chrome and use the install icon in the address bar if shown."
+                ? "SW shell-v4 caches the face only — never RPC. Use Chrome’s install icon in the address bar, or reopen after preview."
                 : "This browser cannot install PWAs.",
             )
           }

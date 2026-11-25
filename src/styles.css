@@ -95,6 +95,22 @@ body {
   transform: none;
 }
 
+.offline-banner {
+  margin: 0;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  background: #3a1020;
+  border-bottom: 1px solid #6a2040;
+  color: #f6d0de;
+}
+
+.offline-banner-ok {
+  background: #14101c;
+  border-bottom-color: var(--border);
+  color: var(--muted);
+}
+
 .hdr {
   margin-bottom: 1rem;
   padding-right: 5.5rem;

@@ -20,7 +20,7 @@ Maps to [ACCEPTANCE.md](./ACCEPTANCE.md) Gate 1 + [TESTING.md](./TESTING.md).
 ## Ship / update
 - [x] Update channel stub — [UPDATE-CHANNEL.md](./UPDATE-CHANNEL.md)
 - [x] PWA webmanifest + icons (`public/manifest.webmanifest`)
-- [x] PWA: installable + offline shell SW (`public/sw.js` shell-v3; never caches RPC)
+- [x] PWA: installable + offline shell SW (`public/sw.js` shell-v4 + offline.html; never caches RPC)
 - [ ] Live stuck-tx RBF on device — fee math PASS; playbook [RBF-STUCK-PLAYBOOK.md](./RBF-STUCK-PLAYBOOK.md)
 - [~] Desktop signed/notarized packs — zip+sha via `desk:pack`; Authenticode/notarize OPEN ([DESKTOP-PACK.md](./DESKTOP-PACK.md))
 - [x] Extension sideload pack + CWS-ready docs (listing later)

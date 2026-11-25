@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Pulse Perch",
   "short_name": "Perch",
   "description": "PulseChain MetaMask replacement — bag, send, approve, Sites, sign (Trezor transport).",
@@ -9,6 +10,7 @@
   "background_color": "#07060c",
   "theme_color": "#ff2bd6",
   "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icons/icon-192.png",
