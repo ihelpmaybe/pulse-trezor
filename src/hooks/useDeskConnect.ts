@@ -84,7 +84,8 @@ export function useDeskConnect(opts: {
   const [deviceHints, setDeviceHints] = useState<DeviceHints | null>(null);
 
   const active = session ?? watch;
-  const canSign = !!session;
+  /** Session alone is not “signing on” — Suite missing means Confirm cannot land. */
+  const canSign = !!session && suite !== "missing";
 
   /** Change BIP44 template — clears listed addresses (must Reload). */
   function applyPathTemplate(next: string) {
@@ -424,6 +425,8 @@ export function useDeskConnect(opts: {
 
   function onDisconnect() {
     setSession(null);
+    setWatch(null);
+    saveWatch(null);
     setErr(null);
     onDisconnectExtras?.();
   }

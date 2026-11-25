@@ -176,9 +176,7 @@ export function ActivityPanel({
           </div>
         ) : null}
       </div>
-      {!active ? (
-        <p className="muted empty-teach">{t("activityConnectHint")}</p>
-      ) : actErr ? (
+      {!active ? null : actErr ? (
         <p className="muted">{actErr}</p>
       ) : actBusy && !activity.length ? (
         <p className="muted">…</p>

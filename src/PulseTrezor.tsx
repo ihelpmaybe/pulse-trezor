@@ -31,7 +31,6 @@ import { type PackToken } from "./chain/tokens";
 import { reconcileErrWithSuite } from "./trezor/errors";
 import { WcPanel } from "./wc/WcPanel";
 import { MigratePanel } from "./ui/MigratePanel";
-import { FirstRunStrip } from "./ui/FirstRunStrip";
 import { loadFavorites, loadWalletFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
 import { decodeSyncPayload } from "./chain/syncPair";
@@ -453,9 +452,11 @@ export function PulseTrezor({
 
   const { injectEth, setInjectEth } = useDeskInject({
     session,
+    canSign,
     chainId,
     effectiveRpc,
     setChainId,
+    setAsset,
     refreshBalances,
   });
 
@@ -739,6 +740,9 @@ export function PulseTrezor({
           watch={watch}
           session={session}
           chainId={chainId}
+          setChainId={setChainId}
+          setAsset={setAsset}
+          setErr={setErr}
           deviceId={deviceId}
           applyWatchImportText={applyWatchImportText}
           setWatchImportBusy={setWatchImportBusy}
@@ -761,8 +765,6 @@ export function PulseTrezor({
           setHexModule={setHexModule}
           bagTab={bagTab}
           setBagTab={setBagTab}
-          privacyHide={privacyHide}
-          togglePrivacyHide={togglePrivacyHide}
           a11y={a11y}
           patchA11y={patchA11y}
           injectEth={injectEth}
@@ -809,12 +811,9 @@ export function PulseTrezor({
         copied={copied}
         onCopy={onCopy}
         watch={!!watch}
+        canSign={canSign}
         onForget={onForget}
         chainId={chainId}
-      />
-      <FirstRunStrip
-        hasSession={!!(session || watch)}
-        onGotoApps={() => setActionTab("apps")}
       />
       <div className="grid">
         <DevicePanel

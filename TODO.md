@@ -11,12 +11,12 @@ Legend: `[ ]` todo · `[x]` done · `[~]` partial
 Product law: bag / send / approve / Sites / sign without MetaMask.
 
 1. [~] **Sites pair smoke** — live WC personal_sign PASS · tx soft coach on face; hash/swap on 369 still needs dust
-2. [x] **Injected provider** — this-tab + MV3; **`0.1.4`** offscreen bridge + session cache (reload unpacked)
+2. [x] **Injected provider** — this-tab + MV3; **`0.1.5`** offscreen bridge · no fake accounts cache (reload unpacked)
 3. [x] **Activity / history** — dense grid + paged PulseScan + infinite scroll
 4. [~] **Gas / RBF** — UI + ynatm ladder + Anvil lab **PASS** (2026-11-24); **device** stuck-tx proof OPEN
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX
-7. [x] **Ship surfaces** — MV3 sideload **`0.1.4`** + desk:pack + Settings/TRY honesty; **CWS/Play listing = not a goal** (2026-11-24)
+7. [x] **Ship surfaces** — MV3 sideload **`0.1.5`** + desk:pack + Settings/TRY honesty; **CWS/Play listing = not a goal** (2026-11-24)
 8. [x] **Softer first-run** — Cancel / Suite cues / FAQ
 9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts. **EVM peers in pack** OK; Pulse remains center.
 

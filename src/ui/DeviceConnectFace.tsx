@@ -37,23 +37,17 @@ export function connectSteps(opts: {
   hasSession: boolean;
 }): { id: ConnectStepId; label: string; state: "done" | "current" | "todo" }[] {
   const suiteUp = opts.suiteChannel === "desktop";
-  const suiteDone = suiteUp || opts.connecting || opts.hasSession;
+  /* Connecting alone must not green Suite — that was onboarding theater. */
+  const suiteDone = suiteUp || opts.hasSession;
   const allowDone = opts.hasSession;
   const allowCurrent = opts.connecting && !opts.hasSession;
   const readyDone = opts.hasSession;
-  const readyCurrent = opts.hasSession;
 
   return [
     {
       id: "suite",
       label: t("stepOpenSuite"),
-      state: suiteDone
-        ? allowCurrent || readyCurrent
-          ? "done"
-          : suiteUp
-            ? "done"
-            : "current"
-        : "current",
+      state: suiteDone ? "done" : "current",
     },
     {
       id: "allow",
@@ -114,12 +108,14 @@ export function DeviceConnectFace({
       <div className="device-connect-face device-connect-compact" role="status">
         <p className="device-connect-title">
           {label}
-          {canSign ? " · signing on" : ""}
+          {canSign ? " · signing on" : " · signing off"}
         </p>
         <p className="muted device-connect-sub">
-          {suiteChannel === "desktop"
-            ? t("suiteDesktopLinked")
-            : t("suiteWebOrDesktop")}
+          {canSign
+            ? suiteChannel === "desktop"
+              ? t("suiteDesktopLinked")
+              : t("suiteWebOrDesktop")
+            : "Open Suite — Confirm cannot land while Suite is down"}
           {deviceHints?.firmware
             ? ` ·${deviceHints.model ? ` ${deviceHints.model}` : ""} FW ${deviceHints.firmware}`
             : ""}
@@ -229,10 +225,9 @@ export function DeviceConnectFace({
           </p>
           <p className="device-connect-channel" role="status">
             <span className="device-connect-chip">{t("viaSuite")}</span>
-            <span className="muted">
-              {" "}
-              {t("viaSuiteHint")}
-            </span>
+            {hasSession || connecting ? (
+              <span className="muted"> {t("viaSuiteHint")}</span>
+            ) : null}
           </p>
         </div>
       </div>
@@ -247,18 +242,20 @@ export function DeviceConnectFace({
         </div>
       ) : null}
 
-      <ol className="device-connect-steps" aria-label="Connect steps">
-        {steps.map((s, i) => (
-          <li
-            key={s.id}
-            className={`device-connect-step ${s.state}`}
-            aria-current={s.state === "current" ? "step" : undefined}
-          >
-            <span className="device-connect-step-n">{i + 1}</span>
-            <span className="device-connect-step-l">{s.label}</span>
-          </li>
-        ))}
-      </ol>
+      {hasSession || connecting ? (
+        <ol className="device-connect-steps" aria-label="Connect steps">
+          {steps.map((s, i) => (
+            <li
+              key={s.id}
+              className={`device-connect-step ${s.state}`}
+              aria-current={s.state === "current" ? "step" : undefined}
+            >
+              <span className="device-connect-step-n">{i + 1}</span>
+              <span className="device-connect-step-l">{s.label}</span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
 
       {fwOutdated ? (
         <p className="warn-line device-fw-cta" role="status">
@@ -301,10 +298,16 @@ export function DeviceConnectFace({
 
       {showChecklist && hasSession ? (
         <ul className="device-connect-check" aria-label="After Allow">
-          <li className={fwOutdated ? "todo" : "ok"}>
+          <li
+            className={
+              fwOutdated || !deviceHints?.firmware ? "todo" : "ok"
+            }
+          >
             {fwOutdated
               ? "Update firmware in Suite"
-              : `Firmware check${deviceHints?.firmware ? ` (${deviceHints.firmware})` : ""} — Suite owns genuine/device trust`}
+              : !deviceHints?.firmware
+                ? "Firmware unknown — open Suite / Connect so Perch can read the device"
+                : `Firmware check (${deviceHints.firmware}) — Suite owns genuine/device trust`}
           </li>
           <li className="ok">
             PIN / passphrase stay on device &amp; Suite — never typed into Perch
@@ -322,18 +325,6 @@ export function DeviceConnectFace({
         </ul>
       ) : null}
 
-      {!hasSession && !connecting ? (
-        <p className="muted empty-teach">
-          Plug in the Trezor, open{" "}
-          <a href={TREZOR_SUITE_WEB} target="_blank" rel="noreferrer">
-            Trezor Suite
-          </a>
-          , unlock it, then <strong>Start connection</strong>. The Allow prompt
-          is in <strong>Suite</strong> — often on another monitor or under the
-          taskbar. PIN stays on the device. Stuck? <strong>Stop waiting</strong>
-          , then start again — that does not reject on the device.
-        </p>
-      ) : null}
     </div>
   );
 }

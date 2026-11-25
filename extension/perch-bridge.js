@@ -41,7 +41,7 @@
     });
   }
 
-  /** Desk → dapp fan-out: accountsChanged / chainChanged + session cache */
+  /** Desk → dapp fan-out: accountsChanged / chainChanged (no fake accounts from storage) */
   window.addEventListener("message", (ev) => {
     const data = ev.data;
     if (

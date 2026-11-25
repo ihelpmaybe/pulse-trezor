@@ -22,6 +22,7 @@ import {
 } from "../trezor/labUserEnv";
 import { t } from "../i18n/en";
 import type { BagTab } from "./BagPanel";
+import { AddEvmForm } from "./AddEvmForm";
 import { InstallPwa } from "./InstallPwa";
 import {
   loadLightMetrics,
@@ -59,6 +60,9 @@ type Props = {
   watch: Session | null;
   session: Session | null;
   chainId: DeskChainId;
+  setChainId: (id: DeskChainId) => void;
+  setAsset: (sym: string) => void;
+  setErr: (msg: string | null) => void;
   deviceId: string;
   applyWatchImportText: (text: string) => void;
   setWatchImportBusy: (busy: boolean) => void;
@@ -81,8 +85,6 @@ type Props = {
   setHexModule: (on: boolean) => void;
   bagTab: BagTab;
   setBagTab: (t: BagTab) => void;
-  privacyHide: boolean;
-  togglePrivacyHide: () => void;
   a11y: A11yPrefs;
   patchA11y: (partial: Partial<A11yPrefs>) => void;
   injectEth: boolean;
@@ -95,6 +97,8 @@ export function SettingsModal(p: Props) {
   const [metricsOn, setMetricsOn] = useState(() => loadMetricsOptIn());
   const [metrics, setMetrics] = useState(() => loadLightMetrics());
   const [labBusy, setLabBusy] = useState(false);
+  const [guidesOpen, setGuidesOpen] = useState(false);
+  const [labOpen, setLabOpen] = useState(false);
   return (
     <div
       className="rpc-modal-root"
@@ -104,7 +108,7 @@ export function SettingsModal(p: Props) {
       }}
     >
       <div
-        className="rpc-modal"
+        className="rpc-modal settings-modal"
         role="dialog"
         aria-modal="true"
         aria-label="Settings"
@@ -124,28 +128,33 @@ export function SettingsModal(p: Props) {
 
         <h4 className="settings-section">About</h4>
         <p className="muted fee">
-          Pulse Perch desk · v0.1.0 · no phone-home · hardware path only · vibe
-          coded, device-tested
+          Pulse Perch · v0.1.0 · hardware path · no phone-home · no seed in
+          browser · local prefs only
         </p>
-        <button
-          type="button"
-          className={metricsOn ? "vision-tile on" : "vision-tile"}
-          aria-pressed={metricsOn}
-          onClick={() => {
-            const next = !metricsOn;
-            saveMetricsOptIn(next);
-            setMetricsOn(next);
-            setMetrics(loadLightMetrics());
-          }}
-        >
-          <span className="vision-copy">
-            <span className="vision-title">{t("metricsOptInTitle")}</span>
-            <span className="vision-blurb">{t("metricsOptInBlurb")}</span>
-          </span>
-          <span className="vision-switch" aria-hidden="true">
-            <span className="vision-knob" />
-          </span>
-        </button>
+        <div className="settings-actions">
+          <button
+            type="button"
+            className={metricsOn ? "vision-tile on" : "vision-tile"}
+            aria-pressed={metricsOn}
+            onClick={() => {
+              const next = !metricsOn;
+              saveMetricsOptIn(next);
+              setMetricsOn(next);
+              setMetrics(loadLightMetrics());
+            }}
+          >
+            <span className="vision-copy">
+              <span className="vision-title">{t("metricsOptInTitle")}</span>
+              <span className="vision-blurb">{t("metricsOptInBlurb")}</span>
+            </span>
+            <span className="vision-switch" aria-hidden="true">
+              <span className="vision-knob" />
+            </span>
+          </button>
+          <button type="button" className="btn ghost" onClick={p.onOpenFaq}>
+            FAQ
+          </button>
+        </div>
         {metricsOn ? (
           <p className="muted fee">
             {t("metricsCountLabel")}: {metrics.firstSendCount}
@@ -154,102 +163,92 @@ export function SettingsModal(p: Props) {
               : ""}
           </p>
         ) : null}
-        <p className="muted fee">
-          <button
-            type="button"
-            className="link"
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              font: "inherit",
-            }}
-            onClick={p.onOpenFaq}
-          >
-            Open FAQ
-          </button>
-          {" — how to use this app"}
-        </p>
-        <p className="muted fee">
-          <a
-            className="link"
-            href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/status.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            What works today
-          </a>
-          {" · "}
-          <a
-            className="link"
-            href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/suite-connect.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Suite + Connect
-          </a>
-          {" · "}
-          <a
-            className="link"
-            href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/pls-on-trezor.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            PLS on Trezor
-          </a>
-          {" · "}
-          <a
-            className="link"
-            href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/provex.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            ProveX
-          </a>
-        </p>
-        <p className="muted fee">
-          <a
-            className="link"
-            href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/migrate-from-eth.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Migrate from ETH
-          </a>
-          {" · "}
-          <a
-            className="link"
-            href="https://github.com/ihelpmaybe/pulse-trezor/blob/main/docs/UNINSTALL-METAMASK-FOR-PULSE.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Uninstall MetaMask
-          </a>
-          {" · "}
-          <a
-            className="link"
-            href="https://suite.trezor.io"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Trezor Suite
-          </a>
-          {" · "}
-          <a
-            className="link"
-            href="https://bridge.pulsechain.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Pulse Bridge
-          </a>
-        </p>
-        <p className="muted fee">{t("updatesHint")}</p>
+        <details
+          className="gas-details settings-fold"
+          open={guidesOpen}
+          onToggle={(e) =>
+            setGuidesOpen((e.target as HTMLDetailsElement).open)
+          }
+        >
+          <summary>Guides</summary>
+          <p className="muted fee settings-link-row">
+            <a
+              className="link"
+              href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/status.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              What works
+            </a>
+            <a
+              className="link"
+              href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/suite-connect.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Suite + Connect
+            </a>
+            <a
+              className="link"
+              href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/pls-on-trezor.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              PLS on Trezor
+            </a>
+            <a
+              className="link"
+              href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/provex.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              ProveX
+            </a>
+            <a
+              className="link"
+              href="https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/migrate-from-eth.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Migrate from ETH
+            </a>
+            <a
+              className="link"
+              href="https://github.com/ihelpmaybe/pulse-trezor/blob/main/docs/UNINSTALL-METAMASK-FOR-PULSE.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Uninstall MetaMask
+            </a>
+            <a
+              className="link"
+              href="https://suite.trezor.io"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Trezor Suite
+            </a>
+            <a
+              className="link"
+              href="https://bridge.pulsechain.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Pulse Bridge
+            </a>
+          </p>
+          <p className="muted fee">{t("updatesHint")}</p>
+        </details>
 
-        <h4 className="settings-section">Install</h4>
-        <p className="muted fee">{t("shipSurfacesHint")}</p>
         <InstallPwa />
+
+        <h4 className="settings-section">Networks</h4>
+        <AddEvmForm
+          chainId={p.chainId}
+          setChainId={p.setChainId}
+          setAsset={p.setAsset}
+          setErr={p.setErr}
+        />
 
         <h4 className="settings-section">Device</h4>
         <p className="muted fee">
@@ -264,68 +263,69 @@ export function SettingsModal(p: Props) {
             : ""}
           {p.deviceHints?.passphraseProtection ? " · passphrase on" : ""}
         </p>
-        <button type="button" className="btn ghost" onClick={p.exportWatchJson}>
-          {t("exportWatch")}
-        </button>
-        <label className="btn ghost watch-import">
-          {p.watchImportBusy ? "…" : t("importWatch")}
-          <input
-            type="file"
-            accept="application/json,.json"
-            hidden
-            disabled={p.watchImportBusy}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = "";
-              if (f) p.onImportWatchFile(f);
-            }}
-          />
-        </label>
+        <div className="settings-actions">
+          <button type="button" className="btn ghost" onClick={p.exportWatchJson}>
+            {t("exportWatch")}
+          </button>
+          <label className="btn ghost watch-import">
+            {p.watchImportBusy ? "…" : t("importWatch")}
+            <input
+              type="file"
+              accept="application/json,.json"
+              hidden
+              disabled={p.watchImportBusy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) p.onImportWatchFile(f);
+              }}
+            />
+          </label>
+        </div>
 
         <h4 className="settings-section">Bag data</h4>
         <p className="muted fee">
-          Balances, activity, and HEX stakes stay on this PC after you close the
-          desk. Cheap refresh on open; stake rows reuse the cache when the count
-          has not changed. Download a file to move machines, or clear when you
-          want this browser wiped.
+          Stays on this PC. Download to move machines; clear to wipe this browser.
         </p>
-        <button
-          type="button"
-          className="btn ghost"
-          disabled={!p.active}
-          onClick={p.exportBagSnapshot}
-        >
-          Download bag
-        </button>
-        <label className="btn ghost watch-import">
-          {p.watchImportBusy ? "…" : "Upload bag"}
-          <input
-            type="file"
-            accept="application/json,.json"
-            hidden
-            disabled={p.watchImportBusy}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = "";
-              if (f) p.onImportBagFile(f);
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={!p.active}
+            onClick={p.exportBagSnapshot}
+          >
+            Download bag
+          </button>
+          <label className="btn ghost watch-import">
+            {p.watchImportBusy ? "…" : "Upload bag"}
+            <input
+              type="file"
+              accept="application/json,.json"
+              hidden
+              disabled={p.watchImportBusy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) p.onImportBagFile(f);
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Clear cached bag data on this PC? Addresses stay until you hit Forget.",
+                )
+              ) {
+                p.onClearBagCache();
+              }
             }}
-          />
-        </label>
-        <button
-          type="button"
-          className="btn ghost"
-          onClick={() => {
-            if (
-              window.confirm(
-                "Clear cached bag data on this PC? Addresses stay until you hit Forget.",
-              )
-            ) {
-              p.onClearBagCache();
-            }
-          }}
-        >
-          Clear bag cache
-        </button>
+          >
+            Clear bag cache
+          </button>
+        </div>
         <SyncPair
           accounts={p.accountList.map((a) => ({
             address: a.address,
@@ -361,31 +361,50 @@ export function SettingsModal(p: Props) {
         />
 
         <h4 className="settings-section">RPC</h4>
-        <label className="field">
-          Node
-          <select
-            value={p.rpcSelectValue}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "__custom__") {
-                p.setRpcCustomMode(true);
-                p.setRpcDraft(p.activeRpcUrl);
-                return;
-              }
-              p.applyRpc(v === p.defaultRpcUrl ? "" : v, false);
-            }}
-          >
-            {p.rpcOptions.map((s) => (
-              <option key={s.url} value={s.url}>
-                {s.name}
-              </option>
-            ))}
-            <option value="__custom__">Custom…</option>
-          </select>
-        </label>
+        <div className="settings-rpc-grid">
+          <label className="field">
+            Node
+            <select
+              value={p.rpcSelectValue}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "__custom__") {
+                  p.setRpcCustomMode(true);
+                  p.setRpcDraft(p.activeRpcUrl);
+                  return;
+                }
+                p.applyRpc(v === p.defaultRpcUrl ? "" : v, false);
+              }}
+            >
+              {p.rpcOptions.map((s) => (
+                <option key={s.url} value={s.url}>
+                  {s.name}
+                </option>
+              ))}
+              <option value="__custom__">Custom…</option>
+            </select>
+          </label>
+          <label className="field">
+            Health check
+            <select
+              value={String(p.rpcHealthMs)}
+              onChange={(e) => {
+                const ms = Number(e.target.value);
+                p.setRpcHealthMs(ms);
+                saveRpcHealthMs(ms);
+              }}
+            >
+              {RPC_HEALTH_MS_OPTIONS.map((o) => (
+                <option key={o.ms} value={o.ms}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         {p.rpcSelectValue === "__custom__" ? (
-          <>
-            <label className="field">
+          <div className="settings-actions">
+            <label className="field settings-grow">
               Custom URL
               <input
                 value={p.rpcDraft}
@@ -398,174 +417,70 @@ export function SettingsModal(p: Props) {
             <button type="button" className="btn" onClick={p.onSaveRpc}>
               Save RPC
             </button>
-          </>
+          </div>
         ) : null}
-        <label className="field">
-          Health check
-          <select
-            value={String(p.rpcHealthMs)}
-            onChange={(e) => {
-              const ms = Number(e.target.value);
-              p.setRpcHealthMs(ms);
-              saveRpcHealthMs(ms);
-            }}
-          >
-            {RPC_HEALTH_MS_OPTIONS.map((o) => (
-              <option key={o.ms} value={o.ms}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p className="muted fee">
-          How often Perch pings the node for the latency chip. Off = once when
-          the desk loads or RPC changes.
-        </p>
+        <p className="muted fee">Latency chip ping. Off = once on load / RPC change.</p>
 
-        <h4 className="settings-section">Lab (trezor-user-env)</h4>
-        <p className="muted fee">
-          Official emu — same wire as a real device (Connect → Suite → Bridge/emu).
-          Not a software wallet.
-        </p>
-        <button
-          type="button"
-          className="btn ghost"
-          disabled={labBusy}
-          onClick={() => {
-            setLabBusy(true);
-            void probeLabUserEnv()
-              .then(setLab)
-              .finally(() => setLabBusy(false));
-          }}
-        >
-          {labBusy ? "Probing…" : "Probe lab"}
-        </button>
-        {lab ? (
-          <p
-            className={lab.controller === "ok" ? "muted fee" : "warn-line"}
-            role="status"
-          >
-            {lab.detail}
-          </p>
-        ) : null}
-        <details className="settings">
-          <summary>Lab checklist</summary>
-          <ol className="muted fee">
-            {LAB_USER_ENV_CHECKLIST.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ol>
-        </details>
-
-        <h4 className="settings-section">Dry-run (Temper)</h4>
-        <label className="field">
-          Temper URL
-          <input
-            value={temperDraft}
-            onChange={(e) => setTemperDraft(e.target.value)}
-            placeholder="http://127.0.0.1:8080"
-            spellCheck={false}
-            autoComplete="off"
-          />
-        </label>
-        <div className="row gap">
+        <h4 className="settings-section">Face</h4>
+        <div className="vision-grid" role="group" aria-label="Face options">
           <button
             type="button"
-            className="btn ghost"
+            className={p.theme === "light" ? "vision-tile on" : "vision-tile"}
+            aria-pressed={p.theme === "light"}
             onClick={() => {
-              saveTemperBaseUrl(temperDraft);
-              setTemperDraft(loadTemperBaseUrl());
-            }}
-          >
-            Save Temper URL
-          </button>
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() => {
-              saveTemperBaseUrl(temperDraft);
-              setTemperDraft(loadTemperBaseUrl());
-              void temperStatus({ baseUrl: loadTemperBaseUrl() }).then((s) => {
-                window.alert(s.detail);
-              });
-            }}
-          >
-            Probe Temper
-          </button>
-        </div>
-        <p className="muted fee">
-          Optional self-host — EnsoBuild/Temper (+ Anvil fork via{" "}
-          <code>scripts/temper-pulse.ps1</code>). Dry-run uses it when up; else
-          one-shot RPC eth_call (no portfolio polling).
-        </p>
-
-        <h4 className="settings-section">Display</h4>
-        <label className="hide-zero">
-          <input
-            type="checkbox"
-            checked={p.theme === "light"}
-            onChange={(e) => {
-              const next: ThemePref = e.target.checked ? "light" : "dark";
+              const next: ThemePref = p.theme === "light" ? "dark" : "light";
               p.setTheme(next);
               applyTheme(next);
             }}
-          />
-          {t("lightTheme")}
-        </label>
-        <label className="hide-zero">
-          <input
-            type="checkbox"
-            checked={p.mascotOn}
-            onChange={(e) => {
-              const on = e.target.checked;
+          >
+            <span className="vision-copy">
+              <span className="vision-title">{t("lightTheme")}</span>
+              <span className="vision-blurb">Light colors</span>
+            </span>
+            <span className="vision-switch" aria-hidden="true">
+              <span className="vision-knob" />
+            </span>
+          </button>
+          <button
+            type="button"
+            className={p.mascotOn ? "vision-tile on" : "vision-tile"}
+            aria-pressed={p.mascotOn}
+            onClick={() => {
+              const on = !p.mascotOn;
               p.setMascotOn(on);
               saveMascot(on);
             }}
-          />
-          Show mascot
-        </label>
-        <p className="muted fee">
-          Corner anime perch art. Off by default — turn on if you want her.
-        </p>
-
-        <h4 className="settings-section">Modules</h4>
-        <label className="hide-zero">
-          <input
-            type="checkbox"
-            checked={p.hexModule}
-            onChange={(e) => {
-              const on = e.target.checked;
+          >
+            <span className="vision-copy">
+              <span className="vision-title">Show mascot</span>
+              <span className="vision-blurb">Corner art · off by default</span>
+            </span>
+            <span className="vision-switch" aria-hidden="true">
+              <span className="vision-knob" />
+            </span>
+          </button>
+          <button
+            type="button"
+            className={p.hexModule ? "vision-tile on" : "vision-tile"}
+            aria-pressed={p.hexModule}
+            onClick={() => {
+              const on = !p.hexModule;
               p.setHexModule(on);
               saveHexModule(on);
               if (!on && p.bagTab === "stakes") p.setBagTab("tokens");
             }}
-          />
-          HEX stakes
-        </label>
-        <p className="muted fee">
-          Shows Stakes tab and “has stakes” marks. Liquid HEX in Tokens stays
-          either way. Off by default — lean face.
-        </p>
-
-        <h4 className="settings-section">Privacy</h4>
-        <button
-          type="button"
-          className={p.privacyHide ? "vision-tile on" : "vision-tile"}
-          aria-pressed={p.privacyHide}
-          onClick={p.togglePrivacyHide}
-        >
-          <span className="vision-copy">
-            <span className="vision-title">Dox shield</span>
-            <span className="vision-blurb">
-              Mask addresses &amp; amounts as ******** (screen share)
+          >
+            <span className="vision-copy">
+              <span className="vision-title">HEX stakes</span>
+              <span className="vision-blurb">Stakes tab · liquid HEX stays</span>
             </span>
-          </span>
-          <span className="vision-switch" aria-hidden="true">
-            <span className="vision-knob" />
-          </span>
-        </button>
+            <span className="vision-switch" aria-hidden="true">
+              <span className="vision-knob" />
+            </span>
+          </button>
+        </div>
 
-        <h4 className="settings-section">Vision impaired</h4>
+        <h4 className="settings-section">Vision</h4>
         <div className="vision-grid" role="group" aria-label="Vision impaired">
           {(
             [
@@ -614,29 +529,111 @@ export function SettingsModal(p: Props) {
 
         <AiPolicyPanel />
 
-        <h4 className="settings-section">Injected provider</h4>
-        <button
-          type="button"
-          className={p.injectEth ? "vision-tile on" : "vision-tile"}
-          aria-pressed={p.injectEth}
-          onClick={() => {
-            p.setInjectEth((on) => {
-              const next = !on;
-              saveInjectEth(next);
-              return next;
-            });
-          }}
+        <details
+          className="gas-details settings-fold"
+          open={labOpen}
+          onToggle={(e) => setLabOpen((e.target as HTMLDetailsElement).open)}
         >
-          <span className="vision-copy">
-            <span className="vision-title">window.ethereum (this tab)</span>
-            <span className="vision-blurb">
-              Lab this-tab inject. Cross-site dapps use the sideload MV3 extension.
+          <summary>Lab &amp; power tools</summary>
+          <p className="muted fee">
+            Official emu — same wire as a real device. Not a software wallet.
+          </p>
+          <div className="settings-actions">
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={labBusy}
+              onClick={() => {
+                setLabBusy(true);
+                void probeLabUserEnv()
+                  .then(setLab)
+                  .finally(() => setLabBusy(false));
+              }}
+            >
+              {labBusy ? "Probing…" : "Probe lab"}
+            </button>
+          </div>
+          {lab ? (
+            <p
+              className={lab.controller === "ok" ? "muted fee" : "warn-line"}
+              role="status"
+            >
+              {lab.detail}
+            </p>
+          ) : null}
+          <details className="gas-details">
+            <summary>Lab checklist</summary>
+            <ol className="muted fee">
+              {LAB_USER_ENV_CHECKLIST.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ol>
+          </details>
+
+          <h4 className="settings-section">Dry-run (Temper)</h4>
+          <label className="field">
+            Temper URL
+            <input
+              value={temperDraft}
+              onChange={(e) => setTemperDraft(e.target.value)}
+              placeholder="http://127.0.0.1:8080"
+              spellCheck={false}
+              autoComplete="off"
+            />
+          </label>
+          <div className="settings-actions">
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => {
+                saveTemperBaseUrl(temperDraft);
+                setTemperDraft(loadTemperBaseUrl());
+              }}
+            >
+              Save Temper URL
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => {
+                saveTemperBaseUrl(temperDraft);
+                setTemperDraft(loadTemperBaseUrl());
+                void temperStatus({ baseUrl: loadTemperBaseUrl() }).then((s) => {
+                  window.alert(s.detail);
+                });
+              }}
+            >
+              Probe Temper
+            </button>
+          </div>
+          <p className="muted fee">
+            Optional self-host. Dry-run uses it when up; else one-shot eth_call.
+          </p>
+
+          <h4 className="settings-section">Injected provider</h4>
+          <button
+            type="button"
+            className={p.injectEth ? "vision-tile on" : "vision-tile"}
+            aria-pressed={p.injectEth}
+            onClick={() => {
+              p.setInjectEth((on) => {
+                const next = !on;
+                saveInjectEth(next);
+                return next;
+              });
+            }}
+          >
+            <span className="vision-copy">
+              <span className="vision-title">window.ethereum (this tab)</span>
+              <span className="vision-blurb">
+                Chainlist Add + lab inject. Cross-site → MV3 extension.
+              </span>
             </span>
-          </span>
-          <span className="vision-switch" aria-hidden="true">
-            <span className="vision-knob" />
-          </span>
-        </button>
+            <span className="vision-switch" aria-hidden="true">
+              <span className="vision-knob" />
+            </span>
+          </button>
+        </details>
       </div>
     </div>
   );

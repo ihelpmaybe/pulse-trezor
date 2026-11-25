@@ -45,6 +45,7 @@ import {
   parseChainRef,
   type DeskChainId,
 } from "../chain/client";
+import { addEthereumChainFromEip3085 } from "../chain/evmNetworks";
 import { originAllowed, rememberOrigin } from "../chain/wcOrigins";
 import { getVerifyState, verifyFace } from "./verify";
 
@@ -189,8 +190,9 @@ export function WcPanel({
         method === "wallet_switchEthereumChain" ||
         method === "wallet_addEthereumChain"
       ) {
+        const rawObj = (reqParams as Record<string, unknown>[])?.[0] ?? {};
         const raw =
-          (reqParams as { chainId?: string }[])?.[0]?.chainId ??
+          (rawObj as { chainId?: string }).chainId ??
           (reqParams as { chainId?: string })?.chainId;
         const next = parseChainRef(raw);
         if (
@@ -205,23 +207,67 @@ export function WcPanel({
             response: { id, jsonrpc: "2.0", result: null },
           });
           setInfo(`Switched to ${chainLabel(next)} (${next})`);
-        } else {
-          await kit.respondSessionRequest({
-            topic,
-            response: {
-              id,
-              jsonrpc: "2.0",
-              error: getSdkError("UNSUPPORTED_CHAINS"),
-            },
-          });
-          onError(
-            method === "wallet_addEthereumChain"
-              ? `Rejected add-chain ${raw ?? "?"} — add the chain ID under Network first`
-              : next && !hasChainPack(next)
-                ? `Chain ${next} not added yet — Device → Add EVM by chain ID`
-                : `dApp asked for unsupported chain ${raw ?? "?"} — rejected`,
-          );
+          return;
         }
+        if (method === "wallet_addEthereumChain" && next && isDeskChainId(next)) {
+          try {
+            if (!hasChainPack(next)) {
+              const label =
+                String((rawObj as { chainName?: string }).chainName || "") ||
+                `Chain ${next}`;
+              const ok = window.confirm(
+                `Add ${label} (${next}) and switch?\n\nPerch pulls public RPCs from Chainlist when possible.`,
+              );
+              if (!ok) throw new Error("User rejected add-chain");
+              await addEthereumChainFromEip3085({
+                chainId: raw,
+                chainName: (rawObj as { chainName?: string }).chainName,
+                nativeCurrency: (
+                  rawObj as {
+                    nativeCurrency?: {
+                      name?: string;
+                      symbol?: string;
+                      decimals?: number;
+                    };
+                  }
+                ).nativeCurrency,
+                rpcUrls: (rawObj as { rpcUrls?: string[] }).rpcUrls,
+                blockExplorerUrls: (rawObj as { blockExplorerUrls?: string[] })
+                  .blockExplorerUrls,
+              });
+            }
+            onSwitchChain?.(next);
+            await kit.respondSessionRequest({
+              topic,
+              response: { id, jsonrpc: "2.0", result: null },
+            });
+            setInfo(`Added / switched to ${chainLabel(next)} (${next})`);
+          } catch (e) {
+            await kit.respondSessionRequest({
+              topic,
+              response: {
+                id,
+                jsonrpc: "2.0",
+                error: getSdkError("USER_REJECTED"),
+              },
+            });
+            onError(e instanceof Error ? e.message : String(e));
+          }
+          return;
+        }
+        await kit.respondSessionRequest({
+          topic,
+          response: {
+            id,
+            jsonrpc: "2.0",
+            error: getSdkError("UNSUPPORTED_CHAINS"),
+          },
+        });
+        onError(
+          next && !hasChainPack(next)
+            ? `Chain ${next} not added yet — Settings → Networks`
+            : `dApp asked for unsupported chain ${raw ?? "?"} — rejected`,
+        );
         return;
       }
 
@@ -322,7 +368,7 @@ export function WcPanel({
     onError(null);
     setBusy(true);
     try {
-      if (!address) throw new Error("Connect Trezor first");
+      if (!address) throw new Error("Connect Trezor with Suite up first");
       const id = projectId.trim();
       if (!id) throw new Error("Paste a free Reown Cloud project id first");
       await initWalletKit(id);
@@ -555,10 +601,7 @@ export function WcPanel({
     <>
       <p className="muted">{t("appsPairIntro")}</p>
       {!address ? (
-        <p className="muted empty-teach">
-          Connect Trezor above first — then paste a <code>wc:</code> URI here.
-          MetaMask does not need to be installed; Perch is the wallet.
-        </p>
+        <p className="muted empty-teach">Connect above, then paste a wc: URI.</p>
       ) : (
         <>
           <details className="settings" open={!projectId.trim()}>

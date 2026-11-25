@@ -12,7 +12,10 @@ type Props = {
   privacyHide: boolean;
   copied: boolean;
   onCopy: () => void;
+  /** Saved watch address (may show after Disconnect). */
   watch: boolean;
+  /** Live Suite session — can sign. */
+  canSign: boolean;
   onForget: () => void;
   chainId: DeskChainId;
 };
@@ -23,31 +26,40 @@ export function TopStrip({
   copied,
   onCopy,
   watch,
+  canSign,
   onForget,
   chainId,
 }: Props) {
+  const watchOnly = !!activeAddress && watch && !canSign;
   return (
     <div className="top-strip">
       {activeAddress ? (
         <button
           type="button"
-          className="addr-bar"
+          className={watchOnly ? "addr-bar watch-only" : "addr-bar"}
           onClick={onCopy}
           title={
             privacyHide
               ? t("unhideToCopy")
-              : copied
-                ? t("copied")
-                : t("copyAddress")
+              : watchOnly
+                ? "Watching — bag only, not connected to sign. Forget to clear."
+                : copied
+                  ? t("copied")
+                  : t("copyAddress")
           }
           aria-label={
             privacyHide
               ? t("addressHidden")
               : copied
                 ? `Copied address ${activeAddress}`
-                : `Copy address ${activeAddress}`
+                : watchOnly
+                  ? `Watching ${activeAddress} — not connected`
+                  : `Copy address ${activeAddress}`
           }
         >
+          {watchOnly ? (
+            <span className="addr-watch-chip">Watching</span>
+          ) : null}
           <AddrParts address={activeAddress} />
           {copied ? (
             <span className="addr-copied" aria-hidden="true">
@@ -82,7 +94,7 @@ export function TopStrip({
           </svg>
         </button>
       ) : null}
-      {watch ? (
+      {watchOnly ? (
         <button
           type="button"
           className="btn ghost addr-forget"

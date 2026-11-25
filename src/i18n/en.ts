@@ -13,18 +13,17 @@ export const en = {
   exportWatch: "Export watch addresses (JSON)",
   importWatch: "Import watch JSON",
   noCollect:
-    "We don’t collect your data. Keys stay on your Trezor — bag, send, approve, and Apps without MetaMask. lolz",
+    "We don’t collect your data. Keys stay on your Trezor — bag, send, approve, and Apps without MetaMask.",
   pulseChain: "PulseChain",
   firstRunTitle: "First time here",
-  firstRunConnect:
-    "Connect — Start connection, then Allow in Suite (other screen OK)",
-  firstRunBag: "Bag — balances show after you’re linked",
-  firstRunApps: "Apps — pair a site when you need a dapp",
+  firstRunConnect: "Connect — Start connection, Allow in Suite",
+  firstRunBag: "Bag — balances after you’re linked",
+  firstRunApps: "Apps — pair a site when you need one",
   openApps: "open Apps",
   openAppsBtn: "Open Apps",
   suiteAllowTitle: "Allow in Trezor Suite",
   suiteAllowHint:
-    "Perch cannot click Allow for you. Stuck? Stop waiting, bring Suite to the front, then Start connection again.",
+    "Stuck? Stop waiting, bring Suite forward, Start connection again.",
   nftOperators: "NFT operators",
   pairInApps: "Pair in Apps",
   fullPulsex: "Full PulseX (ipfs)",
@@ -54,14 +53,14 @@ export const en = {
   suiteDesktopLinked: "Suite Desktop linked",
   suiteWebOrDesktop: "Suite Web or Desktop — Connect 10",
   viaSuite: "Via Suite",
-  viaSuiteHint: "USB / Bluetooth stay inside Suite — Perch never owns the cable.",
+  viaSuiteHint: "USB stays in Suite — Perch never owns the cable.",
   stepOpenSuite: "Open Suite",
   stepAllowConnect: "Allow / Connect",
   stepReady: "Ready",
   acquireDevice: "Acquire device",
   acquiring: "Acquiring…",
   updatesHint:
-    "Updates: pull latest → rebuild / refresh this desk. PWA may need a hard refresh if the shell sticks. No auto-updater — portable zip is npm run desk:pack (unsigned web pack).",
+    "No auto-updater — pull latest, rebuild / refresh. PWA may need a hard refresh. Zip: npm run desk:pack.",
   suiteDesktopWs: "Desktop (connect-ws)",
   suiteNotDetected: "Desktop not detected — use Suite Web or start Desktop",
   checking: "checking…",
@@ -98,9 +97,9 @@ export const en = {
   approveScan: "Scan",
   revoke: "Revoke",
   revokeOnTrezor: "Set allowance to 0 on Trezor",
-  revokeNeedConnect: "Connect Trezor to revoke",
+  revokeNeedConnect: "Connect Trezor with Suite up to revoke",
   swapMainnetOnly: "PulseX swap is mainnet only.",
-  swapNeedConnect: "Connect Trezor to swap.",
+  swapNeedConnect: "Connect Trezor with Suite up to swap.",
   quote: "Quote",
   quoting: "Quoting…",
   approvePulsex: "Approve PulseX",
@@ -116,27 +115,25 @@ export const en = {
   unhideToCopy: "Unhide to copy address",
   speedUp: "Speed up (+25%)",
   cancelStuck: "Cancel stuck",
-  rbfCoach:
-    "Speed up / Cancel: fee math + Anvil lab PASS. Device mempool proof still OPEN — confirm Speed up or Cancel on Suite/Trezor when a tx sticks pending (prefer testnet 943).",
+  rbfCoach: "Pending tip → Activity → Speed up or Cancel (Suite open).",
   rbfPendingHint:
-    "Still pending? Speed up = same transfer, +25% tip. Cancel = 0-value self-send so the nonce clears. Confirm on Trezor either way — Anvil proof ≠ device proof.",
+    "Pending — Speed up (+25% tip) or Cancel (0-value self-send). Confirm on Trezor.",
   metricsOptInTitle: "Local first-send count",
   metricsOptInBlurb:
-    "Opt-in only. Counts successful broadcasts on this PC — never phones home, never sees seed.",
+    "Opt-in. Local send count only — never phones home.",
   metricsCountLabel: "Local sends recorded",
-  appsPairIntro:
-    "Pair WalletConnect apps. Browser PulseX = ipfs.app.pulsex.com (not the desktop download page). Also Piteas, HEX, ProveX, Phiat, … Paste wc:… — Desk signs on Trezor.",
+  appsPairIntro: "Paste a wc: URI — Perch signs on Trezor (PulseX, HEX, …).",
   pwaInstalledLong:
     "Installed as an app on this device. Suite still needs a network when you sign.",
   installPulsePerch: "Install Pulse Perch",
   installWhenOffered: "Install (when browser offers)",
   installHintReady:
-    "Adds a desktop / home-screen app — no MetaMask, no store. Chain calls still need Suite + network.",
+    "Desktop / home-screen app — Suite + network still required to sign.",
   installHintWait:
-    "Chrome/Edge on localhost or HTTPS may offer install after a visit. Or: npm run build && npm run preview, then Install.",
+    "Chrome/Edge may offer install on localhost/HTTPS after a visit.",
   howToInstall: "How to install",
   installHintSw:
-    "SW shell-v4 caches the face only — never RPC. Use Chrome’s install icon in the address bar, or reopen after preview.",
+    "Caches the face only — never RPC. Use the browser install icon if offered.",
   installHintNoPwa: "This browser cannot install PWAs.",
   receiveQrAlt: "Receive address QR",
   qrUnavailable: "QR unavailable — copy the URI instead.",
@@ -159,7 +156,7 @@ export const en = {
   pathLoadWallet: "Load wallet",
   pathSaveTitle: "Save path and load this one wallet",
   shipSurfacesHint:
-    "Ship today: desk zip (desk:pack) + PWA + MV3 sideload. Chrome Web Store / Play listing is not a goal.",
+    "Ship: desk zip + PWA + MV3 sideload. Store listing is not a goal.",
   copyPairLink: "Copy pair link",
   syncNeedAddress: "Connect or import a watch address first.",
   pastePairLink: "Paste pair link or JSON",
@@ -183,7 +180,7 @@ export const en = {
   aiSignRequests: "Sign requests",
   aiSignRequestsBlurb: "Agent may ask — you confirm on device",
   aiPolicyHint:
-    "Allow-list for agents via window.__pulsePerchAi. Denied calls throw. Your Send button and Apps are separate. Keys stay on the device.",
+    "Agent allow-list (window.__pulsePerchAi). Send / Apps stay yours. Keys on device.",
 } as const;
 
 export type EnKey = keyof typeof en;

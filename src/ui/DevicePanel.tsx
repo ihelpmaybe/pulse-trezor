@@ -43,14 +43,9 @@ import {
   nativeSymbol,
   type DeskChainId,
 } from "../chain/client";
-import {
-  addEvmByChainId,
-  getCustomEvmPack,
-  isEvmChainId,
-  removeCustomEvmPack,
-} from "../chain/evmNetworks";
 import type { DeviceHints, ListedAccount, SuiteChannel } from "../trezor/connect";
 import { ethAddressPath } from "../trezor/paths";
+import { AddEvmForm } from "./AddEvmForm";
 import {
   buildEthPathTemplate,
   CHANGE_MAX,
@@ -116,7 +111,7 @@ type Props = {
 };
 
 export function DevicePanel({
-  showTestnet,
+  showTestnet: _showTestnet,
   chainId,
   setChainId,
   setAsset,
@@ -155,10 +150,6 @@ export function DevicePanel({
   setWalletFavs,
 }: Props) {
   const [advanced, setAdvanced] = useState(() => loadDeviceAdvanced());
-  const [addChainId, setAddChainId] = useState("");
-  const [addRpcUrl, setAddRpcUrl] = useState("");
-  const [addBusy, setAddBusy] = useState(false);
-  const [, setNetTick] = useState(0);
   const [pathOpen, setPathOpen] = useState(false);
   const [marks, setMarks] = useState(() => loadAccountMarks());
   const [notes, setNotes] = useState(() => loadAccountNotes());
@@ -292,77 +283,15 @@ export function DevicePanel({
             ))}
           </select>
         </label>
-        <details className="gas-details" open={showTestnet || undefined}>
+        <details className="gas-details">
           <summary>Add EVM by chain ID</summary>
-          <p className="muted fee">
-            Any EVM — resolves public RPCs from Chainlist (ethereum-lists).
-            Paste your own RPC if the list is empty or gated.
-          </p>
-          <label className="field">
-            Chain ID
-            <input
-              value={addChainId}
-              onChange={(e) => setAddChainId(e.target.value.trim())}
-              placeholder="e.g. 8453"
-              inputMode="numeric"
-              spellCheck={false}
-            />
-          </label>
-          <label className="field">
-            RPC URL (optional)
-            <input
-              value={addRpcUrl}
-              onChange={(e) => setAddRpcUrl(e.target.value.trim())}
-              placeholder="https://…"
-              spellCheck={false}
-            />
-          </label>
-          <button
-            type="button"
-            className="btn ghost"
-            disabled={addBusy || !addChainId}
-            onClick={() => {
-              const id = Number(addChainId);
-              if (!isEvmChainId(id)) {
-                setErr?.("Chain ID must be a positive integer.");
-                return;
-              }
-              setAddBusy(true);
-              setErr?.(null);
-              void addEvmByChainId({
-                chainId: id,
-                rpcUrl: addRpcUrl || undefined,
-              })
-                .then((pack) => {
-                  setChainId(pack.chainId);
-                  setAsset(pack.currency.symbol);
-                  setAddChainId("");
-                  setAddRpcUrl("");
-                  setNetTick((n) => n + 1);
-                })
-                .catch((e) => {
-                  setErr?.(e instanceof Error ? e.message : String(e));
-                })
-                .finally(() => setAddBusy(false));
-            }}
-          >
-            {addBusy ? "Resolving…" : "Add & switch"}
-          </button>
-          {getCustomEvmPack(chainId) ? (
-            <button
-              type="button"
-              className="btn ghost"
-              title="Remove this custom network"
-              onClick={() => {
-                removeCustomEvmPack(chainId);
-                setChainId(369);
-                setAsset("PLS");
-                setNetTick((n) => n + 1);
-              }}
-            >
-              Remove custom
-            </button>
-          ) : null}
+          <AddEvmForm
+            chainId={chainId}
+            setChainId={setChainId}
+            setAsset={setAsset}
+            setErr={setErr}
+            hideNetworkSelect
+          />
         </details>
       </div>
 
@@ -538,12 +467,12 @@ export function DevicePanel({
         suiteChannel={suiteChannel}
         connecting={connecting}
         listing={listing}
-        hasSession={!!active}
+        hasSession={!!session}
         canSign={canSign}
         accountCount={accountList.length}
         deviceHints={deviceHints}
         suiteCue={suiteCue}
-        showChecklist={!active || connecting}
+        showChecklist={!session || connecting}
         onAcquireDevice={onAcquireDevice}
         acquireBusy={busy && !connecting}
       />
@@ -701,11 +630,12 @@ export function DevicePanel({
         <div className="session">
           {!canSign ? (
             <p className="muted">
-              Watching — click Connect, then green Confirm in Suite (check other
-              screens).
+              {session
+                ? "Signing off — open Suite (Confirm cannot land while Suite is down)."
+                : "Watching — click Connect, then green Confirm in Suite (check other screens)."}
             </p>
           ) : null}
-          {canSign ? (
+          {session ? (
             <div className="row">
               <button
                 type="button"

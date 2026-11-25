@@ -30,6 +30,17 @@ describe("lightMetrics", () => {
     store.delete(METRICS_COUNTS_KEY);
   });
 
+  it("source promises local-only (no fetch)", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const src = fs.readFileSync(
+      path.join(__dirname, "lightMetrics.ts"),
+      "utf8",
+    );
+    expect(src).toMatch(/Never network/i);
+    expect(src).not.toMatch(/\bfetch\s*\(/);
+  });
+
   it("does not count when opt-in is off", () => {
     expect(loadMetricsOptIn()).toBe(false);
     expect(recordLocalSend().firstSendCount).toBe(0);

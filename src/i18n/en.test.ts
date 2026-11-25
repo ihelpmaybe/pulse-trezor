@@ -29,7 +29,7 @@ describe("en locale map", () => {
     expect(t("approveHint")).toMatch(/Apps/i);
     expect(t("signSwap")).toMatch(/swap/i);
     expect(t("offlineBanner")).toMatch(/Offline/i);
-    expect(t("rbfCoach")).toMatch(/OPEN/i);
+    expect(t("rbfCoach")).toMatch(/Speed up/i);
     expect(t("metricsOptInBlurb")).toMatch(/never phones home/i);
   });
 

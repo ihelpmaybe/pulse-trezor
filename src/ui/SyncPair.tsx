@@ -80,8 +80,7 @@ export function SyncPair(props: {
       <summary>Pair watch list (QR / link)</summary>
       <div className="receive-qr-body">
         <p className="muted fee">
-          SYNC2 — share watch addresses only (max {SYNC_QR_ACCOUNT_CAP} in QR).
-          Never seeds.
+          Watch addresses only (max {SYNC_QR_ACCOUNT_CAP} in QR). Never seeds.
         </p>
         {uri ? (
           <>

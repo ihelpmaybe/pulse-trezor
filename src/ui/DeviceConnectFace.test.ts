@@ -17,13 +17,24 @@ describe("connectSteps", () => {
     expect(steps[2].state).toBe("todo");
   });
 
-  it("marks Allow current while connecting", () => {
+  it("marks Allow current while connecting with desktop up", () => {
     const steps = connectSteps({
       suiteChannel: "desktop",
       connecting: true,
       hasSession: false,
     });
     expect(steps[0].state).toBe("done");
+    expect(steps[1].state).toBe("current");
+    expect(steps[2].state).toBe("todo");
+  });
+
+  it("does not green Suite just because connecting (desktop missing)", () => {
+    const steps = connectSteps({
+      suiteChannel: "web-or-missing",
+      connecting: true,
+      hasSession: false,
+    });
+    expect(steps[0].state).toBe("current");
     expect(steps[1].state).toBe("current");
     expect(steps[2].state).toBe("todo");
   });

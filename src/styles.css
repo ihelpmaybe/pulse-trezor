@@ -518,6 +518,22 @@ body {
   padding-right: 0.7rem;
 }
 
+.addr-bar.watch-only {
+  border-color: color-mix(in srgb, var(--muted) 55%, var(--border));
+}
+
+.addr-watch-chip {
+  flex: 0 0 auto;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.12rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
 .addr-copy-icon {
   flex: 0 0 auto;
   opacity: 0.55;
@@ -1058,38 +1074,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--lime-dim);
-}
-
-.first-run-strip {
-  margin: 0 0 0.65rem;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: rgba(255, 43, 214, 0.06);
-}
-
-.first-run-strip-title {
-  margin: 0 0 0.35rem;
-  font-size: 0.8rem;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.first-run-steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: 0.35rem 0.85rem;
-  font-size: 0.85rem;
-  line-height: 1.35;
-}
-
-.first-run-steps li {
-  margin: 0;
 }
 
 button.linkish {
@@ -2227,6 +2211,51 @@ html[data-a11y-focus] :focus-visible {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.rpc-modal.settings-modal {
+  width: min(44rem, calc(100vw - 2rem));
+  max-height: min(90dvh, 42rem);
+}
+
+.settings-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 0.45rem;
+  margin: 0.35rem 0 0.55rem;
+  align-items: stretch;
+}
+
+.settings-actions > .btn,
+.settings-actions > .watch-import,
+.settings-actions > .vision-tile {
+  width: 100%;
+  margin: 0;
+}
+
+.settings-actions > .vision-tile {
+  grid-column: 1 / -1;
+}
+
+.settings-rpc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.45rem 0.65rem;
+}
+
+.settings-grow {
+  grid-column: 1 / -1;
+}
+
+.settings-fold {
+  margin: 0.55rem 0 0.35rem;
+}
+
+.settings-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin: 0.35rem 0;
 }
 
 .rpc-modal-head {

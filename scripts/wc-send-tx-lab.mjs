@@ -89,7 +89,12 @@ try {
   console.log("TX_OK", hash);
   process.exit(0);
 } catch (e) {
-  const err = e instanceof Error ? e.message : String(e);
+  const err =
+    e instanceof Error
+      ? e.message
+      : typeof e === "object" && e
+        ? JSON.stringify(e, Object.getOwnPropertyNames(e))
+        : String(e);
   writeFileSync(
     "tmp-wc-tx.json",
     JSON.stringify({ ok: false, address, chainId, tx, err }, null, 2),

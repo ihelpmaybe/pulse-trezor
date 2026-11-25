@@ -197,3 +197,68 @@ export async function addEvmByChainId(opts: {
   upsertCustomEvmPack(pack);
   return pack;
 }
+
+/** EIP-3085 wallet_addEthereumChain params (Chainlist “Add to wallet”). */
+export type Eip3085AddChainParams = {
+  chainId?: string | number;
+  chainName?: string;
+  nativeCurrency?: { name?: string; symbol?: string; decimals?: number };
+  rpcUrls?: string[];
+  blockExplorerUrls?: string[];
+};
+
+function parseEip3085ChainId(raw: unknown): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) return Math.floor(raw);
+  const s = String(raw ?? "");
+  if (/^0x/i.test(s)) return Number.parseInt(s, 16);
+  return Number.parseInt(s, 10);
+}
+
+/**
+ * Chainlist magic: prefer ethereum-lists by id; fall back to dapp RPC list.
+ * Idempotent if the pack already exists.
+ */
+export async function addEthereumChainFromEip3085(
+  params: Eip3085AddChainParams,
+): Promise<EvmChainPack> {
+  const id = parseEip3085ChainId(params.chainId);
+  if (!isEvmChainId(id)) throw new Error("Invalid chainId in add-chain request");
+
+  const existing = getCustomEvmPack(id);
+  if (existing) return existing;
+
+  const dappRpcs = normalizeRpcList(params.rpcUrls);
+  const preferredRpc = dappRpcs[0];
+
+  try {
+    return await addEvmByChainId({
+      chainId: id,
+      rpcUrl: preferredRpc,
+    });
+  } catch (e) {
+    if (!preferredRpc) throw e;
+    const pack: EvmChainPack = {
+      name: (params.chainName || `Chain ${id}`).slice(0, 64),
+      chainId: id,
+      currency: {
+        name: params.nativeCurrency?.name || "Ether",
+        symbol: (params.nativeCurrency?.symbol || "ETH").slice(0, 12),
+        decimals: params.nativeCurrency?.decimals ?? 18,
+      },
+      rpc: dappRpcs,
+      rpcOptions: dappRpcs.map((url, i) => ({
+        name: i === 0 ? "Dapp" : `RPC ${i + 1}`,
+        url,
+      })),
+      explorers: params.blockExplorerUrls
+        ?.filter(Boolean)
+        .map((url, i) => ({
+          name: i === 0 ? "Explorer" : `Explorer ${i + 1}`,
+          url: url.replace(/\/$/, ""),
+        })),
+      source: "custom",
+    };
+    upsertCustomEvmPack(pack);
+    return pack;
+  }
+}

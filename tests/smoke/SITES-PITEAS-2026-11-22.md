@@ -1,6 +1,6 @@
 # Sites smoke — Piteas WC (2026-11-22)
 
-**Result: PASS (session)** — pair + approve only; no swap/sign exercised.
+**Result: SESSION only** — pair + approve. Not a Signed PASS; no swap/sign exercised.
 
 ## Path
 1. Pulse Perch Connect #1 → Suite Allow → session (Account #1 `0x73d0…36A8`)

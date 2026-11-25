@@ -53,6 +53,14 @@ export const CONNECT_FACE_SCENARIOS: ConnectFaceScenario[] = [
     expectCurrent: "allow",
   },
   {
+    id: "connecting-suite-missing",
+    label: "Connect clicked · Suite Desktop missing (do not green Suite)",
+    suiteChannel: "web-or-missing",
+    connecting: true,
+    hasSession: false,
+    expectCurrent: "suite",
+  },
+  {
     id: "session-ready",
     label: "Session linked (fake address only — not a device proof)",
     suiteChannel: "desktop",

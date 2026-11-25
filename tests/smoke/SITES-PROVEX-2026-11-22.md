@@ -1,6 +1,6 @@
 # Sites smoke — ProveX WC (2026-11-22)
 
-**Result: PASS (session)** — pair + approve. Escrow/sign not exercised.
+**Result: SESSION only** — pair + approve. Not a Signed PASS. Escrow/sign not exercised.
 
 ## Path
 1. Pulse Perch Connect #1 → Suite Allow → live session `0x73d0…36A8` on **369**

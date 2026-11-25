@@ -1,6 +1,8 @@
 # Pulse Perch extension — privacy
 
-**Product:** Pulse Perch browser extension (lab / future Chrome Web Store).  
+Desk-wide policy: **[../PRIVACY.md](../PRIVACY.md)** · security: **[../SECURITY.md](../SECURITY.md)**.
+
+**Product:** Pulse Perch browser extension (lab sideload; store listing is not a goal).  
 **Maintainer:** community project (ihelpmaybe). Not affiliated with SatoshiLabs / Trezor Inc. as official Pulse support.
 
 ## What we collect

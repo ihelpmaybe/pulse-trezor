@@ -375,6 +375,7 @@ function short(addr: string): string {
 
 export function clearSignTx(opts: {
   to?: string | null;
+  from?: string | null;
   valueHex?: string | null;
   data?: string | null;
   dappUrl?: string | null;
@@ -383,6 +384,7 @@ export function clearSignTx(opts: {
 }): ClearLine[] {
   const lines: ClearLine[] = [];
   const to = (opts.to || "").toLowerCase();
+  const from = (opts.from || "").toLowerCase();
   const data = (opts.data || "0x") as string;
   const method = opts.method || "eth_sendTransaction";
 
@@ -480,11 +482,20 @@ export function clearSignTx(opts: {
         title: `To · ${known.name}`,
         detail: `${short(to)} · ${known.note}`,
       });
-    } else if (!dead) {
+    } else if (from && to === from) {
       lines.push({
-        tone: "warn",
-        title: "To · unknown contract",
-        detail: `${short(to)} — not in known list; read Trezor screen`,
+        tone: "ok",
+        title: "To · self",
+        detail: `${short(to)} — same wallet`,
+      });
+    } else if (!dead) {
+      const emptyData = !data || data === "0x" || data === "0x0";
+      lines.push({
+        tone: emptyData ? "ok" : "warn",
+        title: emptyData ? "To · address" : "To · unknown contract",
+        detail: emptyData
+          ? `${short(to)} — simple send`
+          : `${short(to)} — not in known list; read Trezor screen`,
       });
     }
   }

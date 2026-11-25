@@ -1,8 +1,8 @@
 /**
  * Lab Chrome CDP: with the Perch desk tab closed, silent inject calls
  * must NOT open a new desk tab.
- * - No prior session: eth_chainId / eth_accounts → 4100 (or empty via offscreen miss)
- * - After Connect (0.1.4+): may return cached chainId/accounts without spawning desk
+ * - No live desk/offscreen: eth_accounts → [] (not a connected wallet)
+ * - After Connect (0.1.5+): eth_chainId may use storage hint; eth_accounts stays [] unless offscreen answers
  * eth_requestAccounts may open desk — this smoke does not call that.
  * Reload the extension first so background.js is current.
  * Env: CDP_PORT=9233

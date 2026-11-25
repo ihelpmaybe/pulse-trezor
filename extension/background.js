@@ -39,15 +39,15 @@ function isSignIntent(method) {
   );
 }
 
-/** Safe to answer from chrome.storage when desk tab is gone. */
-function isCachedRead(method) {
+/**
+ * Storage-only reads when the desk tab is gone.
+ * eth_accounts / permissions are NOT cached — that was connected theater
+ * (dapp thinks wallet is live while Suite/device may be cold).
+ * chainId / net_version may use last-known chain hint only.
+ */
+function isCachedChainHint(method) {
   const m = String(method || "");
-  return (
-    m === "eth_accounts" ||
-    m === "eth_chainId" ||
-    m === "net_version" ||
-    m === "wallet_getPermissions"
-  );
+  return m === "eth_chainId" || m === "net_version";
 }
 
 function sleep(ms) {
@@ -83,26 +83,14 @@ async function saveSession(snap) {
 }
 
 function answerFromCache(method, session) {
-  if (!session?.address) return null;
+  if (!session) return null;
   const chainId = Number(session.chainId) || 369;
   const hexChain = `0x${chainId.toString(16)}`;
-  const accounts = [session.address];
   switch (String(method || "")) {
-    case "eth_accounts":
-      return accounts;
     case "eth_chainId":
       return hexChain;
     case "net_version":
       return String(chainId);
-    case "wallet_getPermissions":
-      return [
-        {
-          parentCapability: "eth_accounts",
-          caveats: [
-            { type: "restrictReturnedAccounts", value: accounts },
-          ],
-        },
-      ];
     default:
       return null;
   }
@@ -116,7 +104,7 @@ async function setDeskBadge(ok) {
     });
     await chrome.action.setTitle({
       title: ok
-        ? "Pulse Perch — desk / bridge up"
+        ? "Pulse Perch — desk host reachable (not Suite/device ready)"
         : "Pulse Perch — desk closed (click to open)",
     });
   } catch {
@@ -333,28 +321,41 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     let tab = await findPerchTab();
     await setDeskBadge(!!tab || (await hasOffscreen()));
 
-    /* Cached reads — no desk spawn (dapp probes). */
-    if (!tab && isCachedRead(msg.method)) {
-      const session = await loadSession();
-      const cached = answerFromCache(msg.method, session);
-      if (cached != null) {
-        sendResponse({ result: cached });
-        return;
-      }
-      /* Try offscreen before 4100 — may still have live inject. */
+    /* No visible desk tab: try offscreen (live inject) first — never fake accounts from storage. */
+    if (!tab) {
       const viaOff = await forwardToOffscreen(msg.method, msg.params);
       if (viaOff && !viaOff.error) {
         sendResponse(viaOff);
         return;
       }
-      sendResponse({
-        error: {
-          code: 4100,
-          message:
-            "Pulse Perch not connected — open desk, Connect Trezor once",
-        },
-      });
-      return;
+      if (isCachedChainHint(msg.method)) {
+        const session = await loadSession();
+        const cached = answerFromCache(msg.method, session);
+        if (cached != null) {
+          sendResponse({ result: cached });
+          return;
+        }
+      }
+      if (
+        msg.method === "eth_accounts" ||
+        msg.method === "wallet_getPermissions"
+      ) {
+        /* Empty = not connected. Do not resurrect last address from chrome.storage. */
+        sendResponse({
+          result: msg.method === "eth_accounts" ? [] : [],
+        });
+        return;
+      }
+      if (isCachedChainHint(msg.method)) {
+        sendResponse({
+          error: {
+            code: 4100,
+            message:
+              "Pulse Perch not connected — open desk, Connect Trezor once",
+          },
+        });
+        return;
+      }
     }
 
     if (!tab && (isConnectIntent(msg.method) || isSignIntent(msg.method))) {

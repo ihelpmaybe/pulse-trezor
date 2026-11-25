@@ -36,10 +36,24 @@ export type WatchAssetParams = {
   };
 };
 
+/** EIP-3085 add-chain payload from Chainlist / dapps. */
+export type AddEthereumChainParameter = {
+  chainId: string;
+  chainName?: string;
+  nativeCurrency?: { name: string; symbol: string; decimals: number };
+  rpcUrls: string[];
+  blockExplorerUrls?: string[];
+};
+
 export type InjectedHost = {
   getSelectedAddress: () => string | null;
   getChainId: () => number;
   switchChain: (chainId: number) => Promise<void>;
+  /**
+   * Chainlist magic — resolve/persist pack (ethereum-lists + optional dapp RPC),
+   * then switch. Reject with 4001 if user denies.
+   */
+  addEthereumChain?: (params: AddEthereumChainParameter) => Promise<void>;
   sendTransaction: (tx: InjectedTx) => Promise<string>;
   personalSign: (message: string, address: string) => Promise<string>;
   signTypedData: (params: unknown) => Promise<string>;
@@ -174,7 +188,7 @@ export class PulsePerchProvider {
         if (!a) {
           throw new ProviderRpcError(
             4100,
-            "Connect Trezor in Pulse Perch first",
+            "Connect Trezor in Pulse Perch with Suite up first",
           );
         }
         return [a];
@@ -196,19 +210,33 @@ export class PulsePerchProvider {
       }
 
       case "wallet_addEthereumChain": {
-        const obj = (params[0] || {}) as { chainId?: string };
+        const obj = (params[0] || {}) as AddEthereumChainParameter;
         const id = parseChainIdParam(obj.chainId);
-        // Only switch onto packs already resolved (Device → Add EVM). No silent RPC install.
         if (Number.isFinite(id) && isDeskChainId(id) && hasChainPack(id)) {
           await this.host.switchChain(id);
           this.notifyChainChanged(id);
           return null;
         }
-        throw new ProviderRpcError(
-          4902,
-          `Rejected add-chain ${obj.chainId ?? "?"}. Add the chain ID under Network first.`,
-          { chainId: obj.chainId },
-        );
+        if (!this.host.addEthereumChain) {
+          throw new ProviderRpcError(
+            4902,
+            `Rejected add-chain ${obj.chainId ?? "?"}. Add the chain ID under Settings → Networks first.`,
+            { chainId: obj.chainId },
+          );
+        }
+        if (!obj.chainId) {
+          throw new ProviderRpcError(4200, "wallet_addEthereumChain missing chainId");
+        }
+        await this.host.addEthereumChain({
+          chainId: String(obj.chainId),
+          chainName: obj.chainName,
+          nativeCurrency: obj.nativeCurrency,
+          rpcUrls: Array.isArray(obj.rpcUrls) ? obj.rpcUrls : [],
+          blockExplorerUrls: obj.blockExplorerUrls,
+        });
+        const next = this.host.getChainId();
+        this.notifyChainChanged(next);
+        return null;
       }
 
       case "eth_sendTransaction": {

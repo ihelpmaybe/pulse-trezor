@@ -1,5 +1,6 @@
 /**
  * One-click install when the browser fires beforeinstallprompt (HTTPS / localhost).
+ * Hidden when the browser has nothing to offer.
  */
 import { useEffect, useState } from "react";
 import { t } from "../i18n/en";
@@ -24,7 +25,6 @@ export function InstallPwa() {
     null,
   );
   const [done, setDone] = useState(() => isStandalone());
-  const [hint, setHint] = useState<string | null>(null);
 
   useEffect(() => {
     if (isStandalone()) setDone(true);
@@ -45,45 +45,34 @@ export function InstallPwa() {
   }, []);
 
   if (done) {
-    return <p className="muted fee">{t("pwaInstalledLong")}</p>;
+    return (
+      <>
+        <h4 className="settings-section">Install</h4>
+        <p className="muted fee">{t("pwaInstalled")}</p>
+      </>
+    );
   }
 
+  if (!deferred) return null;
+
   return (
-    <div className="install-pwa">
-      <button
-        type="button"
-        className="btn ghost"
-        disabled={!deferred}
-        onClick={() => {
-          if (!deferred) return;
-          void deferred.prompt().then(async () => {
-            const choice = await deferred.userChoice;
-            if (choice.outcome === "accepted") setDone(true);
-            setDeferred(null);
-          });
-        }}
-      >
-        {deferred ? t("installPulsePerch") : t("installWhenOffered")}
-      </button>
-      <p className="muted fee">
-        {deferred ? t("installHintReady") : t("installHintWait")}
-      </p>
-      {hint ? <p className="muted fee">{hint}</p> : null}
-      {!deferred ? (
+    <>
+      <h4 className="settings-section">Install</h4>
+      <div className="install-pwa">
         <button
           type="button"
-          className="btn ghost"
-          onClick={() =>
-            setHint(
-              typeof window !== "undefined" && "serviceWorker" in navigator
-                ? t("installHintSw")
-                : t("installHintNoPwa"),
-            )
-          }
+          className="btn"
+          onClick={() => {
+            void deferred.prompt().then(async () => {
+              const choice = await deferred.userChoice;
+              if (choice.outcome === "accepted") setDone(true);
+              setDeferred(null);
+            });
+          }}
         >
-          {t("howToInstall")}
+          {t("installPulsePerch")}
         </button>
-      ) : null}
-    </div>
+      </div>
+    </>
   );
 }

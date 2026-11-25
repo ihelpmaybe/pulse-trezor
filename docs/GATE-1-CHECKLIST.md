@@ -9,7 +9,7 @@ Maps to [ACCEPTANCE.md](../ACCEPTANCE.md) **Gate 1** + Desk rows under **Gate T*
 | ACCEPTANCE item | Desk status | Evidence |
 |-----------------|-------------|----------|
 | Desk A0–A2 on Windows | **PASS** | Connect · bag · send · approve · Activity |
-| Bridge / Suite first-run | **PASS** | FirstRunStrip + suite-allow callout (Connect 10 → Suite) |
+| Bridge / Suite first-run | **PASS** | FAQ first-run + suite-allow callout (Connect 10 → Suite) |
 | Receive / send PLS + HEX/PLSX | **PASS** (943 dust; 369 send UI) | smoke GATE-T / ERC20; mainnet WC spend soft |
 | Fee UI + basic history | **PASS** UI · RBF device **OPEN** | fee preview + Activity; [RBF-STUCK-PLAYBOOK.md](./RBF-STUCK-PLAYBOOK.md) |
 | Gate T green for Desk | **PASS** CI · FULL matrix **OPEN** | `npm run smoke` + pen; OS matrix incomplete |
@@ -17,10 +17,11 @@ Maps to [ACCEPTANCE.md](../ACCEPTANCE.md) **Gate 1** + Desk rows under **Gate T*
 ## Product surface
 - [x] A0–A2: Connect · bag · send PLS/ERC-20 · approve/revoke · fees/RBF UI · Activity
 - [x] Sites WC: personal_sign · EIP-712 (live smokes 2026-11-22)
+- [~] Sites WC: PulseX/HEX/ProveX/Piteas — **session pair only** (not Signed PASS)
 - [ ] Sites WC: **tx / swap** on Pulse mainnet 369 (needs dust) — soft coach only ([SITES-WC-SEND-TX](../tests/smoke/SITES-WC-SEND-TX-2026-11-22.md))
 - [x] Sites WC: HEX stakeStart / stakeEnd clear-sign companions (decode + Stakes tab path copy)
-- [x] Inject / MV3 cross-origin + event fan-out (`0.1.4` offscreen + session cache)
-- [x] First-run / Suite cues / Cancel (`FirstRunStrip` + suite-allow callout)
+- [x] Inject / MV3 cross-origin + event fan-out (`0.1.5` offscreen · no fake eth_accounts cache)
+- [x] First-run / Suite cues / Cancel (FAQ + suite-allow callout)
 - [x] Testnet 943 toggle
 
 ## Gate T (Desk)
@@ -41,5 +42,6 @@ Maps to [ACCEPTANCE.md](../ACCEPTANCE.md) **Gate 1** + Desk rows under **Gate T*
 - [x] Update channel honesty — Settings + [UPDATE-CHANNEL.md](./UPDATE-CHANNEL.md) (no auto-updater)
 
 ## Sign-off
-Gate 1 **desk claim** holds on Windows for custody + Sites sign + inject.  
+Gate 1 **desk claim** holds on Windows for custody + Sites **sign** (personal_sign / EIP-712) + inject when Suite is up.  
+Session-pair-only smokes (PulseX/HEX/ProveX/Piteas) are **not** Signed PASS.  
 Blocked for “complete Gate 1” marketing: mainnet Sites **tx** proof + FULL matrix rows + human NVDA tick + device RBF evidence.

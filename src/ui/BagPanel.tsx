@@ -214,11 +214,7 @@ export function BagPanel({
                 aria-labelledby="bag-tab-tokens"
                 hidden={bagTab !== "tokens"}
               >
-                {!active ? (
-                  <p className="muted empty-teach">
-                    Connect first (Allow in Suite), then balances land here.
-                  </p>
-                ) : (
+                {!active ? null : (
                   <>
                     {balBusy ? (
                       <p className="bal">…</p>
@@ -405,8 +401,7 @@ export function BagPanel({
                     ) : null}
                     {chainId === 943 && !customRows.length ? (
                       <p className="muted empty-teach">
-                        Testnet has no pack tokens — Import a contract below, then
-                        Send as ERC-20.
+                        Testnet — Import a contract to send ERC-20.
                       </p>
                     ) : null}
                     <details className="gas-details">
@@ -567,12 +562,7 @@ export function BagPanel({
                 aria-labelledby="bag-tab-nfts"
                 hidden={bagTab !== "nfts"}
               >
-                {!active ? (
-                  <p className="muted empty-teach">
-                    Connect first — then sparse NFT inventory loads from
-                    PulseScan (not a full gallery).
-                  </p>
-                ) : (
+                {!active ? null : (
                   <>
                     <div className="row nft-toolbar">
                       <p className="muted nft-status">
@@ -603,10 +593,8 @@ export function BagPanel({
                     {!nftBusy && !nftErr && !nfts.length ? (
                       <div className="nft-empty">
                         <p className="muted empty-teach">
-                          No NFTs on this PulseScan page — normal if you don’t
-                          hold any, or if the indexer is thin. Refresh, check
-                          NFT operators for leftover marketplace approvals, or
-                          open the bag on PulseScan.
+                          No NFTs here — Refresh, check NFT operators, or open
+                          PulseScan.
                         </p>
                         <div className="row revoke-bulk">
                           <button
@@ -721,9 +709,7 @@ export function BagPanel({
                 aria-labelledby="bag-tab-stakes"
                 hidden={!hexModule || bagTab !== "stakes"}
               >
-                {!hexModule ? null : !active ? (
-                  <p className="muted">{t("stakesConnectHint")}</p>
-                ) : chainId !== 369 ? (
+                {!hexModule ? null : !active ? null : chainId !== 369 ? (
                   <p className="muted">{t("stakesMainnetOnly")}</p>
                 ) : bagBusy && !fullBag ? (
                   <p className="muted">{t("stakesLoading")}</p>

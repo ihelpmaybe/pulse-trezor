@@ -3,6 +3,8 @@
 **What this is:** a PulseChain wallet face for your Trezor — bag, send, approve, Sites — **without MetaMask**.  
 **What you need:** Node 20+, Trezor Suite (desktop), a Trezor, ~10 minutes.
 
+**Privacy:** no phone-home · no seed in the browser · [PRIVACY.md](./PRIVACY.md) · [SECURITY.md](./SECURITY.md).
+
 Lab defaults to **Pulse testnet (943)**. Use tiny test PLS only.
 
 ---
@@ -50,18 +52,17 @@ Get test PLS from a Pulse testnet faucet if the bag is empty.
 
 ## Chrome extension (optional lab)
 
-Sites that only look for MetaMask.
+Sites that only look for MetaMask. Prefer **Sites (WalletConnect)** when the dapp supports it.
 
-**Download:** [pulse-perch-extension-0.1.2.zip](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.2/pulse-perch-extension-0.1.2.zip) (GitHub Release `extension-0.1.2`)
+**Preferred:** build current **0.1.5** locally:
 
-**SHA256:** `e57f289b978a2ff3223ec3e65b8af4e9efb3a9b36d7b5b311d5209c7bb3ae07a`  
-([checksum file](https://github.com/ihelpmaybe/pulse-trezor/releases/download/extension-0.1.2/pulse-perch-extension-0.1.2.sha256))
+```bash
+npm run ext:pack
+```
 
-1. Unzip the pack.
-2. Chrome → Extensions → Developer mode → **Load unpacked** → that folder.
-3. Run the desk (`npm run dev`) → **Connect** Trezor → keep the Perch tab open.
+Then Chrome → Extensions → Developer mode → **Load unpacked** → `dist-ext/pulse-perch-extension/` (or the unzipped pack). Keep the Perch tab + Suite up — cold desk does not fake accounts.
 
-Or build locally: `npm run ext:pack` → `dist-ext/`. Prefer **Sites (WalletConnect)** when the dapp supports it.
+Older GitHub release zip (`extension-0.1.2`) still exists but is behind the no-theater pack.
 
 Details: [extension/README.md](./extension/README.md)
 

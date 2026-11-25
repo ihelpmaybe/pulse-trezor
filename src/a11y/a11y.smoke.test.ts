@@ -35,11 +35,15 @@ describe("a11y contract smoke", () => {
     expect(t).toMatch(/role="status"/);
   });
 
-  it("First-run + Suite Allow stay on the face", () => {
+  it("First-run lives in FAQ; Suite Allow stays on the face", () => {
     const shell = src("PulseTrezor.tsx");
-    expect(shell).toMatch(/FirstRunStrip/);
-    const strip = src("ui/FirstRunStrip.tsx");
-    expect(strip).toMatch(/t\("firstRunTitle"\)/);
+    expect(shell).not.toMatch(/FirstRunStrip/);
+    expect(shell).toMatch(/FaqModal/);
+    const faq = src("ui/FaqModal.tsx");
+    expect(faq).toMatch(/How do I start/);
+    expect(faq).toMatch(/phone home|track me/i);
+    expect(faq).toMatch(/seed ever/i);
+    expect(src("ui/SettingsModal.tsx")).toMatch(/no phone-home/i);
     const face = src("ui/DeviceConnectFace.tsx");
     expect(face).toMatch(/suiteAllowTitle/);
     expect(face).toMatch(/suite-allow-callout/);

@@ -18,10 +18,12 @@ import {
 import {
   isDeskChainId,
   makePublicClient,
+  nativeSymbol,
   type DeskChainId,
   type RpcOverride,
 } from "../chain/client";
 import { addCustomToken } from "../chain/customTokens";
+import { addEthereumChainFromEip3085 } from "../chain/evmNetworks";
 import { sendPlsWithTrezor } from "../trezor/signPulseTx";
 import {
   parseTypedDataParams,
@@ -35,6 +37,7 @@ import {
 } from "../ai/hooks";
 import { assertSiweAllowed } from "../wc/siweGate";
 import {
+  ProviderRpcError,
   PulsePerchProvider,
   attachInjectedProvider,
   detachInjectedProvider,
@@ -62,12 +65,23 @@ function broadcastProviderEvent(event: string, args: unknown[]) {
 
 export function useDeskInject(opts: {
   session: Session | null;
+  /** False when Suite probe is missing — do not advertise accounts as live. */
+  canSign: boolean;
   chainId: DeskChainId;
   effectiveRpc: RpcOverride | undefined;
   setChainId: Dispatch<SetStateAction<DeskChainId>>;
+  setAsset: Dispatch<SetStateAction<string>>;
   refreshBalances: (addr: Address, cid: DeskChainId) => void | Promise<void>;
 }) {
-  const { session, chainId, effectiveRpc, setChainId, refreshBalances } = opts;
+  const {
+    session,
+    canSign,
+    chainId,
+    effectiveRpc,
+    setChainId,
+    setAsset,
+    refreshBalances,
+  } = opts;
   const [injectEth, setInjectEth] = useState(() => loadInjectEth());
 
   useEffect(() => {
@@ -216,14 +230,56 @@ export function useDeskInject(opts: {
 
   /** Host for this-tab inject + extension bridge (`window.__pulsePerchInject`). */
   useEffect(() => {
+    const liveAddr = canSign && session ? session.address : null;
+    const needSuite = () => {
+      if (!session) throw new Error("Connect Trezor first");
+      if (!canSign) {
+        throw new Error(
+          "Trezor Suite is not reachable — open Suite, then try again",
+        );
+      }
+    };
     const host: InjectedHost = {
-      getSelectedAddress: () => session?.address ?? null,
+      getSelectedAddress: () => liveAddr,
       getChainId: () => chainId,
       switchChain: async (id) => {
         if (!isDeskChainId(id)) throw new Error(`Unsupported chain ${id}`);
         setChainId(id);
+        try {
+          setAsset(nativeSymbol(id));
+        } catch {
+          setAsset("ETH");
+        }
+      },
+      addEthereumChain: async (params) => {
+        const rawId = params.chainId;
+        const id = /^0x/i.test(rawId)
+          ? Number.parseInt(rawId, 16)
+          : Number.parseInt(rawId, 10);
+        const label =
+          params.chainName?.trim() ||
+          (Number.isFinite(id) ? `Chain ${id}` : String(rawId));
+        const ok =
+          typeof window !== "undefined"
+            ? window.confirm(
+                `Add ${label} (${rawId}) and switch?\n\nPerch will pull public RPCs from Chainlist when possible.`,
+              )
+            : false;
+        if (!ok) {
+          throw new ProviderRpcError(4001, "User rejected add-chain");
+        }
+        const pack = await addEthereumChainFromEip3085({
+          chainId: params.chainId,
+          chainName: params.chainName,
+          nativeCurrency: params.nativeCurrency,
+          rpcUrls: params.rpcUrls,
+          blockExplorerUrls: params.blockExplorerUrls,
+        });
+        setChainId(pack.chainId);
+        setAsset(pack.currency.symbol);
       },
       sendTransaction: async (tx) => {
+        needSuite();
         if (!session) throw new Error("Connect Trezor first");
         if (!tx.to || !isAddress(tx.to)) throw new Error("Invalid tx.to");
         const value =
@@ -244,6 +300,7 @@ export function useDeskInject(opts: {
         return broadcast.hash;
       },
       personalSign: async (message) => {
+        needSuite();
         if (!session) throw new Error("Connect Trezor first");
         let text = message;
         if (isHex(message)) {
@@ -268,6 +325,7 @@ export function useDeskInject(opts: {
         );
       },
       signTypedData: async (params) => {
+        needSuite();
         if (!session) throw new Error("Connect Trezor first");
         const { address, data } = parseTypedDataParams(params);
         if (
@@ -316,7 +374,7 @@ export function useDeskInject(opts: {
     } else {
       w.__pulsePerchInject = new PulsePerchProvider(host);
     }
-    const accounts = session?.address ? [session.address] : [];
+    const accounts = liveAddr ? [liveAddr] : [];
     w.__pulsePerchInject.notifyAccountsChanged(accounts);
     w.__pulsePerchInject.notifyChainChanged(chainId);
     broadcastProviderEvent("accountsChanged", [accounts]);
@@ -336,7 +394,16 @@ export function useDeskInject(opts: {
     } else {
       detachInjectedProvider();
     }
-  }, [injectEth, session, chainId, effectiveRpc, refreshBalances, setChainId]);
+  }, [
+    injectEth,
+    session,
+    canSign,
+    chainId,
+    effectiveRpc,
+    refreshBalances,
+    setChainId,
+    setAsset,
+  ]);
 
   return { injectEth, setInjectEth };
 }

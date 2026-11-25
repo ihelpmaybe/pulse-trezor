@@ -52,11 +52,34 @@ describe("PulsePerchProvider", () => {
         params: [{ chainId: "0x89" }],
       }),
     ).rejects.toBeInstanceOf(ProviderRpcError);
+  });
 
+  it("wallet_addEthereumChain uses host.addEthereumChain for new packs", async () => {
+    const addEthereumChain = vi.fn(async () => {});
+    const host = mockHost({
+      addEthereumChain,
+      getChainId: () => 137,
+    });
+    const p = new PulsePerchProvider(host);
+    await p.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: "0x89",
+          chainName: "Polygon",
+          rpcUrls: ["https://polygon-rpc.com"],
+        },
+      ],
+    });
+    expect(addEthereumChain).toHaveBeenCalled();
+  });
+
+  it("wallet_addEthereumChain rejects when host has no adder and pack missing", async () => {
+    const p = new PulsePerchProvider(mockHost());
     await expect(
       p.request({
         method: "wallet_addEthereumChain",
-        params: [{ chainId: "0x89" }],
+        params: [{ chainId: "0x89", rpcUrls: ["https://polygon-rpc.com"] }],
       }),
     ).rejects.toBeInstanceOf(ProviderRpcError);
   });

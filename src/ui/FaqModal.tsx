@@ -16,8 +16,8 @@ export const FAQ_ITEMS: FaqItem[] = [
     a: "Yes. Built fast with AI pair-programming, then smoke-tested on device/testnet. Expect rough edges. Read the Trezor screen — the browser can lie; the device cannot.",
   },
   {
-    q: "How do I start?",
-    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Start connection. 3) Allow Pulse Perch in Suite — often on another monitor or under the taskbar — then confirm the address on the Trezor. 4) Bag fills in; optional: Apps to pair a site. Stuck waiting? Stop waiting, bring Suite to the front, start again. Longer walkthrough: github.com/ihelpmaybe/pulse-trezor-guides.",
+    q: "How do I start? (first time)",
+    a: "1) Connect — Start connection, Allow in Suite (other screen / taskbar OK), unlock on device. 2) Bag — balances show after you’re linked. 3) Apps — pair a site when you need a dapp (WalletConnect). Stuck waiting? Stop waiting, bring Suite forward, start again. Guides: github.com/ihelpmaybe/pulse-trezor-guides.",
   },
   {
     q: "I clicked Connect but nothing happens?",
@@ -45,15 +45,15 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Speed up / Cancel stuck — what’s that?",
-    a: "If a tx sits pending: Speed up resends the same job with a higher tip; Cancel replaces the nonce with a 0-value self-send so the queue clears. Confirm on the device either way. Fee math + Anvil lab are proven; a live device mempool replace is still OPEN until you tick that evidence.",
+    a: "If a tx sits pending: Speed up resends the same job with a higher tip; Cancel replaces the nonce with a 0-value self-send so the queue clears. Confirm on the device either way. Device mempool replace is proven on Pulse testnet 943 — use wei-scale dust tips if you want the stuck row to last long enough to Speed up.",
   },
   {
     q: "Where’s the anime mascot?",
-    a: "Off by default. Settings → Display → Show mascot.",
+    a: "Off by default. Settings → Face → Show mascot.",
   },
   {
     q: "HEX stakes?",
-    a: "Optional. Settings → Modules → HEX stakes turns on the Stakes tab and marks. Liquid HEX still shows under Tokens either way. To start or end a stake: open go.hex.com → Apps (WalletConnect). Perch clear-signs stakeStart (hearts + days) and stakeEnd (index + id) before you confirm on the Trezor — trust that strip and the device, not the site chrome.",
+    a: "Optional. Settings → Face → HEX stakes for the Stakes tab. Liquid HEX still shows under Tokens. Start/end via go.hex.com → Apps; trust clear-sign + device, not site chrome.",
   },
   {
     q: "Buy / sell dollars?",
@@ -68,12 +68,28 @@ export const FAQ_ITEMS: FaqItem[] = [
     a: "No. Perch never asks for a seed or private key. Signs go Suite → Trezor. Fake “Trezor update / connect” websites that ask for a seed are scams — close them.",
   },
   {
+    q: "Do you track me / phone home?",
+    a: "No analytics and no Perch accounts. Prefs stay in this browser. Opt-in “local first-send count” in Settings is a counter on this PC only — off by default. Normal wallet calls still hit your RPC, PulseScan, DexScreener (soft USD), Chainlist when you add a network, and Reown only after you paste a project id. Full list: PRIVACY.md on the repo.",
+  },
+  {
+    q: "How do you protect users?",
+    a: "Hardware path only. Clear-sign for Permit / unlimited approve / blind calldata. WalletConnect Verify + Kill all sessions. First mainnet send needs an extra ack. Device screen wins over site chrome. Report issues on GitHub — never trust random DMs offering recovery.",
+  },
+  {
     q: "Testnet vs mainnet?",
     a: "Default is PulseChain mainnet (369). Switch to testnet V4 (943) only for practice. First mainnet send asks for an extra ack. Fee quotes on testnets can look wild — that’s the network, not your bag.",
   },
   {
+    q: "Other EVM networks (Base, Arbitrum, …)?",
+    a: "Chainlist magic: Settings → Injected provider on, open chainlist.org in this tab (or via the MV3 extension), click Add — Perch confirms, pulls public RPCs from ethereum-lists when possible, then switches. Or Settings → Networks / Device → Add EVM and paste the chain ID.",
+  },
+  {
     q: "Chrome extension?",
-    a: "Optional lab inject — Load unpacked from the extension folder / release zip, keep the Perch tab Connected. Prefer Apps (WalletConnect) when the dapp supports it. Store listing is not the product goal.",
+    a: "Optional lab inject — Load unpacked from the extension folder / release zip, keep Perch + Suite up (cold desk does not fake accounts). Prefer Apps (WalletConnect) when the dapp supports it. Store listing is not the product goal.",
+  },
+  {
+    q: "Install as an app?",
+    a: "Optional. Chrome/Edge can offer “Install Pulse Perch” (PWA) on localhost or HTTPS — Settings shows that button only when the browser offers it. Same desk, Suite still required to sign. Desk zip / sideload are separate ship paths, not Settings theater.",
   },
   {
     q: "Something looks phishing-y — what do I do?",

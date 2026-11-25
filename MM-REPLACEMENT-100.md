@@ -3,7 +3,7 @@
 **Scope:** Pulse Perch / PulseChain daily life. Not ETH L2s, Snaps, or fiat on-ramps.  
 **Law:** bag / send / approve / swap / Sites / sign **without MetaMask**.  
 **Board of truth** for product punch-list status (desk gates/smoke → [TODO.md](./TODO.md)).  
-**Canvas:** `mm-replacement-100.canvas.tsx` (filterable). Updated 2026-11-24 (desk polish batches: EN · soft paths · Gate sync · ship honesty).
+**Canvas:** `mm-replacement-100.canvas.tsx` (filterable). Updated 2026-11-24 (theater kill: ext 0.1.5 · Suite-gated signing · session demotes · WC send soft).
 
 ## Custody
 1. [x] Show PLS balance from Pulse RPC
@@ -19,7 +19,7 @@
 11. [x] Switch active account from list
 12. [x] Tx status after send (pending → confirmed) — face poll
 13. [x] Activity / history feed on face — PulseScan v2 dense + infinite scroll 2026-11-23
-14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI + Anvil PASS + face soft coach 2026-11-24; device mempool proof OPEN
+14. [x] Speed-up / cancel stuck tx (replace-by-fee) — device 943 PASS 2026-11-24 · `0x469f…30dd`
 15. [x] Custom gas / tip / max fee controls — Send Advanced in **beats** on 369/943 (not gwei) 2026-11-22
 16. [x] Nonce display + manual override (power)
 17. [x] Passphrase / hidden wallet callouts
@@ -45,20 +45,20 @@
 33. [x] WalletConnect / Reown peer as Pulse Perch
 34. [x] Pair wc: URI from Sites tab
 35. [x] Approve / reject session
-36. [~] eth_sendTransaction via WC → Trezor — wallet path + soft coach 2026-11-24; hash still needs dust / Confirm evidence
+36. [x] eth_sendTransaction via WC → Trezor — 943 PASS 2026-11-24 · hash `0xd6ab75e7…8873` confirmed
 
 37. [x] personal_sign via WC — live PASS 2026-11-22 (lab.pulseperch.dev pair + Suite); inject also PASS
 38. [x] eth_signTypedData_v4 / EIP-712 — inject + WC wallet-path PASS 2026-11-22 (`SITES-WC-EIP712-2026-11-22.md`)
 39. [x] wallet_switchEthereumChain → desk packs (369/943/…) — inject + WC 2026-11-24
 40. [x] Show dapp origin before every sign
 41. [x] Active sessions list + Drop
-42. [x] Piteas WC session smoke (proven)
-43. [x] PulseX IPFS WC pair smoke
-44. [x] HEX site WC pair smoke — PASS session 2026-11-22 (`SITES-HEX-2026-11-22.md`)
-45. [x] ProveX WC / connect smoke — PASS session 2026-11-22 (`SITES-PROVEX-2026-11-22.md`; origin lookalike ack)
-46. [~] End-to-end WC sign on device — personal_sign + EIP-712 PASS 2026-11-22; eth_sendTransaction hash still soft / mainnet dust parked
+42. [~] Piteas WC session smoke — session pair only (not device sign / hash)
+43. [~] PulseX IPFS WC pair smoke — session pair only
+44. [~] HEX site WC pair smoke — session 2026-11-22 (`SITES-HEX-2026-11-22.md`); not Signed PASS
+45. [~] ProveX WC / connect smoke — session 2026-11-22 (`SITES-PROVEX-2026-11-22.md`; origin lookalike ack); not Signed PASS
+46. [x] End-to-end WC sign on device — personal_sign + EIP-712 + eth_sendTransaction (943) PASS; mainnet dust still parked for spend
 47. [x] Injected provider (window.ethereum) — this-tab lab personal_sign + EIP-712 PASS 2026-11-22
-48. [x] Browser extension shell — chain/accounts/sign/typed/dust/closed-desk + event fan-out; **`0.1.4`** offscreen desk bridge + session cache (`npm run ext:pack`); CWS listing later
+48. [x] Browser extension shell — chain/accounts/sign/typed/dust/closed-desk + event fan-out; **`0.1.5`** offscreen desk bridge · chain hint only (no fake `eth_accounts` from storage); CWS listing later
 49. [x] Deep link open-in-Perch from Pulse sites — `?uri=` / `web+pulseperch:` → Sites
 50. [x] Concurrent multi-dapp sessions without clobber — proposal/request queues + live dual pair PASS 2026-11-22 (`wc-concurrent-sessions-lab.mjs`)
 51. [x] Per-origin permissions (accounts / methods) — remember allow/deny origin + cue on proposal
@@ -104,7 +104,7 @@
 83. [x] Silent a11y: live regions, focus trap, labels
 84. [x] Softer first-run: detect Suite Desktop vs Web
 85. [x] Clear Allow-in-Suite coaching (other monitor) — suite-allow callout 2026-11-24
-86. [x] Onboarding: connect → bag → first Sites pair — FirstRunStrip + empty teaches 2026-11-24
+86. [x] Onboarding: connect → bag → first Sites pair — FAQ first-run + empty teaches 2026-11-24
 87. [x] Empty states that teach next click
 88. [~] Locale strings (EN first, then more) — Sync/notes/AI/bag too 2026-11-24; other langs later
 89. [x] Light theme option (display)
@@ -122,7 +122,7 @@
 
 98. [x] Smoke + a11y evidence — CI contract smoke + NVDA checklist path; Gate checklist aligned 2026-11-24
 
-99. [~] Gate 1 acceptance: checklist ↔ ACCEPTANCE synced 2026-11-24; desk claim PASS; mainnet WC spend + FULL + device RBF still soft
+99. [~] Gate 1 acceptance: checklist ↔ ACCEPTANCE synced 2026-11-24; desk + device RBF + WC send (943) PASS; mainnet WC spend + FULL still soft
 100. [x] Public “uninstall MetaMask for Pulse” guide
 
 ## Out of scope (by design)

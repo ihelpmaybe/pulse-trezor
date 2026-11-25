@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Pulse Perch — PulseChain MetaMask replacement (Trezor transport today)",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

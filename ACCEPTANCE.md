@@ -88,9 +88,10 @@ See **[TESTING.md](./TESTING.md)** — SMOKE · FUZZ · PEN · FULL.
 Desk detail / honesty table: **[docs/GATE-1-CHECKLIST.md](./docs/GATE-1-CHECKLIST.md)**.
 
 - [x] Desk A0–A2 on Windows — Connect · bag · send · approve (lab 2026-11)  
-- [x] Bridge / Suite first-run covered — FirstRunStrip + suite-allow (Connect 10)  
+- [x] Bridge / Suite first-run covered — FAQ + suite-allow (Connect 10)  
 - [x] Receive / send PLS + HEX/PLSX — 943 dust PASS; mainnet WC spend still soft  
 - [~] Fee UI + basic history — UI + Anvil RBF PASS; **device** stuck-tx OPEN  
+- [~] Sites WC pair smokes (PulseX/HEX/ProveX/Piteas) — **session only**, not Signed PASS  
 - [~] **Gate T** green for Desk — CI/pen PASS; FULL OS×device OPEN  
 
 
