@@ -542,7 +542,8 @@ export function WcPanel({
       </p>
       {!address ? (
         <p className="muted empty-teach">
-          Next: Connect Trezor above, then come back here to pair a site.
+          Connect Trezor above first — then paste a <code>wc:</code> URI here.
+          MetaMask does not need to be installed; Perch is the wallet.
         </p>
       ) : (
         <>

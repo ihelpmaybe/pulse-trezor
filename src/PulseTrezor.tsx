@@ -907,6 +907,7 @@ export function PulseTrezor({
           busy={busy}
           onSpeedUp={onSpeedUp}
           onCancelStuck={onCancelStuck}
+          onGotoApprovals={() => setActionTab("approve")}
         />
 
         <section className="card send">

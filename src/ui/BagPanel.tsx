@@ -85,6 +85,8 @@ type Props = {
   busy: boolean;
   onSpeedUp: () => void;
   onCancelStuck: () => void;
+  /** Jump to Approvals (NFT operators / setApprovalForAll). */
+  onGotoApprovals?: () => void;
 };
 
 export function BagPanel({
@@ -137,6 +139,7 @@ export function BagPanel({
   busy,
   onSpeedUp,
   onCancelStuck,
+  onGotoApprovals,
 }: Props) {
   return (
             <section className="card bag-card">
@@ -562,7 +565,10 @@ export function BagPanel({
                 hidden={bagTab !== "nfts"}
               >
                 {!active ? (
-                  <p className="muted">Connect to load NFTs.</p>
+                  <p className="muted empty-teach">
+                    Connect first — then sparse NFT inventory loads from
+                    PulseScan (not a full gallery).
+                  </p>
                 ) : (
                   <>
                     <div className="row nft-toolbar">
@@ -575,19 +581,60 @@ export function BagPanel({
                       </p>
                       <button
                         type="button"
-                        className="btn ghost"
+                        className="btn ghost gas-pill"
                         disabled={nftBusy}
                         onClick={() => void refreshNfts(active.address, chainId)}
                       >
                         Refresh
                       </button>
+                      {onGotoApprovals ? (
+                        <button
+                          type="button"
+                          className="btn ghost gas-pill"
+                          onClick={onGotoApprovals}
+                        >
+                          NFT operators
+                        </button>
+                      ) : null}
                     </div>
                     {!nftBusy && !nftErr && !nfts.length ? (
-                      <p className="muted empty-teach">
-                        No NFTs on first PulseScan page — try Refresh, or check
-                        Approvals → NFT operators if a marketplace still has
-                        setApprovalForAll.
-                      </p>
+                      <div className="nft-empty">
+                        <p className="muted empty-teach">
+                          No NFTs on this PulseScan page — normal if you don’t
+                          hold any, or if the indexer is thin. Refresh, check
+                          NFT operators for leftover marketplace approvals, or
+                          open the bag on PulseScan.
+                        </p>
+                        <div className="row revoke-bulk">
+                          <button
+                            type="button"
+                            className="btn ghost gas-pill"
+                            disabled={nftBusy}
+                            onClick={() =>
+                              void refreshNfts(active.address, chainId)
+                            }
+                          >
+                            Refresh
+                          </button>
+                          {onGotoApprovals ? (
+                            <button
+                              type="button"
+                              className="btn ghost gas-pill"
+                              onClick={onGotoApprovals}
+                            >
+                              Approvals
+                            </button>
+                          ) : null}
+                          <a
+                            className="btn ghost gas-pill"
+                            href={explorerAddressUrl(chainId, active.address)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            PulseScan
+                          </a>
+                        </div>
+                      </div>
                     ) : null}
                     {nfts.length ? (
                       <ul className="nft-grid">
@@ -604,14 +651,23 @@ export function BagPanel({
                               rel="noreferrer"
                               title={`${n.collection} #${n.tokenId}`}
                             >
-                              <span className="nft-type">{n.type || "NFT"}</span>
-                              <span className="nft-col">{n.collection}</span>
+                              <span className="nft-col">
+                                {n.collection || "Collection"}
+                              </span>
                               <span className="nft-id">#{n.tokenId}</span>
-                              <span className="muted nft-type">{n.type}</span>
+                              <span className="muted nft-type">
+                                {n.type || "NFT"}
+                              </span>
                             </a>
                           </li>
                         ))}
                       </ul>
+                    ) : null}
+                    {nftsTruncated ? (
+                      <p className="muted fee">
+                        More may exist on PulseScan — this face is a sparse
+                        first page.
+                      </p>
                     ) : null}
                     <p className="muted">
                       <a

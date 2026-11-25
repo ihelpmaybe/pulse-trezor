@@ -38,7 +38,7 @@
 28. [x] Revoke approvals — per-row + bulk selected
 29. [x] Permit / EIP-2612 clear-sign — warn in WC typed/Permit selector
 30. [x] Detect bridged vs inherited lookalikes
-31. [~] NFT / sparse collectible view (Pulse) — tabs + operator revoke
+31. [x] NFT / sparse collectible view (Pulse) — grid + empty actions + operators jump 2026-11-24
 32. [x] Token price hint (optional, trusted feed) — DexScreener soft USD
 
 ## Sites
@@ -48,7 +48,7 @@
 36. [~] eth_sendTransaction via WC → Trezor — lab URI + Suite Grant up 2026-11-22; hash blocked (Confirm click / 0 PLS on 369)
 37. [x] personal_sign via WC — live PASS 2026-11-22 (lab.pulseperch.dev pair + Suite); inject also PASS
 38. [x] eth_signTypedData_v4 / EIP-712 — inject + WC wallet-path PASS 2026-11-22 (`SITES-WC-EIP712-2026-11-22.md`)
-39. [~] wallet_switchEthereumChain → 369
+39. [x] wallet_switchEthereumChain → desk packs (369/943/…) — inject + WC 2026-11-24
 40. [x] Show dapp origin before every sign
 41. [x] Active sessions list + Drop
 42. [x] Piteas WC session smoke (proven)
@@ -86,7 +86,7 @@
 70. [x] Pen report before Gate 1 ship — template in tests/pen/REPORT.md (cancel + Suite-quit PASS)
 
 ## Pulse apps
-71. [~] Sites path works without MetaMask installed
+71. [x] Sites path works without MetaMask installed — Apps empty teach + WC host
 72. [~] PulseX swap via Sites (not only in-face) — ipfs link on Swap tab
 73. [x] Optional in-face PulseX convenience swap
 74. [x] Slippage / deadline controls for swaps

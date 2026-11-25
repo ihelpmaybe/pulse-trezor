@@ -994,12 +994,16 @@ body {
   margin: 0;
 }
 
+.nft-empty {
+  margin: 0.35rem 0 0.55rem;
+}
+
 .nft-grid {
   list-style: none;
   margin: 0.55rem 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: 0.45rem;
 }
 
