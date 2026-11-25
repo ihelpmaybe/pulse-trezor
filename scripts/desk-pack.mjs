@@ -1,9 +1,16 @@
 /**
  * Zip dist/ → release/pulse-perch-<ver>-web.zip + .sha256
+ * Includes Windows Open-Pulse-Perch.cmd + serve-desk.ps1 for normie local run.
  * Thin portable pack — not Electron/notarize.
  */
 import { createHash } from "node:crypto";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -21,6 +28,25 @@ if (!existsSync(dist)) {
   process.exit(1);
 }
 mkdirSync(outDir, { recursive: true });
+
+const launcherCmd = join(root, "scripts", "Open-Pulse-Perch.cmd");
+const launcherPs = join(root, "scripts", "serve-desk.ps1");
+const readmeLocal = join(dist, "README-OPEN.txt");
+writeFileSync(
+  readmeLocal,
+  [
+    "Pulse Perch — portable desk",
+    "",
+    "Windows: double-click Open-Pulse-Perch.cmd",
+    "  → opens http://127.0.0.1:5174/  (leave the black window open)",
+    "",
+    "Then: unlock Trezor Suite → Connect in Perch → confirm address on device.",
+    "No seed in the browser. SHA256 of this zip is on GitHub Releases.",
+    "",
+  ].join("\r\n"),
+);
+if (existsSync(launcherCmd)) copyFileSync(launcherCmd, join(dist, "Open-Pulse-Perch.cmd"));
+if (existsSync(launcherPs)) copyFileSync(launcherPs, join(dist, "serve-desk.ps1"));
 
 const isWin = process.platform === "win32";
 let ok = false;

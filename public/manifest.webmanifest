@@ -1,10 +1,10 @@
 {
-  "id": "/",
+  "id": "./",
   "name": "Pulse Perch",
   "short_name": "Perch",
   "description": "PulseChain MetaMask replacement — bag, send, approve, Sites, sign (Trezor transport).",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#07060c",
@@ -13,19 +13,19 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/perch-icon.svg",
+      "src": "perch-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
@@ -34,7 +34,7 @@
   "protocol_handlers": [
     {
       "protocol": "web+pulseperch",
-      "url": "/?uri=%s"
+      "url": "./?uri=%s"
     }
   ],
   "categories": ["finance", "utilities"]

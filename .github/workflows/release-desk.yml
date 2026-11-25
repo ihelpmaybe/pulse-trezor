@@ -1,0 +1,66 @@
+name: release-desk
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "desk-*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node node_modules/esbuild/install.js
+      - name: Build portable desk (root base)
+        run: npm run build
+      - run: npm run desk:pack
+      - name: Pack extension
+        run: npm run ext:pack
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VER=$(node -p "require('./package.json').version")
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="desk-v${VER}"
+          fi
+          NOTES=$(mktemp)
+          cat > "$NOTES" <<EOF
+          ## Pulse Perch desk ${VER}
+
+          **Normie install:** [INSTALL.md](https://github.com/ihelpmaybe/pulse-trezor/blob/main/INSTALL.md)
+
+          - Live desk: https://ihelpmaybe.github.io/pulse-trezor/
+          - Windows: unzip \`pulse-perch-${VER}-web.zip\` → double-click \`Open-Pulse-Perch.cmd\`
+          - Unlock Trezor Suite before Connect. No seed in the browser.
+
+          SHA256 files attached. MIT · PRIVACY · SECURITY
+          EOF
+          sed -i 's/^          //' "$NOTES"
+          mapfile -t ASSETS < <(ls release/pulse-perch-${VER}-web.zip release/pulse-perch-${VER}-web.zip.sha256)
+          if ls dist-ext/pulse-perch-extension-*.zip >/dev/null 2>&1; then
+            mapfile -t EXT < <(ls dist-ext/pulse-perch-extension-*.zip dist-ext/pulse-perch-extension-*.sha256 2>/dev/null || true)
+            ASSETS+=("${EXT[@]}")
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" \
+              --target "${GITHUB_SHA}" \
+              --title "Pulse Perch ${VER}" \
+              --notes-file "$NOTES"
+          fi

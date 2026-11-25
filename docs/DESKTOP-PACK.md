@@ -1,6 +1,6 @@
 # Desktop pack · signing / notarize
 
-**Preferred ship today:** PWA install + `npm run desk:pack` (zip of `dist/` + SHA256). Not an Electron/Tauri app.
+**Preferred ship today:** GitHub Pages (HTTPS PWA) + `npm run desk:pack` zip with `Open-Pulse-Perch.cmd` for Windows. Not an Electron/Tauri app. Normie steps: [INSTALL.md](../INSTALL.md).
 
 ## Portable web pack
 

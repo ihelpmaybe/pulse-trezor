@@ -89,7 +89,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Install as an app?",
-    a: "Optional. Chrome/Edge can offer “Install Pulse Perch” (PWA) on localhost or HTTPS — Settings shows that button only when the browser offers it. Same desk, Suite still required to sign. Desk zip / sideload are separate ship paths, not Settings theater.",
+    a: "Easiest: open the live desk (GitHub Pages link in INSTALL.md) and use Chrome/Edge Install when offered. Or download the Windows zip from Releases and double-click Open-Pulse-Perch.cmd. Suite still required to sign. Settings only shows Install when the browser offers it.",
   },
   {
     q: "Something looks phishing-y — what do I do?",

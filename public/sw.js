@@ -1,16 +1,32 @@
-/* Pulse Perch — offline shell. Cache app shell + same-origin assets; never RPC/API. */
-const CACHE = "pulse-perch-shell-v4";
-const SHELL = [
-  "/",
-  "/index.html",
-  "/offline.html",
-  "/manifest.webmanifest",
-  "/perch-icon.svg",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-];
+/* Pulse Perch — offline shell. Cache app shell + same-origin assets; never RPC/API.
+ * Paths are scope-relative so GitHub Pages (/pulse-trezor/) and root both work. */
+const CACHE = "pulse-perch-shell-v5";
+
+function scopeBase() {
+  try {
+    return new URL(self.registration.scope).pathname;
+  } catch {
+    return "/";
+  }
+}
+
+function abs(path) {
+  const base = scopeBase();
+  const clean = String(path || "").replace(/^\//, "");
+  if (!clean) return base;
+  return `${base}${clean}`.replace(/\/{2,}/g, "/");
+}
 
 self.addEventListener("install", (event) => {
+  const SHELL = [
+    abs(""),
+    abs("index.html"),
+    abs("offline.html"),
+    abs("manifest.webmanifest"),
+    abs("perch-icon.svg"),
+    abs("icons/icon-192.png"),
+    abs("icons/icon-512.png"),
+  ];
   event.waitUntil(
     caches
       .open(CACHE)
@@ -43,30 +59,31 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (isBlocked(url)) return;
 
-  // Navigations: network first, then cached shell, then offline face
+  const base = scopeBase();
+  const assetsPrefix = `${base}assets/`.replace(/\/{2,}/g, "/");
+
   if (req.mode === "navigate") {
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          void caches.open(CACHE).then((c) => c.put("/index.html", copy));
+          void caches.open(CACHE).then((c) => c.put(abs("index.html"), copy));
           return res;
         })
         .catch(() =>
           caches
-            .match("/index.html")
+            .match(abs("index.html"))
             .then(
               (h) =>
                 h ||
-                caches.match("/") ||
-                caches.match("/offline.html"),
+                caches.match(abs("")) ||
+                caches.match(abs("offline.html")),
             ),
         ),
     );
     return;
   }
 
-  // Static assets: cache-first, then network + put
   event.respondWith(
     caches
       .match(req)
@@ -75,7 +92,7 @@ self.addEventListener("fetch", (event) => {
         return fetch(req).then((res) => {
           if (
             res.ok &&
-            (url.pathname.startsWith("/assets/") ||
+            (url.pathname.startsWith(assetsPrefix) ||
               url.pathname.match(/\.(js|css|svg|png|webp|woff2?|html)$/i))
           ) {
             const copy = res.clone();
@@ -84,6 +101,10 @@ self.addEventListener("fetch", (event) => {
           return res;
         });
       })
-      .catch(() => caches.match("/offline.html").then((h) => h || caches.match("/"))),
+      .catch(() =>
+        caches
+          .match(abs("offline.html"))
+          .then((h) => h || caches.match(abs(""))),
+      ),
   );
 });

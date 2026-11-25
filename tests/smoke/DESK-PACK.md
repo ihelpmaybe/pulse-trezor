@@ -12,8 +12,8 @@ npm run desk:pack
 ## Artifacts
 | File | Notes |
 |------|--------|
-| `release/pulse-perch-0.1.0-web.zip` | contents of `dist/` |
-| `release/pulse-perch-0.1.0-web.zip.sha256` | `01b56cd38c13e052ae48ea4d7fa827acd386d138f5177321cce699ea02776c63` |
+| `release/pulse-perch-0.1.0-web.zip` | contents of `dist/` + `Open-Pulse-Perch.cmd` + `serve-desk.ps1` |
+| `release/pulse-perch-0.1.0-web.zip.sha256` | `955d47a42abae07db033187a437ba788c7d4ca087b98a3114f387652d87045e1` |
 
 ## Honesty
 - This proves **portable web zip + SHA256**, not a signed installer.

@@ -7,11 +7,18 @@ Suite hosts the device; Perch is the Pulse UI.
 
 **Wholesome defaults:** no phone-home telemetry · no seed in the browser · keys stay on the Trezor · clear-sign before Suite · local prefs only. Details → [PRIVACY.md](./PRIVACY.md) · [SECURITY.md](./SECURITY.md).
 
-**Start here → [TRY.md](./TRY.md)** · In-app **?** FAQ (next to the eye)
+**Normies → [INSTALL.md](./INSTALL.md)** (browser link or Windows zip · no `npm`) · Builders → [TRY.md](./TRY.md) · In-app **?** FAQ
 
 ---
 
-## Quick start
+## Install (everyone)
+
+1. Open **https://ihelpmaybe.github.io/pulse-trezor/** (or grab the Windows zip from [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) → `Open-Pulse-Perch.cmd`)
+2. Unlock **Trezor Suite** → **Connect** in Perch → confirm the address on the device
+
+Optional: Chrome/Edge **Install Pulse Perch** (PWA) from that HTTPS page. Details: [INSTALL.md](./INSTALL.md).
+
+## Quick start (builders)
 
 ```bash
 git clone https://github.com/ihelpmaybe/pulse-trezor.git
@@ -21,14 +28,14 @@ npm run setup
 npm run dev
 ```
 
-Open **http://127.0.0.1:5174/** → unlock **Trezor Suite** → **Connect** → confirm address on device.
-
-Lab default = **Pulse testnet 943**. Guides: [Suite + Connect](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/suite-connect.md) · [PLS on Trezor](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/pls-on-trezor.md) · [all guides](https://github.com/ihelpmaybe/pulse-trezor-guides).
+Open **http://127.0.0.1:5174/** · Lab default = **Pulse testnet 943**. Guides: [Suite + Connect](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/suite-connect.md) · [PLS on Trezor](https://github.com/ihelpmaybe/pulse-trezor-guides/blob/main/pls-on-trezor.md) · [all guides](https://github.com/ihelpmaybe/pulse-trezor-guides).
 
 | Artifact | Link |
 |----------|------|
-| Try / install | [TRY.md](./TRY.md) |
-| Extension sideload | [TRY.md](./TRY.md) · `npm run ext:pack` → `dist-ext/` (**0.1.5**) · older release zip still tagged [`extension-0.1.2`](https://github.com/ihelpmaybe/pulse-trezor/releases/tag/extension-0.1.2) |
+| Install (normie) | [INSTALL.md](./INSTALL.md) · [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) |
+| Live desk | https://ihelpmaybe.github.io/pulse-trezor/ |
+| Builder try | [TRY.md](./TRY.md) |
+| Extension sideload | [TRY.md](./TRY.md) · `npm run ext:pack` → `dist-ext/` (**0.1.5**) |
 | Pen report | [tests/pen/REPORT-2026-11-23.md](./tests/pen/REPORT-2026-11-23.md) |
 | Threat watch | [docs/THREAT-WATCH-2026-11.md](./docs/THREAT-WATCH-2026-11.md) |
 

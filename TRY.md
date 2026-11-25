@@ -1,7 +1,9 @@
-# Try Pulse Perch (testnet)
+# Try Pulse Perch (builders / testnet)
+
+**Normies (no Node):** use **[INSTALL.md](./INSTALL.md)** — live link or Windows zip.
 
 **What this is:** a PulseChain wallet face for your Trezor — bag, send, approve, Sites — **without MetaMask**.  
-**What you need:** Node 20+, Trezor Suite (desktop), a Trezor, ~10 minutes.
+**What you need for this page:** Node 20+, Trezor Suite (desktop), a Trezor, ~10 minutes.
 
 **Privacy:** no phone-home · no seed in the browser · [PRIVACY.md](./PRIVACY.md) · [SECURITY.md](./SECURITY.md).
 
@@ -9,7 +11,7 @@ Lab defaults to **Pulse testnet (943)**. Use tiny test PLS only.
 
 ---
 
-## 1. Run the desk
+## 1. Run the desk (dev)
 
 ```bash
 git clone https://github.com/ihelpmaybe/pulse-trezor.git
@@ -78,13 +80,13 @@ Details: [extension/README.md](./extension/README.md)
 
 ## Install as an app (optional)
 
-Settings → **Install Pulse Perch** when Chrome/Edge offers it (localhost or HTTPS).  
-Or: `npm run build && npm run preview`, then use the browser install icon.
+Prefer the live HTTPS desk ([INSTALL.md](./INSTALL.md)) so Chrome/Edge can offer **Install Pulse Perch**.  
+Dev: `npm run build && npm run preview`, then the browser install icon.
 
 ## Ship surfaces (honest)
 
-- **Desk:** `npm run build && npm run desk:pack` → unsigned web zip + SHA (or just `npm run dev`).
-- **PWA:** Settings → Install when the browser offers it.
+- **Normie:** GitHub Pages + Releases zip (`Open-Pulse-Perch.cmd`) — [INSTALL.md](./INSTALL.md).
+- **Desk pack:** `npm run build && npm run desk:pack` → unsigned web zip + SHA.
 - **Extension:** Load unpacked / sideload zip only. **Chrome Web Store and Play listing are not a goal.**
 
 ## Honest limits

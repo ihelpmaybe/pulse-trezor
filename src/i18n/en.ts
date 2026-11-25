@@ -156,7 +156,7 @@ export const en = {
   pathLoadWallet: "Load wallet",
   pathSaveTitle: "Save path and load this one wallet",
   shipSurfacesHint:
-    "Ship: desk zip + PWA + MV3 sideload. Store listing is not a goal.",
+    "Ship: live desk link + Windows zip + PWA. Store listing is not a goal.",
   copyPairLink: "Copy pair link",
   syncNeedAddress: "Connect or import a watch address first.",
   pastePairLink: "Paste pair link or JSON",

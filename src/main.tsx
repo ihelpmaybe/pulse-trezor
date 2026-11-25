@@ -12,7 +12,9 @@ createRoot(document.getElementById("root")!).render(
 /** Prod always; localhost/dev so Install / PWA can fire without preview-only. */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    void navigator.serviceWorker.register("/sw.js").catch(() => {
+    const base = import.meta.env.BASE_URL || "/";
+    const swUrl = base.endsWith("/") ? `${base}sw.js` : `${base}/sw.js`;
+    void navigator.serviceWorker.register(swUrl, { scope: base }).catch(() => {
       /* offline install optional */
     });
   });
