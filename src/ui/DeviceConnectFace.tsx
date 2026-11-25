@@ -112,7 +112,7 @@ export function DeviceConnectFace({
       <div className="device-connect-hero">
         <img
           className="device-connect-art"
-          src="/trezor-device.svg"
+          src="/trezor-device.svg?v=2"
           width={72}
           height={96}
           alt=""
