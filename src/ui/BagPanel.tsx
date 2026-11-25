@@ -158,7 +158,7 @@ export function BagPanel({
                     className={bagTab === "tokens" ? "tab on" : "tab"}
                     onClick={() => setBagTab("tokens")}
                   >
-                    Tokens
+                    {t("tokens")}
                   </button>
                   <button
                     type="button"
@@ -170,7 +170,7 @@ export function BagPanel({
                     className={bagTab === "nfts" ? "tab on" : "tab"}
                     onClick={() => setBagTab("nfts")}
                   >
-                    NFTs
+                    {t("nfts")}
                   </button>
                   <button
                     type="button"
@@ -182,7 +182,7 @@ export function BagPanel({
                     className={bagTab === "activity" ? "tab on" : "tab"}
                     onClick={() => setBagTab("activity")}
                   >
-                    Activity
+                    {t("activity")}
                   </button>
                   {hexModule && chainId === 369 ? (
                     <button
@@ -195,7 +195,7 @@ export function BagPanel({
                       className={bagTab === "stakes" ? "tab on" : "tab"}
                       onClick={() => setBagTab("stakes")}
                     >
-                      Stakes
+                      {t("stakes")}
                       {(acctHexStakes[active?.address?.toLowerCase() ?? ""] ?? 0) >
                       0
                         ? ` · ${acctHexStakes[active!.address.toLowerCase()]}`
@@ -593,7 +593,7 @@ export function BagPanel({
                           className="btn ghost gas-pill"
                           onClick={onGotoApprovals}
                         >
-                          NFT operators
+                          {t("nftOperators")}
                         </button>
                       ) : null}
                     </div>

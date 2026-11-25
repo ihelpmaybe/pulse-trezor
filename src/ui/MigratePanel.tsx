@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from "react";
 import type { DeskChainId } from "../chain/client";
+import { t } from "../i18n/en";
 import {
   loadDeviceAdvanced,
   loadMigrateWalk,
@@ -68,7 +69,7 @@ export function MigratePanel({
     return (
       <div className="apps-card migrate-card">
         <div className="apps-card-head">
-          <h3>Migrate from ETH</h3>
+          <h3>{t("migrateFromEth")}</h3>
         </div>
         <p className="muted fee">
           Same-address risk + bridge checklist. Turn on{" "}
@@ -85,7 +86,7 @@ export function MigratePanel({
   return (
     <div className="apps-card migrate-card migrate-card-advanced">
       <div className="apps-card-head">
-        <h3>Migrate from ETH</h3>
+        <h3>{t("migrateFromEth")}</h3>
         <span className="muted fee">
           {doneCount}/{STEPS.length}
         </span>

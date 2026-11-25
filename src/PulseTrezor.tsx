@@ -922,7 +922,7 @@ export function PulseTrezor({
               className={actionTab === "send" ? "tab on" : "tab"}
               onClick={() => setActionTab("send")}
             >
-              Send
+              {t("send")}
             </button>
             <button
               type="button"
@@ -940,7 +940,7 @@ export function PulseTrezor({
                   : "PulseX swap is mainnet only"
               }
             >
-              Swap
+              {t("swap")}
             </button>
             <button
               type="button"
@@ -953,7 +953,7 @@ export function PulseTrezor({
               onClick={() => setActionTab("approve")}
               disabled={chainId !== 369 && chainId !== 943}
             >
-              Approvals
+              {t("approvals")}
             </button>
             <button
               type="button"
@@ -965,7 +965,7 @@ export function PulseTrezor({
               className={actionTab === "apps" ? "tab on" : "tab"}
               onClick={() => setActionTab("apps")}
             >
-              Apps
+              {t("apps")}
             </button>
           </div>
 

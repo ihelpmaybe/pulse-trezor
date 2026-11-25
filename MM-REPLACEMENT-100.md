@@ -105,7 +105,7 @@
 85. [x] Clear Allow-in-Suite coaching (other monitor) — suite-allow callout 2026-11-24
 86. [x] Onboarding: connect → bag → first Sites pair — FirstRunStrip + empty teaches 2026-11-24
 87. [x] Empty states that teach next click
-88. [~] Locale strings (EN first, then more) — en.ts map started
+88. [~] Locale strings (EN first, then more) — en.ts expanded + wired face 2026-11-24; other langs later
 89. [x] Light theme option (display)
 90. [ ] NVDA / VoiceOver manual acceptance pass
 

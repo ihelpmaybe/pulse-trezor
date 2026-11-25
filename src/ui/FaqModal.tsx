@@ -17,7 +17,11 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "How do I start?",
-    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Connect (or Load accounts). 3) Allow in Suite — it may be on another monitor — and confirm the address on the Trezor. 4) Load full bag on Pulse (369) or stay on testnet (943) for practice. If Connect hangs, Cancel then retry. Longer walkthrough: github.com/ihelpmaybe/pulse-trezor-guides (Suite + Connect, Try Perch).",
+    a: "1) Open Trezor Suite and unlock the device. 2) In Perch hit Start connection. 3) Allow Pulse Perch in Suite — often on another monitor or under the taskbar — then confirm the address on the Trezor. 4) Bag fills in; optional: Apps to pair a site. Stuck waiting? Stop waiting, bring Suite to the front, start again. Longer walkthrough: github.com/ihelpmaybe/pulse-trezor-guides.",
+  },
+  {
+    q: "I clicked Connect but nothing happens?",
+    a: "The Allow prompt is in Trezor Suite, not in Perch. Check the other monitor and the Windows taskbar for “Trezor Suite”. Perch cannot click Allow for you. Stop waiting if it’s stuck, then try again.",
   },
   {
     q: "Do I need MetaMask?",
@@ -69,7 +73,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Chrome extension?",
-    a: "Lab sideload only (not Chrome Web Store yet). Download the release zip, check the SHA256, Load unpacked, keep Perch Connected. Account/network changes on the desk should update open dApp tabs without a reload. Prefer Apps (WalletConnect) when the dApp supports it.",
+    a: "Optional lab inject — Load unpacked from the extension folder / release zip, keep the Perch tab Connected. Prefer Apps (WalletConnect) when the dapp supports it. Store listing is not the product goal.",
   },
   {
     q: "Something looks phishing-y — what do I do?",

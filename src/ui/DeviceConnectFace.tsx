@@ -3,6 +3,7 @@
  * Ideas from public HW-wallet polish; art is Perch-original (not OneKey/Trezor product dumps).
  */
 import type { DeviceHints, SuiteChannel } from "../trezor/connect";
+import { t } from "../i18n/en";
 
 /** Official Suite / firmware help — open in browser; Suite Desktop owns the update. */
 export const TREZOR_FIRMWARE_HELP =
@@ -140,12 +141,10 @@ export function DeviceConnectFace({
 
       {connecting && suiteCue ? (
         <div className="suite-allow-callout" role="status">
-          <p className="suite-allow-callout-title">Allow in Trezor Suite</p>
+          <p className="suite-allow-callout-title">{t("suiteAllowTitle")}</p>
           <p className="suite-allow-callout-body">{suiteCue}</p>
           <p className="muted fee suite-allow-callout-hint">
-            Perch cannot click Allow for you. Stuck?{" "}
-            <strong>Stop waiting</strong>, bring Suite to the front, then Start
-            connection again.
+            {t("suiteAllowHint")}
           </p>
         </div>
       ) : null}

@@ -8,6 +8,7 @@ import {
   type SwapAsset,
   type SwapQuote,
 } from "../chain/pulsex";
+import { t } from "../i18n/en";
 import { SWAP_FACE, swapAssetLabel } from "./swapFace";
 
 type Props = {
@@ -194,7 +195,7 @@ export function SwapPanel({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Full PulseX (ipfs)
+                  {t("fullPulsex")}
                 </a>
                 {onGotoApps ? (
                   <button
@@ -202,7 +203,7 @@ export function SwapPanel({
                     className="btn ghost gas-pill"
                     onClick={onGotoApps}
                   >
-                    Pair in Apps
+                    {t("pairInApps")}
                   </button>
                 ) : null}
               </div>
