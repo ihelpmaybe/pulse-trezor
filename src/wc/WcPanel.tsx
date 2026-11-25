@@ -444,12 +444,26 @@ export function WcPanel({
         throw new Error(`Unsupported method: ${method}`);
       }
 
+      if (method === "eth_sendTransaction") {
+        const hash = typeof result === "string" ? result : "";
+        if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) {
+          throw new Error(
+            "No tx hash after broadcast — not claiming Signed. Check Activity / Suite.",
+          );
+        }
+      }
+
       await kit.respondSessionRequest({
         topic,
         response: { id, jsonrpc: "2.0", result },
       });
       setPendingQ((q) => q.slice(1));
-      setInfo(`Signed · ${method}`);
+      if (method === "eth_sendTransaction") {
+        const hash = result as string;
+        setInfo(`Broadcast · ${hash.slice(0, 10)}…${hash.slice(-4)}`);
+      } else {
+        setInfo(`Signed · ${method}`);
+      }
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
       const soft =

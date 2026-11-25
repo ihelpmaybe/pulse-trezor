@@ -420,25 +420,6 @@ export function DevicePanel({
                 ))}
               </select>
             </label>
-            <label className="field device-range-field">
-              Count
-              <input
-                type="text"
-                inputMode="numeric"
-                value={rangeDraft}
-                disabled={connecting}
-                placeholder="20 or 2000-3000"
-                title="How many (20) or slot range (2000-3000) under this Account'"
-                onChange={(e) => setRangeDraft(e.target.value)}
-                onBlur={commitRangeDraft}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    commitRangeDraft();
-                  }
-                }}
-              />
-            </label>
           </div>
           <code
             className="device-path-preview"
@@ -448,6 +429,27 @@ export function DevicePanel({
           </code>
         </>
       ) : null}
+      <div className="device-count-face" role="group" aria-label="Load count">
+        <label className="field device-range-field">
+          Count
+          <input
+            type="text"
+            inputMode="numeric"
+            value={rangeDraft}
+            disabled={connecting}
+            placeholder="12 or 0-20"
+            title="How many (12) or slot range (0-20). Keep ≤200 for one-click Load."
+            onChange={(e) => setRangeDraft(e.target.value)}
+            onBlur={commitRangeDraft}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitRangeDraft();
+              }
+            }}
+          />
+        </label>
+      </div>
       <div className="row" style={{ marginTop: 0 }}>
         <button
           type="button"
@@ -455,14 +457,14 @@ export function DevicePanel({
           disabled={connecting || !loadSpec || loadTooBig}
           title={
             loadTooBig
-              ? `Count ${loadSpan} is too big for one click (max ${FACE_LOAD_SOFT_MAX}). Lower Advanced Count / range.`
+              ? `Count ${loadSpan} is too big for one click (max ${FACE_LOAD_SOFT_MAX}). Lower Count above.`
               : accountList.length
                 ? advanced
                   ? `Add / reload ${loadSpan} addresses under …/${pathKnobs.account}'/${pathKnobs.change}/N (${loadFrom}–${loadSpec?.to ?? loadFrom}) — Rabby-style “add more from Trezor”`
-                  : `Add / reload ${loadSpan} addresses from Trezor (change Count/range for more)`
+                  : `Add / reload ${loadSpan} addresses — edit Count above`
                 : advanced
                   ? `Load ${loadSpan} wallets under …/${pathKnobs.account}'/${pathKnobs.change}/N (${loadFrom}–${loadSpec?.to ?? loadFrom})`
-                  : `Load ${loadSpan} wallets (default path)`
+                  : `Load ${loadSpan} wallets — Count field above`
           }
           onClick={() => {
             const p = parseLoadSpec(rangeDraft);
@@ -541,7 +543,7 @@ export function DevicePanel({
         accountCount={accountList.length}
         deviceHints={deviceHints}
         suiteCue={suiteCue}
-        showChecklist={!!active}
+        showChecklist={!active || connecting}
         onAcquireDevice={onAcquireDevice}
         acquireBusy={busy && !connecting}
       />

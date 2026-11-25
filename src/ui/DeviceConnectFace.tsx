@@ -106,6 +106,43 @@ export function DeviceConnectFace({
   const label =
     deviceHints?.label?.trim() ||
     (hasSession ? "Trezor" : "Your Trezor");
+  /** Connected = status strip only — no onboarding theater. */
+  const compact = hasSession && !connecting && !listing;
+
+  if (compact) {
+    return (
+      <div className="device-connect-face device-connect-compact" role="status">
+        <p className="device-connect-title">
+          {label}
+          {canSign ? " · signing on" : ""}
+        </p>
+        <p className="muted device-connect-sub">
+          {suiteChannel === "desktop"
+            ? t("suiteDesktopLinked")
+            : t("suiteWebOrDesktop")}
+          {deviceHints?.firmware
+            ? ` ·${deviceHints.model ? ` ${deviceHints.model}` : ""} FW ${deviceHints.firmware}`
+            : ""}
+          {accountCount > 0
+            ? ` · ${accountCount} address${accountCount === 1 ? "" : "es"}`
+            : ""}
+        </p>
+        {fwOutdated ? (
+          <p className="warn-line">Update firmware in Suite</p>
+        ) : null}
+        {deviceHints?.unacquired && onAcquireDevice ? (
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={acquireBusy}
+            onClick={onAcquireDevice}
+          >
+            {acquireBusy ? t("acquiring") : t("acquireDevice")}
+          </button>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="device-connect-face">

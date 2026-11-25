@@ -137,17 +137,30 @@ export function useDeskConnect(opts: {
         if (!cancelled) setErr(humanTrezorError(raw));
       }
     })();
-    void probeSuite().then((s) => {
-      if (!cancelled) setSuite(s);
-    });
-    void detectSuiteChannel().then((c) => {
-      if (!cancelled) setSuiteChannel(c);
-    });
+    const refreshSuiteFace = () => {
+      void probeSuite().then((st) => {
+        if (!cancelled) setSuite(st);
+      });
+      void detectSuiteChannel().then((c) => {
+        if (!cancelled) setSuiteChannel(c);
+      });
+    };
+    refreshSuiteFace();
     void getDeviceHints().then((h) => {
       if (!cancelled) setDeviceHints(h);
     });
+    // Re-probe — never leave green “· Suite” after Suite dies (pen P-SD1).
+    const suiteTimer = window.setInterval(refreshSuiteFace, 12_000);
+    const onVis = () => {
+      if (document.visibilityState === "visible") refreshSuiteFace();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", onVis);
     return () => {
       cancelled = true;
+      window.clearInterval(suiteTimer);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", onVis);
     };
   }, [setErr]);
 

@@ -1152,6 +1152,22 @@ button.linkish {
   flex-shrink: 0;
 }
 
+.device-connect-compact {
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+.device-connect-compact .device-connect-title {
+  font-size: 0.88rem;
+}
+
+.device-count-face {
+  margin: 0.35rem 0 0.15rem;
+  max-width: 11rem;
+}
+
 .device-connect-title {
   margin: 0;
   font-weight: 650;
