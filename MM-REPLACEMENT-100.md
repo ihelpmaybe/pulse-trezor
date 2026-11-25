@@ -87,7 +87,7 @@
 
 ## Pulse apps
 71. [x] Sites path works without MetaMask installed — Apps empty teach + WC host
-72. [~] PulseX swap via Sites (not only in-face) — ipfs link on Swap tab
+72. [x] PulseX swap via Sites (not only in-face) — ipfs + Pair in Apps on Swap tab
 73. [x] Optional in-face PulseX convenience swap
 74. [x] Slippage / deadline controls for swaps
 75. [x] ProveX entry + USDC awareness

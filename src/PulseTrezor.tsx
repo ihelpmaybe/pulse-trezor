@@ -1065,6 +1065,7 @@ export function PulseTrezor({
                 refreshSwapQuote={refreshSwapQuote}
                 onSwapApproveRouter={onSwapApproveRouter}
                 onSwap={onSwap}
+                onGotoApps={() => setActionTab("apps")}
               />
             ) : null}
           </div>

@@ -31,6 +31,8 @@ type Props = {
   refreshSwapQuote: () => void;
   onSwapApproveRouter: () => void;
   onSwap: () => void;
+  /** Full PulseX UI via Apps (WalletConnect). */
+  onGotoApps?: () => void;
 };
 
 export function SwapPanel({
@@ -54,6 +56,7 @@ export function SwapPanel({
   refreshSwapQuote,
   onSwapApproveRouter,
   onSwap,
+  onGotoApps,
 }: Props) {
   return chainId !== 369 ? (
     <p className="muted">PulseX swap is mainnet only.</p>
@@ -181,17 +184,27 @@ export function SwapPanel({
           ) : (
             <p className="muted fee">
               Quote uses PulseX V2. Token→token hops via WPLS. Confirm path on
-              Trezor. Prefer Apps for the full PulseX UI:{" "}
+              Trezor.
+            </p>
+            <div className="row revoke-bulk">
               <a
-                className="link"
+                className="btn ghost gas-pill"
                 href="https://ipfs.app.pulsex.com"
                 target="_blank"
                 rel="noreferrer"
               >
-                ipfs.app.pulsex.com
+                Full PulseX (ipfs)
               </a>
-              .
-            </p>
+              {onGotoApps ? (
+                <button
+                  type="button"
+                  className="btn ghost gas-pill"
+                  onClick={onGotoApps}
+                >
+                  Pair in Apps
+                </button>
+              ) : null}
+            </div>
           )}
           {chainId === 369 ? (
             <p className="warn-line">Mainnet — real funds.</p>
