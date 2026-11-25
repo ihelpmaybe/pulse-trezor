@@ -182,29 +182,31 @@ export function SwapPanel({
               {deadlineMin}m
             </p>
           ) : (
-            <p className="muted fee">
-              Quote uses PulseX V2. Token→token hops via WPLS. Confirm path on
-              Trezor.
-            </p>
-            <div className="row revoke-bulk">
-              <a
-                className="btn ghost gas-pill"
-                href="https://ipfs.app.pulsex.com"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Full PulseX (ipfs)
-              </a>
-              {onGotoApps ? (
-                <button
-                  type="button"
+            <>
+              <p className="muted fee">
+                Quote uses PulseX V2. Token→token hops via WPLS. Confirm path on
+                Trezor.
+              </p>
+              <div className="row revoke-bulk">
+                <a
                   className="btn ghost gas-pill"
-                  onClick={onGotoApps}
+                  href="https://ipfs.app.pulsex.com"
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  Pair in Apps
-                </button>
-              ) : null}
-            </div>
+                  Full PulseX (ipfs)
+                </a>
+                {onGotoApps ? (
+                  <button
+                    type="button"
+                    className="btn ghost gas-pill"
+                    onClick={onGotoApps}
+                  >
+                    Pair in Apps
+                  </button>
+                ) : null}
+              </div>
+            </>
           )}
           {chainId === 369 ? (
             <p className="warn-line">Mainnet — real funds.</p>
