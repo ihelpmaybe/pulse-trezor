@@ -116,7 +116,7 @@
 94. [ ] Linux pack
 95. [ ] macOS pack + notarize
 96. [ ] Mobile companion path (Tip link / shared pack)
-97. [~] Versioned updates channel — stub `docs/UPDATE-CHANNEL.md` (no auto-updater yet)
+97. [~] Versioned updates channel — Settings says rebuild/refresh; no auto-updater (OK)
 98. [~] Smoke + a11y evidence in CI / tests/smoke
 99. [~] Gate 1 acceptance: bag/Sites/approve UI w/o MM PASS 2026-11-23 (`GATE-1-2026-11-23.md`); send/sign from prior smokes; mainnet WC spend still soft
 100. [x] Public “uninstall MetaMask for Pulse” guide

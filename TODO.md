@@ -141,7 +141,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Migrate-from-ETH wizard entry
 - [x] WC peer name **Pulse Perch** + Pulse chain
 - [x] Deep link / badge target for “Open in Desk” — `?uri=` + `web+pulseperch:`
-- [~] Watch-only mode pitched for Tip users (SYNC) — Tip link on Apps
+- [x] Watch-only / Tip pitch — Migrate card notes Tip QR/SKU later; export watch in Settings
 
 ## BONUS — after Gate 1–2 (do not start early)
 

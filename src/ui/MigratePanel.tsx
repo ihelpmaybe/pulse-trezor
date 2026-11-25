@@ -77,7 +77,7 @@ export function MigratePanel({
           <a className="link" href={GUIDE} target="_blank" rel="noreferrer">
             guide
           </a>
-          .
+          . Phone QR / SKU pay is Tip later — desk finishes first.
         </p>
       </div>
     );

@@ -212,8 +212,8 @@ export function SettingsModal(p: Props) {
           </a>
         </p>
         <p className="muted fee">
-          Channel: desk-web · rebuild to update (
-          <code>docs/UPDATE-CHANNEL.md</code>).
+          Updates: rebuild / refresh this desk (PWA may need a hard refresh if
+          the shell sticks). No auto-updater yet — that’s fine for now.
         </p>
 
         <h4 className="settings-section">Install</h4>
