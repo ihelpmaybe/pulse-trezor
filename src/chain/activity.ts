@@ -4,6 +4,7 @@
  */
 import { formatEther, formatUnits, type Address } from "viem";
 import { nativeSymbol, packFor, type DeskChainId } from "./client";
+import { scanApiFromIndexer } from "./indexer";
 
 export type ActivityRow = {
   hash: `0x${string}`;
@@ -27,9 +28,7 @@ function scanApiBase(chainId: DeskChainId): string | null {
     | undefined;
   const api = explorers?.[0]?.apiUrl?.trim();
   if (api) return api.replace(/\/$/, "");
-  if (chainId === 369) return "https://api.scan.pulsechain.com";
-  if (chainId === 943) return "https://api.scan.v4.testnet.pulsechain.com";
-  return null;
+  return scanApiFromIndexer(chainId);
 }
 
 function shortPeer(a: string | null | undefined): string {

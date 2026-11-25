@@ -117,7 +117,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 ## G — Ecosystem (desk-owned bits)
 - [x] Link Suite gap / upstream status from Desk UI or about page
 - [x] Cross-link Tip (mobile soft) + guides + rescue
-- [~] Consume SYNC registry / token pack from `pulse-trezor-platform` — SYNC1 export/import aligned 2026-11-23; pack tokens still local
+- [x] Consume SYNC registry / token pack from `pulse-trezor-platform` — SYNC1 + `npm run pack:sync` · indexer pack · rpc desk→platform
 
 ## PLAT — Desk targets (this app)
 - [x] Windows (primary) — lab PASS 2026-11

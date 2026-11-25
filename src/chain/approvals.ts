@@ -14,6 +14,7 @@ import {
   type DeskChainId,
   type RpcOverride,
 } from "./client";
+import { scanApiFromIndexer } from "./indexer";
 import { PULSEX_V2_ROUTER, WPLS } from "./pulsex";
 import { coreErc20Tokens, type PackToken } from "./tokens";
 import { loadCustomTokens, type CustomToken } from "./customTokens";
@@ -76,9 +77,7 @@ function scanApiBase(chainId: DeskChainId): string | null {
     | undefined;
   const api = explorers?.[0]?.apiUrl?.trim();
   if (api) return api.replace(/\/$/, "");
-  if (chainId === 369) return "https://api.scan.pulsechain.com";
-  if (chainId === 943) return "https://api.scan.v4.testnet.pulsechain.com";
-  return null;
+  return scanApiFromIndexer(chainId);
 }
 
 function spenderName(addr: Address): string {

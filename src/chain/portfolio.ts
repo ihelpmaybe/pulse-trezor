@@ -9,6 +9,7 @@ import {
   type DeskChainId,
   type RpcOverride,
 } from "./client";
+import { scanApiFromIndexer } from "./indexer";
 
 const HEX = "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" as Address;
 
@@ -81,9 +82,7 @@ function scanApiBase(chainId: DeskChainId): string | null {
     | undefined;
   const api = explorers?.[0]?.apiUrl?.trim();
   if (api) return api.replace(/\/$/, "");
-  if (chainId === 369) return "https://api.scan.pulsechain.com";
-  if (chainId === 943) return "https://api.scan.v4.testnet.pulsechain.com";
-  return null;
+  return scanApiFromIndexer(chainId);
 }
 
 function looksLikeSpam(value: string, decimals: string | null | undefined): boolean {

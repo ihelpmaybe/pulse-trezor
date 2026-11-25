@@ -1,0 +1,27 @@
+{
+  "packId": "pulse-core",
+  "kind": "indexer",
+  "version": "1.0.0",
+  "decision": "public-blockscout-api",
+  "doc": "SYNC7-indexer-decision.md",
+  "providers": [
+    {
+      "chainId": 369,
+      "name": "PulseScan",
+      "kind": "blockscout",
+      "uiUrl": "https://scan.pulsechain.com",
+      "apiUrl": "https://api.scan.pulsechain.com",
+      "notes": "Primary history source for Desk/Tip Gate 1"
+    },
+    {
+      "chainId": 943,
+      "name": "PulseScan Testnet",
+      "kind": "blockscout",
+      "uiUrl": "https://scan.v4.testnet.pulsechain.com",
+      "apiUrl": "https://api.scan.v4.testnet.pulsechain.com",
+      "notes": "Confirm routes on wire; fall back to UI-only if API path differs"
+    }
+  ],
+  "balances": "viem-rpc-from-pack",
+  "selfHost": "deferred-until-public-api-blocks"
+}

@@ -6,6 +6,7 @@ import { formatEther, formatUnits, type Address, type Hex } from "viem";
 import { decodeErc20Transfer } from "../wc/clearSign";
 import type { TemperLog } from "./temperClient";
 import { nativeSymbol, type DeskChainId } from "./client";
+import tokenlist from "../pack/tokenlist.json";
 
 export type BalanceDelta = {
   /** Human face line. */
@@ -20,18 +21,32 @@ const TRANSFER_TOPIC =
 const APPROVAL_TOPIC =
   "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925";
 
-/** Pulse mainnet / common — ticker + decimals for face (not a price oracle). */
-const KNOWN: Record<string, { ticker: string; decimals: number }> = {
-  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39": { ticker: "HEX", decimals: 8 },
-  "0xa1077a294dde1b09bb078844df40758a5d0f9a27": { ticker: "WPLS", decimals: 18 },
-  "0x95b303987a60f913a4007660ed51631422072033": { ticker: "PLSX", decimals: 18 },
-  "0x15d38573d2feeb82e7ad5187ab8c1d52810b1f07": { ticker: "USDC", decimals: 6 },
+/** Extra face decimals beyond pulse-core tokenlist. */
+const EXTRA_KNOWN: Record<string, { ticker: string; decimals: number }> = {
   "0x0cb6f5a34ad42ec934882a05238669b12e9621e9": { ticker: "USDT", decimals: 6 },
   "0xefd766cbb243bac7659ce4ada79e976567fd1e32": { ticker: "DAI", decimals: 18 },
   "0x70499adebb11efd915e3b69e700c331778628707": {
     ticker: "WPLS",
     decimals: 18,
   },
+};
+
+/** Pulse mainnet — ticker + decimals from SYNC4 pack (+ extras). */
+const KNOWN: Record<string, { ticker: string; decimals: number }> = {
+  ...Object.fromEntries(
+    tokenlist.tokens
+      .filter(
+        (t) =>
+          t.chainId === 369 &&
+          !t.extensions?.native &&
+          t.address !== "0x0000000000000000000000000000000000000000",
+      )
+      .map((t) => [
+        t.address.toLowerCase(),
+        { ticker: t.symbol, decimals: t.decimals },
+      ]),
+  ),
+  ...EXTRA_KNOWN,
 };
 
 function short(a: string): string {

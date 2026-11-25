@@ -18,7 +18,8 @@
     "pwa:icons": "node scripts/pwa-icons.mjs",
     "ext:pack": "node scripts/ext-make-icons.mjs && node scripts/ext-pack.mjs",
     "desk:pack": "node scripts/desk-pack.mjs",
-    "connect:e2e": "node scripts/connect-e2e-harness.mjs"
+    "connect:e2e": "node scripts/connect-e2e-harness.mjs",
+    "pack:sync": "node scripts/sync-pulse-core-pack.mjs"
   },
   "engines": {
     "node": ">=20"

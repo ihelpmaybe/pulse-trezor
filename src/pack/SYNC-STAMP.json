@@ -1,0 +1,17 @@
+{
+  "syncedAt": "2026-11-25T00:47:36.002Z",
+  "desk": "C:\\Users\\punki\\Desktop\\pulse-trezor-org\\pulse-trezor\\src\\pack",
+  "platform": "C:\\Users\\punki\\Desktop\\pulse-trezor-org\\pulse-trezor-platform\\packs\\pulse-core\\v1",
+  "actions": [
+    "copied indexer.json platform → desk",
+    "tokenlist.json already aligned",
+    "pushed rpc.json desk → platform (670c6ccdd808)",
+    "pushed deeplinks.json desk → platform"
+  ],
+  "hashes": {
+    "tokenlist": "e9c57fbe7946",
+    "rpc": "670c6ccdd808",
+    "deeplinks": "58793cd3e0ab",
+    "indexer": "6f97652c7fd5"
+  }
+}
