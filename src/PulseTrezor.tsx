@@ -31,6 +31,7 @@ import { type PackToken } from "./chain/tokens";
 import { reconcileErrWithSuite } from "./trezor/errors";
 import { WcPanel } from "./wc/WcPanel";
 import { MigratePanel } from "./ui/MigratePanel";
+import { FirstRunStrip } from "./ui/FirstRunStrip";
 import { loadFavorites, loadWalletFavorites } from "./chain/favorites";
 import { fetchTokenUsdHints, type PriceHint } from "./chain/prices";
 import { decodeSyncPayload } from "./chain/syncPair";
@@ -810,6 +811,10 @@ export function PulseTrezor({
         watch={!!watch}
         onForget={onForget}
         chainId={chainId}
+      />
+      <FirstRunStrip
+        hasSession={!!(session || watch)}
+        onGotoApps={() => setActionTab("apps")}
       />
       <div className="grid">
         <DevicePanel

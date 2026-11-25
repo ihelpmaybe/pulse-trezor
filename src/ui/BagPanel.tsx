@@ -209,7 +209,9 @@ export function BagPanel({
                 hidden={bagTab !== "tokens"}
               >
                 {!active ? (
-                  <p className="muted">Connect to load balances.</p>
+                  <p className="muted empty-teach">
+                    Connect first (Allow in Suite), then balances land here.
+                  </p>
                 ) : (
                   <>
                     {balBusy ? (

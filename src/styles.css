@@ -1056,6 +1056,49 @@ body {
   color: var(--lime-dim);
 }
 
+.first-run-strip {
+  margin: 0 0 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 43, 214, 0.06);
+}
+
+.first-run-strip-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.first-run-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.first-run-steps li {
+  margin: 0;
+}
+
+button.linkish {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent, #ff2bd6);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
 .suite-allow-callout {
   margin: 0.35rem 0 0.55rem;
   padding: 0.55rem 0.7rem;
