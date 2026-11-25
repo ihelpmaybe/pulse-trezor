@@ -110,14 +110,75 @@ export function DeviceConnectFace({
   return (
     <div className="device-connect-face">
       <div className="device-connect-hero">
-        <img
+        <svg
           className="device-connect-art"
-          src="/trezor-device.svg?v=2"
           width={72}
           height={96}
-          alt=""
+          viewBox="0 0 120 160"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
           aria-hidden
-        />
+          focusable="false"
+        >
+          <defs>
+            <linearGradient id="perchHwBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3a3f46" />
+              <stop offset="100%" stopColor="#1c1f24" />
+            </linearGradient>
+            <linearGradient id="perchHwGlass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#7dffb3" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#1a3d2a" stopOpacity={0.9} />
+            </linearGradient>
+          </defs>
+          <rect
+            x="18"
+            y="8"
+            width="84"
+            height="144"
+            rx="14"
+            fill="url(#perchHwBody)"
+            stroke="#5a616c"
+            strokeWidth="2"
+          />
+          <rect
+            x="28"
+            y="22"
+            width="64"
+            height="52"
+            rx="6"
+            fill="url(#perchHwGlass)"
+            stroke="#8affc0"
+            strokeWidth="1.2"
+          />
+          <rect
+            x="36"
+            y="36"
+            width="48"
+            height="6"
+            rx="2"
+            fill="#b6ffd4"
+            opacity="0.85"
+          />
+          <rect
+            x="36"
+            y="48"
+            width="28"
+            height="4"
+            rx="2"
+            fill="#b6ffd4"
+            opacity="0.45"
+          />
+          <circle
+            cx="60"
+            cy="106"
+            r="14"
+            fill="#12151a"
+            stroke="#6b7280"
+            strokeWidth="2"
+          />
+          <circle cx="60" cy="106" r="5" fill="#8affc0" opacity="0.7" />
+          <rect x="42" y="128" width="36" height="8" rx="3" fill="#2a2f36" />
+        </svg>
         <div className="device-connect-hero-copy">
           <p className="device-connect-title">{label}</p>
           <p className="muted device-connect-sub">
