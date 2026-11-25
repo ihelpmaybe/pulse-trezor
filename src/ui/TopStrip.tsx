@@ -3,6 +3,7 @@
  */
 import type { Address } from "viem";
 import type { DeskChainId } from "../chain/client";
+import { t } from "../i18n/en";
 import { AddrParts } from "./AddrParts";
 import { ReceiveQr } from "./ReceiveQr";
 
@@ -34,14 +35,14 @@ export function TopStrip({
           onClick={onCopy}
           title={
             privacyHide
-              ? "Unhide to copy address"
+              ? t("unhideToCopy")
               : copied
-                ? "Copied"
-                : "Click to copy full address"
+                ? t("copied")
+                : t("copyAddress")
           }
           aria-label={
             privacyHide
-              ? "Address hidden"
+              ? t("addressHidden")
               : copied
                 ? `Copied address ${activeAddress}`
                 : `Copy address ${activeAddress}`
@@ -50,7 +51,7 @@ export function TopStrip({
           <AddrParts address={activeAddress} />
           {copied ? (
             <span className="addr-copied" aria-hidden="true">
-              Copied
+              {t("copied")}
             </span>
           ) : null}
           <svg

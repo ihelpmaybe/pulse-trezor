@@ -1,6 +1,6 @@
 # Extension ship surface — CWS-ready packaging (listing later)
 
-**Status:** sideload / lab zip only. Chrome Web Store **listing not submitted**.  
+**Status:** sideload / lab zip only. Chrome Web Store / Play **listing is not a product goal** (operator 2026-11-24). Docs stay ready if that ever changes.  
 Pack: `npm run ext:pack` → `dist-ext/pulse-perch-extension-<version>.zip` + `.sha256`.
 
 ## What we ship today

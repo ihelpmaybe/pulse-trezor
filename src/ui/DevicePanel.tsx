@@ -62,6 +62,7 @@ import {
   saveAccountRangeSpec,
   saveDeviceAdvanced,
 } from "./deskStorage";
+import { t } from "../i18n/en";
 import { DeviceConnectFace } from "./DeviceConnectFace";
 
 type SessionLike = {
@@ -508,20 +509,20 @@ export function DevicePanel({
             onClick={onConnect}
           >
             {connecting && !listing
-              ? "Waiting on Suite…"
+              ? t("waitingOnSuite")
               : advanced
-                ? `Start connection …/${accountIndex}`
-                : "Start connection"}
+                ? `${t("startConnection")} …/${accountIndex}`
+                : t("startConnection")}
           </button>
         ) : null}
         {connecting || busy ? (
           <button
             type="button"
             className="btn ghost"
-            title="Stop waiting in Perch — does not reject on the device. Finish or reject in Suite / on Trezor if a prompt is open."
+            title={t("stopWaitingTitle")}
             onClick={connecting ? onCancelConnect : onCancelBusy}
           >
-            Stop waiting
+            {t("stopWaiting")}
           </button>
         ) : null}
       </div>
@@ -703,7 +704,7 @@ export function DevicePanel({
                 className="btn ghost"
                 onClick={onDisconnect}
               >
-                Disconnect
+                {t("disconnect")}
               </button>
             </div>
           ) : null}

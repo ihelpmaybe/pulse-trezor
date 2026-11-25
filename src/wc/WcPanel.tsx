@@ -25,7 +25,9 @@ import {
   signPersonalMessage,
   signTypedData,
 } from "../trezor/signMessage";
+import { t } from "../i18n/en";
 import { sendPlsWithTrezor } from "../trezor/signPulseTx";
+import { softenWcSendError, wcSendTxCoach } from "./txSoftPath";
 import {
   activeSessions,
   approveProposal,
@@ -394,8 +396,8 @@ export function WcPanel({
     if (!kit) return;
     setBusy(true);
     onError(null);
+    const { method, params, topic, id } = pending;
     try {
-      const { method, params, topic, id } = pending;
       let result: unknown;
 
       if (method === "eth_sendTransaction") {
@@ -449,7 +451,10 @@ export function WcPanel({
       setPendingQ((q) => q.slice(1));
       setInfo(`Signed · ${method}`);
     } catch (e) {
-      onError(e instanceof Error ? e.message : String(e));
+      const raw = e instanceof Error ? e.message : String(e);
+      const soft =
+        method === "eth_sendTransaction" ? softenWcSendError(raw) : null;
+      onError(soft || raw);
       try {
         await kit.respondSessionRequest({
           topic: pending.topic,
@@ -534,12 +539,7 @@ export function WcPanel({
 
   const body = (
     <>
-      <p className="muted">
-        Pair WalletConnect apps. Browser PulseX ={" "}
-        <code>ipfs.app.pulsex.com</code> (not the desktop download page). Also
-        Piteas, HEX, ProveX, Phiat, … Paste <code>wc:…</code> — Desk signs on
-        Trezor.
-      </p>
+      <p className="muted">{t("appsPairIntro")}</p>
       {!address ? (
         <p className="muted empty-teach">
           Connect Trezor above first — then paste a <code>wc:</code> URI here.
@@ -592,7 +592,7 @@ export function WcPanel({
             disabled={busy || !projectId.trim() || !uri.trim()}
             onClick={() => void onPair()}
           >
-            {busy ? "…" : "Pair site"}
+            {busy ? "…" : t("pairSite")}
           </button>
 
           {sessions.length > 0 ? (
@@ -788,6 +788,11 @@ export function WcPanel({
               <p className="muted fee">
                 Explain: {explainClearLines(pending.lines)}
               </p>
+              {pending.method === "eth_sendTransaction" ? (
+                <p className="muted fee" role="status">
+                  {wcSendTxCoach()}
+                </p>
+              ) : null}
               <ul className="clear-list">
                 {pending.lines.map((l, i) => (
                   <li key={i} className={l.tone}>
@@ -840,7 +845,7 @@ export function WcPanel({
                       : undefined
                   }
                 >
-                  Sign on Trezor
+                  {t("signOnTrezor")}
                 </button>
                 <button
                   type="button"

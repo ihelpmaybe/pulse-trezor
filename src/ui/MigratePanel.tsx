@@ -18,13 +18,13 @@ const BRIDGE = "https://bridge.pulsechain.com";
 const UNINSTALL_MM =
   "https://github.com/ihelpmaybe/pulse-trezor/blob/main/docs/UNINSTALL-METAMASK-FOR-PULSE.md";
 
-const STEPS: { id: keyof MigrateWalkState; label: string }[] = [
-  { id: "suiteReady", label: "Suite open · Perch Connected · address matches device" },
-  { id: "onPulse", label: "Network = PulseChain (369), not testnet" },
-  { id: "listedAssets", label: "Listed what moves (bridge vs sell-and-rebuy)" },
-  { id: "bridged", label: "Bridged to the verified Perch address" },
-  { id: "bagOk", label: "Refreshed bag — assets show on Pulse" },
-  { id: "approvalsClean", label: "Approvals scanned / revoked after DEX use" },
+const STEPS: { id: keyof MigrateWalkState; labelKey: Parameters<typeof t>[0] }[] = [
+  { id: "suiteReady", labelKey: "migrateStepSuite" },
+  { id: "onPulse", labelKey: "migrateStepOnPulse" },
+  { id: "listedAssets", labelKey: "migrateStepListed" },
+  { id: "bridged", labelKey: "migrateStepBridged" },
+  { id: "bagOk", labelKey: "migrateStepBag" },
+  { id: "approvalsClean", labelKey: "migrateStepApprovals" },
 ];
 
 type Props = {
@@ -100,13 +100,10 @@ export function MigratePanel({
           checked={walk.sameAddrAck}
           onChange={(e) => patch({ sameAddrAck: e.target.checked })}
         />
-        <span>
-          I understand same-address risk — I’ll verify the receive address on
-          Trezor before bridging.
-        </span>
+        <span>{t("migrateSameAddrAck")}</span>
       </label>
       {!walk.sameAddrAck ? (
-        <p className="muted fee">Ack above to unlock the walk.</p>
+        <p className="muted fee">{t("migrateAckUnlock")}</p>
       ) : (
         <>
           <ul className="migrate-steps">
@@ -118,7 +115,7 @@ export function MigratePanel({
                     checked={!!walk[s.id]}
                     onChange={(e) => patch({ [s.id]: e.target.checked })}
                   />
-                  <span>{s.label}</span>
+                  <span>{t(s.labelKey)}</span>
                 </label>
               </li>
             ))}

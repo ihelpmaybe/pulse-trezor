@@ -34,3 +34,5 @@ Hardware path only: Connect 10 → Suite → Trezor. Desk bag / send / approve /
 ## Sign-off
 
 Desk pen checklist green as of 2026-11-23. Gate 1 desk claim holds with smoke + this report (&lt; 30 days). FULL OS×device matrix still open (not required to claim desk Gate 1 slice).
+
+**Before next release tag:** run [RE-PEN-BEFORE-TAG.md](./RE-PEN-BEFORE-TAG.md) if this date is stale or Connect/WC/inject moved a lot.

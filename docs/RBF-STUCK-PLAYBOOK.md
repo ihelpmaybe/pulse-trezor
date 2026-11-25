@@ -5,6 +5,7 @@
 **Live proof status (this lab):**
 - **Anvil (software):** run `scripts/rbf-anvil-proof.mjs` → `docs/RBF-ANVIL-EVIDENCE.md` (not a Trezor claim).
 - **Device / Suite:** OPEN until a real pending tx is observed and replaced. Prefer **v4testnet (943)**.
+- **Face soft path (2026-11-24):** pending Speed up / Cancel shows coach copy (`src/trezor/rbfSoftPath.ts`) — fee math PASS, device mempool still OPEN. Do not tick Gate RBF live from that strip alone.
 
 ## Prove it (device or emu + Suite)
 

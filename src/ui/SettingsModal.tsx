@@ -23,6 +23,11 @@ import {
 import { t } from "../i18n/en";
 import type { BagTab } from "./BagPanel";
 import { InstallPwa } from "./InstallPwa";
+import {
+  loadLightMetrics,
+  loadMetricsOptIn,
+  saveMetricsOptIn,
+} from "./lightMetrics";
 import { SyncPair } from "./SyncPair";
 import {
   RPC_HEALTH_MS_OPTIONS,
@@ -87,6 +92,8 @@ type Props = {
 export function SettingsModal(p: Props) {
   const [temperDraft, setTemperDraft] = useState(() => loadTemperBaseUrl());
   const [lab, setLab] = useState<LabUserEnvStatus | null>(null);
+  const [metricsOn, setMetricsOn] = useState(() => loadMetricsOptIn());
+  const [metrics, setMetrics] = useState(() => loadLightMetrics());
   const [labBusy, setLabBusy] = useState(false);
   return (
     <div
@@ -117,9 +124,36 @@ export function SettingsModal(p: Props) {
 
         <h4 className="settings-section">About</h4>
         <p className="muted fee">
-          Pulse Perch desk · v0.1.0 · no telemetry · hardware path only · vibe
+          Pulse Perch desk · v0.1.0 · no phone-home · hardware path only · vibe
           coded, device-tested
         </p>
+        <button
+          type="button"
+          className={metricsOn ? "vision-tile on" : "vision-tile"}
+          aria-pressed={metricsOn}
+          onClick={() => {
+            const next = !metricsOn;
+            saveMetricsOptIn(next);
+            setMetricsOn(next);
+            setMetrics(loadLightMetrics());
+          }}
+        >
+          <span className="vision-copy">
+            <span className="vision-title">{t("metricsOptInTitle")}</span>
+            <span className="vision-blurb">{t("metricsOptInBlurb")}</span>
+          </span>
+          <span className="vision-switch" aria-hidden="true">
+            <span className="vision-knob" />
+          </span>
+        </button>
+        {metricsOn ? (
+          <p className="muted fee">
+            {t("metricsCountLabel")}: {metrics.firstSendCount}
+            {metrics.lastSendAt
+              ? ` · last ${metrics.lastSendAt.slice(0, 10)}`
+              : ""}
+          </p>
+        ) : null}
         <p className="muted fee">
           <button
             type="button"
@@ -211,22 +245,20 @@ export function SettingsModal(p: Props) {
             Pulse Bridge
           </a>
         </p>
-        <p className="muted fee">
-          Updates: rebuild / refresh this desk (PWA may need a hard refresh if
-          the shell sticks). No auto-updater yet — that’s fine for now.
-        </p>
+        <p className="muted fee">{t("updatesHint")}</p>
 
         <h4 className="settings-section">Install</h4>
+        <p className="muted fee">{t("shipSurfacesHint")}</p>
         <InstallPwa />
 
         <h4 className="settings-section">Device</h4>
         <p className="muted fee">
           Suite:{" "}
           {p.suiteChannel === "desktop"
-            ? "Desktop (connect-ws)"
+            ? t("suiteDesktopWs")
             : p.suiteChannel === "web-or-missing"
-              ? "Desktop not detected — use Suite Web or start Desktop"
-              : "checking…"}
+              ? t("suiteNotDetected")
+              : t("checking")}
           {p.deviceHints?.firmware
             ? ` · FW ${p.deviceHints.firmware}${p.deviceHints.outdated ? " (outdated)" : ""}`
             : ""}
@@ -539,23 +571,23 @@ export function SettingsModal(p: Props) {
             [
               {
                 key: "largeText" as const,
-                title: "Larger text",
-                blurb: "Bump type size",
+                title: t("a11yLargerText"),
+                blurb: t("a11yLargerTextBlurb"),
               },
               {
                 key: "highContrast" as const,
-                title: "High contrast",
-                blurb: "Brighter type & edges",
+                title: t("a11yHighContrast"),
+                blurb: t("a11yHighContrastBlurb"),
               },
               {
                 key: "reduceMotion" as const,
-                title: "Calm motion",
-                blurb: "Kill animations",
+                title: t("a11yCalmMotion"),
+                blurb: t("a11yCalmMotionBlurb"),
               },
               {
                 key: "strongFocus" as const,
-                title: "Focus ring",
-                blurb: "Thicker keyboard outline",
+                title: t("a11yFocusRing"),
+                blurb: t("a11yFocusRingBlurb"),
               },
             ] as const
           ).map((opt) => {

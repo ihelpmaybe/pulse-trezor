@@ -34,6 +34,8 @@ import {
   parseTokenAmount,
   type PackToken,
 } from "../chain/tokens";
+import { t } from "../i18n/en";
+import { rbfPendingHint, rbfSoftCoach } from "../trezor/rbfSoftPath";
 import {
   sendPhaseLabel,
   type FeePreview,
@@ -567,7 +569,7 @@ export function SendPanel({
         }
         onClick={onSend}
       >
-        {busy ? sendPhaseLabel(sendPhase) : "Sign & send"}
+        {busy ? sendPhaseLabel(sendPhase) : t("signSend")}
       </button>
       {busy && sendPhase === "broadcast" ? (
         <p className="muted fee" role="status">
@@ -641,7 +643,7 @@ export function SendPanel({
         </button>
       </details>
       {chainId === 369 && mainnetSendAcked ? (
-        <p className="warn-line">Mainnet — real funds.</p>
+        <p className="warn-line">{t("mainnetRealFunds")}</p>
       ) : null}
       {lastTx ? (
         <div className="stuck-box">
@@ -685,10 +687,9 @@ export function SendPanel({
           </div>
           {txStatus === "pending" || txStatus === "timeout" ? (
             <>
-              <p className="muted fee">
-                Still pending? Speed up = same transfer, +25% tip — like
-                bumping priority after you already sent. Cancel = replace it
-                with a 0-value self-send so the nonce clears.
+              <p className="muted fee">{rbfPendingHint()}</p>
+              <p className="muted fee" role="status">
+                {rbfSoftCoach()}
               </p>
               <div className="row">
                 <button
@@ -697,7 +698,7 @@ export function SendPanel({
                   disabled={busy}
                   onClick={onSpeedUp}
                 >
-                  Speed up (+25%)
+                  {t("speedUp")}
                 </button>
                 <button
                   type="button"
@@ -705,7 +706,7 @@ export function SendPanel({
                   disabled={busy}
                   onClick={onCancelStuck}
                 >
-                  Cancel stuck
+                  {t("cancelStuck")}
                 </button>
               </div>
             </>

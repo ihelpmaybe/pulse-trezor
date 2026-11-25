@@ -4,6 +4,7 @@
  */
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { t } from "../i18n/en";
 
 export type AccountNoteMenuState = {
   address: string;
@@ -62,7 +63,7 @@ export function AccountNoteMenu({
         className="acct-note-item"
         onClick={onAddOrEdit}
       >
-        {menu.hasNote ? "Edit note" : "Add note"}
+        {menu.hasNote ? t("editNote") : t("addNote")}
       </button>
       <button
         type="button"
@@ -71,7 +72,7 @@ export function AccountNoteMenu({
         disabled={!menu.hasNote}
         onClick={onClear}
       >
-        Clear note
+        {t("clearNote")}
       </button>
       <button
         type="button"
@@ -79,7 +80,7 @@ export function AccountNoteMenu({
         className="acct-note-item"
         onClick={onCopyAddress}
       >
-        Copy address
+        {t("copyAddressShort")}
       </button>
     </div>,
     document.body,

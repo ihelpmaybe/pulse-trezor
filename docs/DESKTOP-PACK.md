@@ -12,6 +12,12 @@ npm run desk:pack
 
 Serve the unzipped folder locally (`npx serve dist` or your host). Suite still required for Trezor.
 
+### Smoke (operator)
+1. `npm run build && npm run desk:pack`
+2. Confirm `release/pulse-perch-<ver>-web.zip` and matching `.sha256` exist
+3. Record date + SHA256 in [tests/smoke/DESK-PACK.md](../tests/smoke/DESK-PACK.md) when you cut a pack for humans
+4. Do **not** tick Authenticode / notarize — those stay OPEN until a native wrapper + certs exist
+
 ## Windows Authenticode (later)
 
 - Needs a code-signing cert (EV preferred for SmartScreen).
@@ -29,4 +35,4 @@ Serve the unzipped folder locally (`npx serve dist` or your host). Suite still r
 - Zip / AppImage only if you add a native shell later. Today: PWA or local static serve.
 
 ## Honesty bar
-Signed/notarized = **OPEN** until certs + wrapper exist. This doc is the checklist, not a fake green cell.
+Signed/notarized = **OPEN** until certs + wrapper exist. Zip+sha = the ship surface we can prove today.

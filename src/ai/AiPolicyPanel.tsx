@@ -3,6 +3,7 @@
  * User picks capabilities; sign is off unless they turn it on.
  */
 import { useEffect, useState } from "react";
+import { t } from "../i18n/en";
 import {
   type AiPrefs,
   applyAiPrefs,
@@ -13,34 +14,34 @@ import {
 
 const OPTIONS: {
   key: keyof AiPrefs;
-  title: string;
-  blurb: string;
+  titleKey: Parameters<typeof t>[0];
+  blurbKey: Parameters<typeof t>[0];
   danger?: boolean;
 }[] = [
   {
     key: "explainBeforeSign",
-    title: "Explain",
-    blurb: "Plain English before sign",
+    titleKey: "aiExplain",
+    blurbKey: "aiExplainBlurb",
   },
   {
     key: "simulateTx",
-    title: "Simulate",
-    blurb: "Dry-run when possible",
+    titleKey: "aiSimulate",
+    blurbKey: "aiSimulateBlurb",
   },
   {
     key: "agentPrepare",
-    title: "Prepare",
-    blurb: "Draft unsigned payloads",
+    titleKey: "aiPrepare",
+    blurbKey: "aiPrepareBlurb",
   },
   {
     key: "clearSignHints",
-    title: "Clear-sign",
-    blurb: "Extra human warnings",
+    titleKey: "aiClearSign",
+    blurbKey: "aiClearSignBlurb",
   },
   {
     key: "allowSign",
-    title: "Sign requests",
-    blurb: "Agent may ask — you confirm on device",
+    titleKey: "aiSignRequests",
+    blurbKey: "aiSignRequestsBlurb",
     danger: true,
   },
 ];
@@ -74,10 +75,7 @@ export function AiPolicyPanel({ hideTitle = false, className }: Props) {
   return (
     <div className={["ai-policy", className].filter(Boolean).join(" ")}>
       {!hideTitle ? <h4 className="settings-section">Agent policy</h4> : null}
-      <p className="muted settings-hint">
-        Allow-list for agents via window.__pulsePerchAi. Denied calls throw.
-        Your Send button and Apps are separate. Keys stay on the device.
-      </p>
+      <p className="muted settings-hint">{t("aiPolicyHint")}</p>
       <div className="vision-grid" role="group" aria-label="Agent policy">
         {OPTIONS.map((opt) => {
           const on = prefs[opt.key];
@@ -96,8 +94,8 @@ export function AiPolicyPanel({ hideTitle = false, className }: Props) {
               onClick={() => patch({ [opt.key]: !on })}
             >
               <span className="vision-copy">
-                <span className="vision-title">{opt.title}</span>
-                <span className="vision-blurb">{opt.blurb}</span>
+                <span className="vision-title">{t(opt.titleKey)}</span>
+                <span className="vision-blurb">{t(opt.blurbKey)}</span>
               </span>
               <span className="vision-switch" aria-hidden="true">
                 <span className="vision-knob" />

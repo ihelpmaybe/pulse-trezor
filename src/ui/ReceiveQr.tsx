@@ -6,6 +6,7 @@ import QRCode from "qrcode";
 import { parseEther, type Address } from "viem";
 import { eip681PayNative, eip681Receive } from "../chain/eip681";
 import type { DeskChainId } from "../chain/client";
+import { t } from "../i18n/en";
 
 export function ReceiveQr(props: {
   address: Address;
@@ -48,15 +49,15 @@ export function ReceiveQr(props: {
 
   return (
     <details className="receive-qr">
-      <summary>Receive QR / EIP-681</summary>
+      <summary>{t("receiveQr")}</summary>
       <div className="receive-qr-body">
         {dataUrl ? (
-          <img src={dataUrl} alt="Receive address QR" width={160} height={160} />
+          <img src={dataUrl} alt={t("receiveQrAlt")} width={160} height={160} />
         ) : (
-          <p className="muted">QR unavailable — copy the URI instead.</p>
+          <p className="muted">{t("qrUnavailable")}</p>
         )}
         <label className="field">
-          Request amount (optional)
+          {t("requestAmount")}
           <input
             value={payAmt}
             onChange={(e) => setPayAmt(e.target.value)}
@@ -77,7 +78,7 @@ export function ReceiveQr(props: {
             });
           }}
         >
-          {copied ? "Copied" : "Copy pay URI"}
+          {copied ? t("copied") : t("copyPayUri")}
         </button>
       </div>
     </details>

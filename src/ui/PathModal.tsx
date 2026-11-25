@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getFocusable, trapTabKey } from "../a11y/focusTrap";
+import { t } from "../i18n/en";
 import { DEFAULT_PATH_TEMPLATE } from "../trezor/paths";
 import { ACCOUNT_INDEX_MAX } from "./faceFormat";
 import { saveAccountIndex } from "./deskStorage";
@@ -201,11 +202,11 @@ export function PathModal({
         className="rpc-modal path-modal"
         role="dialog"
         aria-modal="true"
-        aria-label="Derivation path"
+        aria-label={t("pathDerivation")}
         ref={panelRef}
       >
         <div className="rpc-modal-head">
-          <h3>Derivation path</h3>
+          <h3>{t("pathDerivation")}</h3>
           <button
             type="button"
             className="btn ghost rpc-modal-close"
@@ -245,7 +246,7 @@ export function PathModal({
             min={0}
             max={ACCOUNT_INDEX_MAX}
             disabled={connecting}
-            ariaLabel="Account branch"
+            ariaLabel={t("pathAccountBranch")}
             title="Account' — different wallet family (Ledger Live bumps this)"
             onCommit={(n) => commitBranch(n, change)}
           />
@@ -256,7 +257,7 @@ export function PathModal({
             min={0}
             max={CHANGE_MAX}
             disabled={connecting}
-            ariaLabel="Change branch"
+            ariaLabel={t("pathChangeBranch")}
             title="Change — 0 or 1; another set of slots under this account"
             onCommit={(n) => commitBranch(account, n)}
           />
@@ -266,7 +267,7 @@ export function PathModal({
             min={0}
             max={ACCOUNT_INDEX_MAX}
             disabled={connecting}
-            ariaLabel="Wallet slot"
+            ariaLabel={t("pathWalletSlot")}
             title="Address index — MetaMask / Perch wallet slot"
             onCommit={commitSlot}
           />
@@ -284,13 +285,13 @@ export function PathModal({
               commitSlot(0);
             }}
           >
-            Reset to …/0'/0/0
+            {t("pathReset")}
           </button>
           <button
             type="button"
             className="btn"
             disabled={connecting}
-            title="Save path and load this one wallet"
+            title={t("pathSaveTitle")}
             onClick={() => {
               // Flush typed drafts (blur alone may not have run if Done was clicked).
               const inputs = panelRef.current
@@ -316,7 +317,7 @@ export function PathModal({
               onLoadOne(s);
             }}
           >
-            Load wallet
+            {t("pathLoadWallet")}
           </button>
         </div>
       </div>

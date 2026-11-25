@@ -3,7 +3,7 @@
 **Scope:** Pulse Perch / PulseChain daily life. Not ETH L2s, Snaps, or fiat on-ramps.  
 **Law:** bag / send / approve / swap / Sites / sign **without MetaMask**.  
 **Board of truth** for product punch-list status (desk gates/smoke → [TODO.md](./TODO.md)).  
-**Canvas:** `mm-replacement-100.canvas.tsx` (filterable). Updated 2026-11-24.
+**Canvas:** `mm-replacement-100.canvas.tsx` (filterable). Updated 2026-11-24 (desk polish batches: EN · soft paths · Gate sync · ship honesty).
 
 ## Custody
 1. [x] Show PLS balance from Pulse RPC
@@ -19,7 +19,7 @@
 11. [x] Switch active account from list
 12. [x] Tx status after send (pending → confirmed) — face poll
 13. [x] Activity / history feed on face — PulseScan v2 dense + infinite scroll 2026-11-23
-14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI + ynatm ladder + Anvil lab PASS; device mempool proof OPEN
+14. [~] Speed-up / cancel stuck tx (replace-by-fee) — UI + Anvil PASS + face soft coach 2026-11-24; device mempool proof OPEN
 15. [x] Custom gas / tip / max fee controls — Send Advanced in **beats** on 369/943 (not gwei) 2026-11-22
 16. [x] Nonce display + manual override (power)
 17. [x] Passphrase / hidden wallet callouts
@@ -45,7 +45,8 @@
 33. [x] WalletConnect / Reown peer as Pulse Perch
 34. [x] Pair wc: URI from Sites tab
 35. [x] Approve / reject session
-36. [~] eth_sendTransaction via WC → Trezor — lab URI + Suite Grant up 2026-11-22; hash blocked (Confirm click / 0 PLS on 369)
+36. [~] eth_sendTransaction via WC → Trezor — wallet path + soft coach 2026-11-24; hash still needs dust / Confirm evidence
+
 37. [x] personal_sign via WC — live PASS 2026-11-22 (lab.pulseperch.dev pair + Suite); inject also PASS
 38. [x] eth_signTypedData_v4 / EIP-712 — inject + WC wallet-path PASS 2026-11-22 (`SITES-WC-EIP712-2026-11-22.md`)
 39. [x] wallet_switchEthereumChain → desk packs (369/943/…) — inject + WC 2026-11-24
@@ -105,20 +106,23 @@
 85. [x] Clear Allow-in-Suite coaching (other monitor) — suite-allow callout 2026-11-24
 86. [x] Onboarding: connect → bag → first Sites pair — FirstRunStrip + empty teaches 2026-11-24
 87. [x] Empty states that teach next click
-88. [~] Locale strings (EN first, then more) — en.ts expanded + wired face 2026-11-24; other langs later
+88. [~] Locale strings (EN first, then more) — Sync/notes/AI/bag too 2026-11-24; other langs later
 89. [x] Light theme option (display)
-90. [ ] NVDA / VoiceOver manual acceptance pass
+90. [~] NVDA / VoiceOver manual acceptance — checklist `tests/a11y/NVDA-CHECKLIST.md` drafted; human tick OPEN
+
 
 ## Ship
 91. [x] Web / Vite desk usable today
 92. [x] PWA installable (zero-friction try) — manifest + icon + SW shell
-93. [~] Windows desktop pack — `desk:pack` web zip+sha (Electron/Tauri later)
+93. [x] Windows portable web pack — `desk:pack` zip+sha smoke 2026-11-24 (`DESK-PACK.md`); Electron/Tauri later
 94. [ ] Linux pack
 95. [ ] macOS pack + notarize
 96. [ ] Mobile companion path (Tip link / shared pack)
-97. [~] Versioned updates channel — Settings says rebuild/refresh; no auto-updater (OK)
-98. [~] Smoke + a11y evidence in CI / tests/smoke
-99. [~] Gate 1 acceptance: bag/Sites/approve UI w/o MM PASS 2026-11-23 (`GATE-1-2026-11-23.md`); send/sign from prior smokes; mainnet WC spend still soft
+97. [x] Versioned updates channel — honest rebuild/refresh + desk:pack; no auto-updater (OK)
+
+98. [x] Smoke + a11y evidence — CI contract smoke + NVDA checklist path; Gate checklist aligned 2026-11-24
+
+99. [~] Gate 1 acceptance: checklist ↔ ACCEPTANCE synced 2026-11-24; desk claim PASS; mainnet WC spend + FULL + device RBF still soft
 100. [x] Public “uninstall MetaMask for Pulse” guide
 
 ## Out of scope (by design)

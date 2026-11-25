@@ -63,6 +63,7 @@ import {
   saveFirstMainnetSendAcked,
   type Session,
 } from "../ui/deskStorage";
+import { recordLocalSend } from "../ui/lightMetrics";
 import { trimGwei } from "../ui/swapFace";
 
 type TokenRow = { token: PackToken; raw: bigint; formatted: string };
@@ -446,6 +447,7 @@ export function useDeskSend(opts: {
           onPhase: setSendPhase,
         });
         setLastTx(broadcast.hash);
+        recordLocalSend();
         setStuckTx(broadcast);
         setRbfStep(0);
         setTxStatus("pending");
@@ -517,6 +519,7 @@ export function useDeskSend(opts: {
           onPhase: setSendPhase,
         });
         setLastTx(broadcast.hash);
+        recordLocalSend();
         setStuckTx(broadcast);
         setRbfStep(step + 1);
         setTxStatus("pending");
@@ -575,6 +578,7 @@ export function useDeskSend(opts: {
           onPhase: setSendPhase,
         });
         setLastTx(broadcast.hash);
+        recordLocalSend();
         setStuckTx(broadcast);
         setRbfStep(step + 1);
         setTxStatus("pending");
@@ -641,6 +645,7 @@ export function useDeskSend(opts: {
     })
       .then((broadcast) => {
         setLastTx(broadcast.hash);
+        recordLocalSend();
         setStuckTx(broadcast);
         setTxStatus("pending");
         void waitForTxStatus(chainId, broadcast.hash, effectiveRpc).then(

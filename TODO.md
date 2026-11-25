@@ -10,13 +10,13 @@ Legend: `[ ]` todo · `[x]` done · `[~]` partial
 
 Product law: bag / send / approve / Sites / sign without MetaMask.
 
-1. [~] **Sites pair smoke** — live WC personal_sign PASS · tx/swap on 369 still needs dust
+1. [~] **Sites pair smoke** — live WC personal_sign PASS · tx soft coach on face; hash/swap on 369 still needs dust
 2. [x] **Injected provider** — this-tab + MV3; **`0.1.4`** offscreen bridge + session cache (reload unpacked)
 3. [x] **Activity / history** — dense grid + paged PulseScan + infinite scroll
 4. [~] **Gas / RBF** — UI + ynatm ladder + Anvil lab **PASS** (2026-11-24); **device** stuck-tx proof OPEN
 5. [x] **Token UX** — custom import + hide zeros + favorites
 6. [x] **Convenience swap** — in-face PulseX
-7. [~] **Ship surfaces** — MV3 sideload **`0.1.4`** + pack/sha enough; **CWS/Play listing = not a goal** (operator 2026-11-24)
+7. [x] **Ship surfaces** — MV3 sideload **`0.1.4`** + desk:pack + Settings/TRY honesty; **CWS/Play listing = not a goal** (2026-11-24)
 8. [x] **Softer first-run** — Cancel / Suite cues / FAQ
 9. ~~Out of scope by design~~ Snaps, fiat buy, portfolio charts. **EVM peers in pack** OK; Pulse remains center.
 
@@ -60,7 +60,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [~] Matrix: Win×Lin×Mac×Web × Safe 3/5/7/emu — template [docs/OS-DEVICE-MATRIX.md](./docs/OS-DEVICE-MATRIX.md); Win lab PASS
 - [~] Main 369 + testnet 943 rows — 943 smokes PASS; 369 Sites tx OPEN
 - [ ] FULL green before ACCEPTANCE Gate 1–2
-- [ ] Re-run pen &lt; 30 days before each release tag
+- [~] Re-run pen &lt; 30 days before each release tag — stub [tests/pen/RE-PEN-BEFORE-TAG.md](./tests/pen/RE-PEN-BEFORE-TAG.md); last PASS 2026-11-23
 
 ## A0 — Bootstrap
 - [x] App shell (Vite + Connect patterns)
@@ -106,7 +106,7 @@ Standard: [TESTING.md](./TESTING.md). No Gate ship without evidence.
 - [x] Modular HEX stakes UI — Settings → Modules (default off); possession nudge when stakes exist
 - [~] Reuse pqq-wallet derivation + Connect adapter — not required for “has stakes” view
 - [x] Portfolio view (stakes + liquid HEX) — Stakes tab when module on
-- [~] Stake / end clear-sign via Sites — not in-desk stakeStart product
+- [x] Stake / end clear-sign via Sites — decode + Stakes tab path / Open Apps (not in-desk stakeStart) 2026-11-24
 - [x] Advanced claim / migrate tools — Apps card → custom call / Approvals / Sites + migrate guide 2026-11-23
 
 ## E — Power tools
@@ -149,7 +149,7 @@ See [ADOPTION.md](./ADOPTION.md) P1–P2 · [BUILD-EFFICIENCY.md](./BUILD-EFFICI
 
 - [~] Locales after English — EN map expanded; more languages later
 - [x] Public Desk **PWA** polish (zero-install try) — shell-v4 · offline.html · banner · Apple meta
-- [ ] Opt-in light metrics (first-send) — no seed telemetry
+- [x] Opt-in light metrics (first-send) — local count only; Settings toggle 2026-11-24
 - [ ] Safe{Wallet} / multisig connect path (optional power users)
 - [ ] Account-abstraction / smart-EOA spike (only if Pulse ecosystem needs it)
 - [ ] Ledger signing path **only if** platform PLAT-Ledger research says yes

@@ -46,7 +46,7 @@ export function connectSteps(opts: {
   return [
     {
       id: "suite",
-      label: "Open Suite",
+      label: t("stepOpenSuite"),
       state: suiteDone
         ? allowCurrent || readyCurrent
           ? "done"
@@ -57,12 +57,12 @@ export function connectSteps(opts: {
     },
     {
       id: "allow",
-      label: "Allow / Connect",
+      label: t("stepAllowConnect"),
       state: allowDone ? "done" : allowCurrent ? "current" : "todo",
     },
     {
       id: "ready",
-      label: "Ready",
+      label: t("stepReady"),
       state: readyDone ? "done" : "todo",
     },
   ];
@@ -122,18 +122,18 @@ export function DeviceConnectFace({
           <p className="device-connect-title">{label}</p>
           <p className="muted device-connect-sub">
             {suiteChannel === "desktop"
-              ? "Suite Desktop linked"
-              : "Suite Web or Desktop — Connect 10"}
+              ? t("suiteDesktopLinked")
+              : t("suiteWebOrDesktop")}
             {deviceHints?.firmware
               ? ` ·${deviceHints.model ? ` ${deviceHints.model}` : ""} FW ${deviceHints.firmware}`
               : ""}
             {canSign ? " · signing on" : ""}
           </p>
           <p className="device-connect-channel" role="status">
-            <span className="device-connect-chip">Via Suite</span>
+            <span className="device-connect-chip">{t("viaSuite")}</span>
             <span className="muted">
               {" "}
-              USB / Bluetooth stay inside Suite — Perch never owns the cable.
+              {t("viaSuiteHint")}
             </span>
           </p>
         </div>
@@ -195,7 +195,7 @@ export function DeviceConnectFace({
               disabled={acquireBusy || connecting}
               onClick={onAcquireDevice}
             >
-              {acquireBusy ? "Acquiring…" : "Acquire device"}
+              {acquireBusy ? t("acquiring") : t("acquireDevice")}
             </button>
           ) : null}
         </div>

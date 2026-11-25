@@ -5,6 +5,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { ApprovalRow, ApprovalScanMeta } from "../chain/approvals";
 import type { NftApprovalRow } from "../chain/nftApprovals";
+import { t } from "../i18n/en";
 import { shortAddr } from "./faceFormat";
 
 type Props = {
@@ -43,24 +44,21 @@ export function ApprovePanel({
   onRevokeNft,
 }: Props) {
   if (!active) {
-    return <p className="muted">Connect to load approvals.</p>;
+    return <p className="muted">{t("approveConnect")}</p>;
   }
 
   return (
     <>
-      <p className="muted fee">
-        Already-granted spenders on chain. New ones come from Apps when a dApp
-        asks — confirm on Trezor, then revoke here later.
-      </p>
+      <p className="muted fee">{t("approveHint")}</p>
       <div className="row nft-toolbar">
         <p className="muted nft-status">
           {apprBusy
-            ? "Deep scan — history, bag tokens, Approval logs…"
+            ? t("approveScanning")
             : apprErr
               ? apprErr
               : approvals.length
                 ? `${approvals.length} open approval${approvals.length === 1 ? "" : "s"}`
-                : "No open allowances found — nothing to revoke."}
+                : t("approveNone")}
         </p>
         <button
           type="button"
@@ -68,7 +66,7 @@ export function ApprovePanel({
           disabled={apprBusy}
           onClick={refreshApprovals}
         >
-          {apprBusy ? "…" : "Scan"}
+          {apprBusy ? "…" : t("approveScan")}
         </button>
       </div>
       {approvals.length ? (
@@ -133,12 +131,10 @@ export function ApprovePanel({
                     disabled={busy || !canSign}
                     onClick={() => onRevoke(row)}
                     title={
-                      canSign
-                        ? "Set allowance to 0 on Trezor"
-                        : "Connect Trezor to revoke"
+                      canSign ? t("revokeOnTrezor") : t("revokeNeedConnect")
                     }
                   >
-                    Revoke
+                    {t("revoke")}
                   </button>
                 </li>
               );

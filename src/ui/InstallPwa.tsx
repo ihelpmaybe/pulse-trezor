@@ -2,6 +2,7 @@
  * One-click install when the browser fires beforeinstallprompt (HTTPS / localhost).
  */
 import { useEffect, useState } from "react";
+import { t } from "../i18n/en";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -44,12 +45,7 @@ export function InstallPwa() {
   }, []);
 
   if (done) {
-    return (
-      <p className="muted fee">
-        Installed as an app on this device. Suite still needs a network when you
-        sign.
-      </p>
-    );
+    return <p className="muted fee">{t("pwaInstalledLong")}</p>;
   }
 
   return (
@@ -67,12 +63,10 @@ export function InstallPwa() {
           });
         }}
       >
-        {deferred ? "Install Pulse Perch" : "Install (when browser offers)"}
+        {deferred ? t("installPulsePerch") : t("installWhenOffered")}
       </button>
       <p className="muted fee">
-        {deferred
-          ? "Adds a desktop / home-screen app — no MetaMask, no store. Chain calls still need Suite + network."
-          : "Chrome/Edge on localhost or HTTPS may offer install after a visit. Or: npm run build && npm run preview, then Install."}
+        {deferred ? t("installHintReady") : t("installHintWait")}
       </p>
       {hint ? <p className="muted fee">{hint}</p> : null}
       {!deferred ? (
@@ -82,12 +76,12 @@ export function InstallPwa() {
           onClick={() =>
             setHint(
               typeof window !== "undefined" && "serviceWorker" in navigator
-                ? "SW shell-v4 caches the face only — never RPC. Use Chrome’s install icon in the address bar, or reopen after preview."
-                : "This browser cannot install PWAs.",
+                ? t("installHintSw")
+                : t("installHintNoPwa"),
             )
           }
         >
-          How to install
+          {t("howToInstall")}
         </button>
       ) : null}
     </div>

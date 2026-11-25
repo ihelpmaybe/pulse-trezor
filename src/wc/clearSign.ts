@@ -87,12 +87,12 @@ const SELECTORS: Record<
   "0x52a438b8": {
     name: "stakeStart(uint256,uint256)",
     tone: "warn",
-    note: "HEX stakeStart — confirm hearts + days on device",
+    note: "HEX stakeStart via Sites — confirm hearts + days on Trezor (site labels can lie)",
   },
   "0x67dcb881": {
     name: "stakeEnd(uint256,uint256)",
     tone: "warn",
-    note: "HEX stakeEnd — confirm stake index / id on device",
+    note: "HEX stakeEnd via Sites — confirm stake index + id on Trezor (site labels can lie)",
   },
 };
 
@@ -341,12 +341,12 @@ export function decodeHexStakeCalldata(data?: string | null): ClearLine[] {
       {
         tone: "warn",
         title: "HEX stakeStart · hearts",
-        detail: `${formatUnits(a, 8)} HEX — confirm on Trezor`,
+        detail: `${formatUnits(a, 8)} HEX — confirm on Trezor (Apps / Sites)`,
       },
       {
         tone: "warn",
         title: "HEX stakeStart · days",
-        detail: `${String(b)} days — confirm on Trezor`,
+        detail: `${String(b)} days — confirm on Trezor (Apps / Sites)`,
       },
     ];
   }
@@ -356,12 +356,12 @@ export function decodeHexStakeCalldata(data?: string | null): ClearLine[] {
       {
         tone: "warn",
         title: "HEX stakeEnd · index",
-        detail: `stakeLists index ${String(a)} — confirm on Trezor`,
+        detail: `stakeLists index ${String(a)} — confirm on Trezor (Apps / Sites)`,
       },
       {
         tone: "warn",
         title: "HEX stakeEnd · stakeId",
-        detail: `id ${String(b)} — confirm on Trezor`,
+        detail: `id ${String(b)} — confirm on Trezor (Apps / Sites)`,
       },
     ];
   }

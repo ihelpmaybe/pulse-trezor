@@ -8,6 +8,7 @@ import {
   decodeSyncPayload,
   SYNC_QR_ACCOUNT_CAP,
 } from "../chain/syncPair";
+import { t } from "../i18n/en";
 
 export function SyncPair(props: {
   accounts: {
@@ -107,15 +108,15 @@ export function SyncPair(props: {
                 });
               }}
             >
-              {copied ? "Copied" : "Copy pair link"}
+              {copied ? t("copied") : t("copyPairLink")}
             </button>
           </>
         ) : (
-          <p className="muted">Connect or import a watch address first.</p>
+          <p className="muted">{t("syncNeedAddress")}</p>
         )}
 
         <label className="field">
-          Paste pair link or JSON
+          {t("pastePairLink")}
           <textarea
             value={paste}
             onChange={(e) => {

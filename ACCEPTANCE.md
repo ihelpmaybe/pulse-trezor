@@ -77,7 +77,7 @@ Legend: **OK** = covered in some TODO · **GAP** = missing/weak · **OUT** = exp
 ### Gate T — Tests (blocks every other Gate)
 See **[TESTING.md](./TESTING.md)** — SMOKE · FUZZ · PEN · FULL.
 
-- [ ] Desk: smoke CI + pen report  
+- [x] Desk: smoke CI + pen report — `npm run smoke` + `tests/pen/REPORT.md` (2026-11-23+) · FULL matrix still OPEN  
 - [ ] Tip: smoke + backup/seed pen  
 - [ ] Platform SYNC: roundtrip smoke + seed-reject fuzz  
 - [ ] Rescue: forge (+ fuzz) green; pen authz  
@@ -85,11 +85,14 @@ See **[TESTING.md](./TESTING.md)** — SMOKE · FUZZ · PEN · FULL.
 - [ ] No Gate 1–3 ship with open **Critical** pen or red FULL row  
 
 ### Gate 1 — HWW without MetaMask
-- [ ] Desk A0–A2 on Windows  
-- [ ] Bridge first-run covered  
-- [ ] Receive / send PLS + HEX/PLSX  
-- [ ] Fee UI + basic history (indexer decided)  
-- [ ] **Gate T** green for Desk  
+Desk detail / honesty table: **[docs/GATE-1-CHECKLIST.md](./docs/GATE-1-CHECKLIST.md)**.
+
+- [x] Desk A0–A2 on Windows — Connect · bag · send · approve (lab 2026-11)  
+- [x] Bridge / Suite first-run covered — FirstRunStrip + suite-allow (Connect 10)  
+- [x] Receive / send PLS + HEX/PLSX — 943 dust PASS; mainnet WC spend still soft  
+- [~] Fee UI + basic history — UI + Anvil RBF PASS; **device** stuck-tx OPEN  
+- [~] **Gate T** green for Desk — CI/pen PASS; FULL OS×device OPEN  
+
 
 ### Gate 2 — Mobile↔desktop
 - [ ] Tip TIP0–TIP1 + SYNC1–SYNC2  

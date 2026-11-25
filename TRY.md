@@ -80,6 +80,12 @@ Details: [extension/README.md](./extension/README.md)
 Settings → **Install Pulse Perch** when Chrome/Edge offers it (localhost or HTTPS).  
 Or: `npm run build && npm run preview`, then use the browser install icon.
 
+## Ship surfaces (honest)
+
+- **Desk:** `npm run build && npm run desk:pack` → unsigned web zip + SHA (or just `npm run dev`).
+- **PWA:** Settings → Install when the browser offers it.
+- **Extension:** Load unpacked / sideload zip only. **Chrome Web Store and Play listing are not a goal.**
+
 ## Honest limits
 
 - Not official Trezor Pulse support. Suite still does not list Pulse.

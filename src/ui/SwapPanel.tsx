@@ -60,9 +60,9 @@ export function SwapPanel({
   onGotoApps,
 }: Props) {
   return chainId !== 369 ? (
-    <p className="muted">PulseX swap is mainnet only.</p>
+    <p className="muted">{t("swapMainnetOnly")}</p>
   ) : !canSign ? (
-    <p className="muted">Connect Trezor to swap.</p>
+    <p className="muted">{t("swapNeedConnect")}</p>
   ) : (
         <>
           <div className="swap-grid">
@@ -147,7 +147,7 @@ export function SwapPanel({
               disabled={swapQuoteBusy || !swapAmt.trim()}
               onClick={refreshSwapQuote}
             >
-              {swapQuoteBusy ? "Quoting…" : "Quote"}
+              {swapQuoteBusy ? t("quoting") : t("quote")}
             </button>
             {swapNeedApprove ? (
               <button
@@ -156,7 +156,7 @@ export function SwapPanel({
                 disabled={busy}
                 onClick={onSwapApproveRouter}
               >
-                Approve PulseX
+                {t("approvePulsex")}
               </button>
             ) : null}
             <button
@@ -165,7 +165,7 @@ export function SwapPanel({
               disabled={busy || !swapQuote || swapNeedApprove || swapQuoteBusy}
               onClick={onSwap}
             >
-              {busy ? "Signing…" : "Sign swap"}
+              {busy ? t("signing") : t("signSwap")}
             </button>
           </div>
           {swapQuote ? (
@@ -210,7 +210,7 @@ export function SwapPanel({
             </>
           )}
           {chainId === 369 ? (
-            <p className="warn-line">Mainnet — real funds.</p>
+            <p className="warn-line">{t("mainnetRealFunds")}</p>
           ) : null}
         </>
   );

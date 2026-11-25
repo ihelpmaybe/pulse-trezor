@@ -2,6 +2,7 @@
  * Honest network / install face — shell may be cached; chain still needs net.
  */
 import { useEffect, useState } from "react";
+import { t } from "../i18n/en";
 
 function isStandalone(): boolean {
   try {
@@ -45,12 +46,9 @@ export function OfflineBanner() {
       role="status"
     >
       {!online ? (
-        <span>
-          Offline — shell may load from cache; Suite / RPC / Sites need a
-          network.
-        </span>
+        <span>{t("offlineBanner")}</span>
       ) : (
-        <span>Running as installed app (PWA).</span>
+        <span>{t("pwaInstalled")}</span>
       )}
     </div>
   );

@@ -45,7 +45,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Speed up / Cancel stuck — what’s that?",
-    a: "If a tx sits pending: Speed up resends the same job with a higher tip; Cancel replaces the nonce with a 0-value self-send so the queue clears. Confirm on the device either way.",
+    a: "If a tx sits pending: Speed up resends the same job with a higher tip; Cancel replaces the nonce with a 0-value self-send so the queue clears. Confirm on the device either way. Fee math + Anvil lab are proven; a live device mempool replace is still OPEN until you tick that evidence.",
   },
   {
     q: "Where’s the anime mascot?",
@@ -53,7 +53,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "HEX stakes?",
-    a: "Optional. Settings → Modules → HEX stakes turns on the Stakes tab and marks. Liquid HEX still shows under Tokens either way.",
+    a: "Optional. Settings → Modules → HEX stakes turns on the Stakes tab and marks. Liquid HEX still shows under Tokens either way. To start or end a stake: open go.hex.com → Apps (WalletConnect). Perch clear-signs stakeStart (hearts + days) and stakeEnd (index + id) before you confirm on the Trezor — trust that strip and the device, not the site chrome.",
   },
   {
     q: "Buy / sell dollars?",

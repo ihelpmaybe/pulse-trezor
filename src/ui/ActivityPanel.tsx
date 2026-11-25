@@ -16,6 +16,7 @@ import {
   type ActivityRow,
 } from "../chain/activity";
 import type { DeskChainId } from "../chain/client";
+import { t } from "../i18n/en";
 import { fmtActivityAmtParts } from "./faceFormat";
 
 type ActFilter = "all" | "in" | "out";
@@ -140,12 +141,16 @@ export function ActivityPanel({
         {embedded ? null : <h2>Activity</h2>}
         {active ? (
           <div className="row activity-tools">
-            <div className="gas-speed" role="group" aria-label="Activity filter">
+            <div
+              className="gas-speed"
+              role="group"
+              aria-label={t("activityFilter")}
+            >
               {(
                 [
-                  ["all", "All"],
-                  ["in", "In"],
-                  ["out", "Out"],
+                  ["all", t("activityAll")],
+                  ["in", t("activityIn")],
+                  ["out", t("activityOut")],
                 ] as const
               ).map(([id, label]) => (
                 <button
@@ -172,15 +177,13 @@ export function ActivityPanel({
         ) : null}
       </div>
       {!active ? (
-        <p className="muted empty-teach">
-          Next: Connect, then Refresh here for recent PulseScan txs.
-        </p>
+        <p className="muted empty-teach">{t("activityConnectHint")}</p>
       ) : actErr ? (
         <p className="muted">{actErr}</p>
       ) : actBusy && !activity.length ? (
         <p className="muted">…</p>
       ) : !activity.length && !showPending ? (
-        <p className="muted">No recent txs on this chain.</p>
+        <p className="muted">{t("activityEmpty")}</p>
       ) : (
         <>
           {activity.length > 0 ? (
@@ -223,7 +226,7 @@ export function ActivityPanel({
                       disabled={busy}
                       onClick={onSpeedUp}
                     >
-                      Speed up
+                      {t("speedUpShort")}
                     </button>
                     <button
                       type="button"
@@ -231,7 +234,7 @@ export function ActivityPanel({
                       disabled={busy}
                       onClick={onCancelStuck}
                     >
-                      Cancel
+                      {t("cancelShort")}
                     </button>
                   </span>
                 ) : null}

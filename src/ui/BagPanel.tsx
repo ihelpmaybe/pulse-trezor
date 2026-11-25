@@ -87,6 +87,8 @@ type Props = {
   onCancelStuck: () => void;
   /** Jump to Approvals (NFT operators / setApprovalForAll). */
   onGotoApprovals?: () => void;
+  /** Jump to Apps (WalletConnect) for HEX stakeStart / stakeEnd. */
+  onGotoApps?: () => void;
 };
 
 export function BagPanel({
@@ -140,12 +142,13 @@ export function BagPanel({
   onSpeedUp,
   onCancelStuck,
   onGotoApprovals,
+  onGotoApps,
 }: Props) {
   return (
             <section className="card bag-card">
               <div className="bag-head">
                 <h2 title={active ? "Balances for this account" : undefined}>
-                  {active ? `Slot #${active.derivationIndex}` : "Balances"}
+                  {active ? `Slot #${active.derivationIndex}` : t("balances")}
                 </h2>
                 <div className="action-tabs bag-tabs" role="tablist" aria-label="Bag">
                   <button
@@ -407,7 +410,7 @@ export function BagPanel({
                       </p>
                     ) : null}
                     <details className="gas-details">
-                      <summary>Import token</summary>
+                      <summary>{t("importToken")}</summary>
                       <label className="field">
                         Contract
                         <input
@@ -484,10 +487,10 @@ export function BagPanel({
                           onClick={onLoadFullBag}
                         >
                           {bagBusy
-                            ? "Loading bag…"
+                            ? t("loadingBag")
                             : fullBag
-                              ? "Reload full bag"
-                              : "Load full bag"}
+                              ? t("reloadFullBag")
+                              : t("loadFullBag")}
                         </button>
                       ) : null}
                     </div>
@@ -719,23 +722,22 @@ export function BagPanel({
                 hidden={!hexModule || bagTab !== "stakes"}
               >
                 {!hexModule ? null : !active ? (
-                  <p className="muted">Connect to load HEX stakes.</p>
+                  <p className="muted">{t("stakesConnectHint")}</p>
                 ) : chainId !== 369 ? (
-                  <p className="muted">HEX stakes are mainnet (369) only.</p>
+                  <p className="muted">{t("stakesMainnetOnly")}</p>
                 ) : bagBusy && !fullBag ? (
-                  <p className="muted">Loading stakes…</p>
+                  <p className="muted">{t("stakesLoading")}</p>
                 ) : (
                   <>
                     <p className="muted fee">
-                      Clear-sign: Apps shows stakeStart hearts/days and stakeEnd
-                      index/id. Confirm on Trezor — dApp labels can lie.{" "}
+                      {t("stakesClearSign")}{" "}
                       <a
                         className="link"
                         href="https://go.hex.com"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        go.hex.com
+                        {t("goHex")}
                       </a>
                     </p>
                     <div className="row">
@@ -745,8 +747,17 @@ export function BagPanel({
                         disabled={bagBusy}
                         onClick={onLoadFullBag}
                       >
-                        {bagBusy ? "Loading…" : "Reload stakes"}
+                        {bagBusy ? t("loading") : t("reloadStakes")}
                       </button>
+                      {onGotoApps ? (
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          onClick={onGotoApps}
+                        >
+                          {t("openAppsBtn")}
+                        </button>
+                      ) : null}
                     </div>
                     {fullBag && fullBag.stakeCount > 0 ? (
                       <ul className="stake-grid">
@@ -771,16 +782,7 @@ export function BagPanel({
                       </ul>
                     ) : (
                       <p className="muted empty-teach">
-                        No HEX stakes on this account. Start / end stakes via{" "}
-                        <a
-                          className="link"
-                          href="https://go.hex.com"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          go.hex.com
-                        </a>{" "}
-                        → Apps (WalletConnect).
+                        {t("stakesEmpty")}
                       </p>
                     )}
                   </>
