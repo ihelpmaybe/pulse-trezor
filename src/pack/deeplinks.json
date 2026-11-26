@@ -205,6 +205,13 @@
       "role": "hww"
     },
     {
+      "id": "pulsechain-garden",
+      "name": "PulseChain Garden",
+      "app": "https://ihelpmaybe.github.io/pulsechain-garden/",
+      "github": "https://github.com/ihelpmaybe/pulsechain-garden",
+      "role": "prompts-art"
+    },
+    {
       "id": "tip",
       "name": "Tip wallet",
       "github": "https://github.com/ihelpmaybe/Tip-wallet",

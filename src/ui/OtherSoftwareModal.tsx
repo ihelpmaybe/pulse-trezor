@@ -35,6 +35,13 @@ const COMMUNITY: CommunityItem[] = [
     iconSrc: perchIcon,
   },
   {
+    name: "PulseChain Garden",
+    tag: "RH / HEX prompts · art",
+    href: "https://ihelpmaybe.github.io/pulsechain-garden/",
+    mark: "PG",
+    tone: "green",
+  },
+  {
     name: "Tip wallet",
     tag: "Android · EIP-681 Pulse",
     href: "https://github.com/ihelpmaybe/Tip-wallet",
