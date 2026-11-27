@@ -44,8 +44,8 @@ jobs:
 
           **Install (no coding):** [INSTALL.md](https://github.com/ihelpmaybe/pulse-trezor/blob/main/INSTALL.md)
 
-          - Live desk: https://ihelpmaybe.github.io/pulse-trezor/
-          - Windows: unzip \`pulse-perch-${VER}-web.zip\` → double-click \`Open-Pulse-Perch.cmd\`
+          - Wallet: unzip \`pulse-perch-${VER}-web.zip\` → double-click \`Open-Pulse-Perch.cmd\` (localhost)
+          - Showcase peek (no Connect): https://ihelpmaybe.github.io/pulse-trezor/
           - Unlock Trezor Suite before Connect. No seed in the browser.
 
           SHA256 files attached. MIT · PRIVACY · SECURITY

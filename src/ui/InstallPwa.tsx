@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from "react";
 import { t } from "../i18n/en";
+import { isShowcase } from "../showcase";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -27,6 +28,7 @@ export function InstallPwa() {
   const [done, setDone] = useState(() => isStandalone());
 
   useEffect(() => {
+    if (isShowcase()) return;
     if (isStandalone()) setDone(true);
     const onPrompt = (e: Event) => {
       e.preventDefault();
@@ -53,7 +55,7 @@ export function InstallPwa() {
     );
   }
 
-  if (!deferred) return null;
+  if (isShowcase() || !deferred) return null;
 
   return (
     <>

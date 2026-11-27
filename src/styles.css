@@ -105,6 +105,26 @@ body {
   color: #f6d0de;
 }
 
+.showcase-banner {
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  background: color-mix(in srgb, var(--warn) 18%, var(--card));
+  border-bottom: 1px solid color-mix(in srgb, var(--warn) 55%, var(--border));
+  color: var(--text);
+}
+
+.showcase-banner a {
+  color: var(--pulse);
+  font-weight: 600;
+}
+
+.showcase-banner code {
+  font-size: 0.9em;
+  color: var(--amber);
+}
+
 .offline-banner-ok {
   background: #14101c;
   border-bottom-color: var(--border);

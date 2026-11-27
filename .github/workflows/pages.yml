@@ -26,9 +26,10 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: node node_modules/esbuild/install.js
-      - name: Build for GitHub Pages
+      - name: Build for GitHub Pages (showcase — no Connect)
         env:
           BASE_PATH: /pulse-trezor/
+          VITE_SHOWCASE: "1"
         run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

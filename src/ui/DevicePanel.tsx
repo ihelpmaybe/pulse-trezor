@@ -22,6 +22,7 @@ import {
   addWalletFavorite,
   removeWalletFavorite,
 } from "../chain/favorites";
+import { isShowcase, PERCH_INSTALL, PERCH_RELEASES } from "../showcase";
 import {
   ACCOUNT_INDEX_MAX,
   FACE_LOAD_SOFT_MAX,
@@ -433,7 +434,18 @@ export function DevicePanel({
         >
           Clear
         </button>
-        {!session ? (
+        {!session && isShowcase() ? (
+          <a
+            className="btn"
+            href={PERCH_RELEASES}
+            target="_blank"
+            rel="noreferrer"
+            title="Showcase — Connect only after you download the zip or run locally"
+          >
+            Run local to Connect
+          </a>
+        ) : null}
+        {!session && !isShowcase() ? (
           <button
             type="button"
             className="btn"
@@ -451,6 +463,16 @@ export function DevicePanel({
                 ? `${t("startConnection")} …/${accountIndex}`
                 : t("startConnection")}
           </button>
+        ) : null}
+        {isShowcase() ? (
+          <a
+            className="btn ghost"
+            href={PERCH_INSTALL}
+            target="_blank"
+            rel="noreferrer"
+          >
+            INSTALL.md
+          </a>
         ) : null}
         {connecting || busy ? (
           <button

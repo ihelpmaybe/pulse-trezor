@@ -41,6 +41,7 @@ import {
 import type { DeskChainId, RpcOverride } from "../chain/client";
 import { trimAccountsByPlsGap } from "../trezor/accountGap";
 import { ACCOUNT_INDEX_MAX, parseLoadSpec } from "../ui/faceFormat";
+import { isShowcase, PERCH_RELEASES } from "../showcase";
 
 type SetErr = Dispatch<SetStateAction<string | null>>;
 type SetBusy = Dispatch<SetStateAction<boolean>>;
@@ -255,6 +256,12 @@ export function useDeskConnect(opts: {
     from?: number;
     to?: number;
   }) {
+    if (isShowcase()) {
+      setErr(
+        `Showcase only — run local (zip / npm run dev) to load accounts. ${PERCH_RELEASES}`,
+      );
+      return;
+    }
     const gapTrim = !!opts?.gapTrim;
     const spec = parseLoadSpec(accountRange) ?? { from: 0, to: 11, span: 12 };
     let from: number;
@@ -349,6 +356,12 @@ export function useDeskConnect(opts: {
   }
 
   function onConnect() {
+    if (isShowcase()) {
+      setErr(
+        `Showcase only — download the zip and Open-Pulse-Perch.cmd (or npm run dev) to Connect. ${PERCH_RELEASES}`,
+      );
+      return;
+    }
     setErr(null);
     setBusy(true);
     setConnecting(true);

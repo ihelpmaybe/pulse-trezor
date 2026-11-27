@@ -1,6 +1,6 @@
 # Try Pulse Perch (builders / testnet)
 
-**No Node?** use **[INSTALL.md](./INSTALL.md)** — live link or Windows zip.
+**No Node?** use **[INSTALL.md](./INSTALL.md)** — Windows zip → `Open-Pulse-Perch.cmd` (localhost). GitHub Pages is showcase only (no Connect).
 
 **What this is:** a PulseChain wallet face for your Trezor — bag, send, approve, Sites — **without MetaMask**.  
 **What you need for this page:** Node 20+, Trezor Suite (desktop), a Trezor, ~10 minutes.

@@ -38,6 +38,7 @@ import {
   pairUri,
   rejectProposal,
 } from "./walletKit";
+import { isShowcase, PERCH_RELEASES } from "../showcase";
 import {
   chainLabel,
   hasChainPack,
@@ -595,6 +596,25 @@ export function WcPanel({
         `Dry-run failed — ${e instanceof Error ? e.message : String(e)}. Do not sign unless you understand why.`,
       );
     }
+  }
+
+  if (isShowcase()) {
+    const peek = (
+      <div className="card">
+        <p className="muted">
+          Showcase — WalletConnect / Sites only after you run Perch locally
+          (zip → Open-Pulse-Perch.cmd or npm run dev). Allowlist localhost on
+          your Reown project — not github.io.
+        </p>
+        <p>
+          <a className="btn" href={PERCH_RELEASES} target="_blank" rel="noreferrer">
+            Download zip
+          </a>
+        </p>
+      </div>
+    );
+    if (embedded) return <div className="wc-embed">{peek}</div>;
+    return peek;
   }
 
   const body = (

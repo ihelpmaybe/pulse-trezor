@@ -13,10 +13,12 @@ Suite hosts the device; Perch is the Pulse UI.
 
 ## Install (everyone)
 
-1. Open **https://ihelpmaybe.github.io/pulse-trezor/** (or grab the Windows zip from [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) → `Open-Pulse-Perch.cmd`)
+**Pages = showcase only.** Do not Connect on github.io.
+
+1. Grab the Windows zip from [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) → unzip → **`Open-Pulse-Perch.cmd`** (opens localhost)
 2. Unlock **Trezor Suite** → **Connect** in Perch → confirm the address on the device
 
-Optional: Chrome/Edge **Install Pulse Perch** (PWA) from that HTTPS page. Details: [INSTALL.md](./INSTALL.md).
+Peek (no wallet): https://ihelpmaybe.github.io/pulse-trezor/ · Details: [INSTALL.md](./INSTALL.md).
 
 ## Quick start (builders)
 
@@ -33,7 +35,8 @@ Open **http://127.0.0.1:5174/** · Lab default = **Pulse testnet 943**. Guides: 
 | Artifact | Link |
 |----------|------|
 | Install | [INSTALL.md](./INSTALL.md) · [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases) |
-| Live desk | https://ihelpmaybe.github.io/pulse-trezor/ |
+| Showcase peek (no Connect) | https://ihelpmaybe.github.io/pulse-trezor/ |
+| Wallet | Releases zip → `Open-Pulse-Perch.cmd` · or `npm run dev` |
 | Builder try | [TRY.md](./TRY.md) |
 | Extension sideload | [TRY.md](./TRY.md) · `npm run ext:pack` → `dist-ext/` (**0.1.5**) |
 | Pen report | [tests/pen/REPORT-2026-11-23.md](./tests/pen/REPORT-2026-11-23.md) |
