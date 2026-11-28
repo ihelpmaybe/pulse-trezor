@@ -14,6 +14,22 @@ export const en = {
   importWatch: "Import watch JSON",
   noCollect:
     "We don’t collect your data. Keys stay on your Trezor — bag, send, approve, and Apps without MetaMask.",
+  popupBlockedStep1:
+    "On Chrome’s box, pick Always allow pop-ups from this 127.0.0.1 address.",
+  popupBlockedStep2: "Click Done on Chrome’s box.",
+  popupBlockedStep3: "Click Connect Trezor Suite below again.",
+  chromePopupExplain:
+    "Chrome may show its own box: “Pop-ups blocked” and “about:blank”. That is Chrome’s wording — not a Perch warning and not a virus scan.",
+  chromePopupFactWallet:
+    "This wallet tab you are reading is not the pop-up. Keep it open.",
+  chromePopupFactBlank:
+    "“about:blank” means an empty helper window. Trezor fills it so Suite can ask you to Allow Pulse Perch.",
+  chromePopupFactAllow:
+    "Choose Always allow for this 127.0.0.1 address — that only lets Perch open Suite’s allow window on your PC.",
+  chromePopupFactSafe:
+    "Your seed never goes in the browser. Allow does not move funds.",
+  chromePopupBeforeClick:
+    "Unlock Trezor Suite first, then click Connect Trezor Suite. If Chrome’s box appears, use Always allow — then click the button again.",
   donateLabel: "Donate (PLS / PulseChain)",
   donateCopy: "Copy",
   donateCopied: "Copied",
