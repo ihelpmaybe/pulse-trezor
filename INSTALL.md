@@ -13,9 +13,9 @@ Privacy: [PRIVACY.md](./PRIVACY.md) · Security: [SECURITY.md](./SECURITY.md). N
 
 1. Download **`pulse-perch-*-web.zip`** from [Releases](https://github.com/ihelpmaybe/pulse-trezor/releases).
 2. Check the `.sha256` file if you want (recommended).
-3. Unzip → double-click **`Open-Pulse-Perch.cmd`**.
-4. Leave the black window open. Browser opens **http://127.0.0.1:5174/**.
-5. Unlock Suite → **Connect** → confirm on device.
+3. Unzip → double-click **`Open-Pulse-Perch.cmd`** (no black window).
+4. Browser opens the desk. Unlock Suite → **Connect** → confirm on device.
+5. When done: **Quit** (✕ top-right) or Settings → Quit Pulse Perch.
 
 ---
 

@@ -2,6 +2,7 @@
  * FAQ / other software / privacy eye / settings — top-right desk chrome.
  */
 import type { RefObject } from "react";
+import { LocalDeskQuit } from "./LocalDeskQuit";
 
 type Props = {
   faqOpen: boolean;
@@ -123,6 +124,7 @@ export function DeskTools({
           </svg>
         )}
       </button>
+      <LocalDeskQuit compact />
       {showSettings ? (
         <button
           type="button"

@@ -1,6 +1,6 @@
 /**
  * Zip dist/ → release/pulse-perch-<ver>-web.zip + .sha256
- * Includes Windows Open-Pulse-Perch.cmd + serve-desk.ps1 for normie local run.
+ * Includes silent Open-Pulse-Perch.cmd/.vbs + serve-desk.ps1 (+ Debug cmd).
  * Thin portable pack — not Electron/notarize.
  */
 import { createHash } from "node:crypto";
@@ -37,15 +37,24 @@ writeFileSync(
   [
     "Pulse Perch — portable desk",
     "",
-    "Windows: double-click Open-Pulse-Perch.cmd",
-    "  → opens http://127.0.0.1:5174/  (leave the black window open)",
+    "ONLY THIS: double-click  Open-Pulse-Perch.cmd",
+    "No black window. Browser opens the desk by itself.",
+    "Ignore every other file in this folder (they are the app guts).",
     "",
-    "Then: unlock Trezor Suite → Connect in Perch → confirm address on device.",
-    "No seed in the browser. SHA256 of this zip is on GitHub Releases.",
+    "When done: click Quit (X) in the desk top-right, or Settings → Quit.",
+    "Then: unlock Trezor Suite → Connect → confirm address on device.",
+    "No seed in the browser. Checksum (.sha256) is optional on GitHub Releases.",
+    "",
+    "Trouble? Use Open-Pulse-Perch-Debug.cmd (shows a console).",
     "",
   ].join("\r\n"),
 );
+const launcherVbs = join(root, "scripts", "Open-Pulse-Perch.vbs");
+const launcherDebug = join(root, "scripts", "Open-Pulse-Perch-Debug.cmd");
 if (existsSync(launcherCmd)) copyFileSync(launcherCmd, join(dist, "Open-Pulse-Perch.cmd"));
+if (existsSync(launcherVbs)) copyFileSync(launcherVbs, join(dist, "Open-Pulse-Perch.vbs"));
+if (existsSync(launcherDebug))
+  copyFileSync(launcherDebug, join(dist, "Open-Pulse-Perch-Debug.cmd"));
 if (existsSync(launcherPs)) copyFileSync(launcherPs, join(dist, "serve-desk.ps1"));
 
 const isWin = process.platform === "win32";

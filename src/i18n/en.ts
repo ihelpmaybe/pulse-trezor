@@ -125,6 +125,14 @@ export const en = {
   appsPairIntro: "Paste a wc: URI — Perch signs on Trezor (PulseX, HEX, …).",
   pwaInstalledLong:
     "Installed as an app on this device. Suite still needs a network when you sign.",
+  localDeskSection: "This PC (zip pack)",
+  localDeskBlurb:
+    "Running from the Windows zip. No console window — Quit here when you are done.",
+  quitPulsePerch: "Quit Pulse Perch",
+  quitPulsePerchHint: "Stop the local desk on this PC",
+  quittingPulsePerch: "Quitting…",
+  localDeskStopped:
+    "Perch stopped on this PC. You can close this browser tab.",
   installPulsePerch: "Install Pulse Perch",
   installWhenOffered: "Install (when browser offers)",
   installHintReady:

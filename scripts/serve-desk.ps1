@@ -1,28 +1,12 @@
 ﻿# Pulse Perch — local static server for the portable web pack (normie zip).
-# Serves this folder on http://127.0.0.1:5174/ and opens the browser.
+# Serves this folder on localhost and opens the browser.
 # Suite still required for Trezor. No Node.
+# Designed to run hidden (Open-Pulse-Perch.vbs). Quit from the desk UI.
 
 $ErrorActionPreference = "Stop"
-$root = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-$port = 5174
-$prefix = "http://127.0.0.1:$port/"
-
-Add-Type -AssemblyName System.Net.HttpListener
-$listener = [System.Net.HttpListener]::new()
-$listener.Prefixes.Add($prefix)
-try {
-  $listener.Start()
-} catch {
-  Write-Host "Port $port busy — close the other Perch window or free the port."
-  Write-Host $_
-  pause
-  exit 1
-}
-
-Write-Host "Pulse Perch desk: $prefix"
-Write-Host "Leave this window open. Unlock Trezor Suite, then Connect in the browser."
-Write-Host "Ctrl+C to stop."
-Start-Process $prefix
+$root = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
+$preferredPorts = 5174..5184
+$script:ShouldStop = $false
 
 function Get-ContentType([string]$path) {
   switch -Regex ($path) {
@@ -33,17 +17,84 @@ function Get-ContentType([string]$path) {
     '\.webmanifest$' { "application/manifest+json"; break }
     '\.svg$' { "image/svg+xml"; break }
     '\.png$' { "image/png"; break }
+    '\.jpe?g$' { "image/jpeg"; break }
     '\.woff2?$' { "font/woff2"; break }
     '\.ico$' { "image/x-icon"; break }
     default { "application/octet-stream" }
   }
 }
 
-while ($listener.IsListening) {
-  $ctx = $listener.GetContext()
+function Write-JsonResponse($res, [int]$code, [string]$json) {
+  $bytes = [Text.Encoding]::UTF8.GetBytes($json)
+  $res.StatusCode = $code
+  $res.ContentType = "application/json; charset=utf-8"
+  $res.Headers.Add("Cache-Control", "no-store")
+  $res.ContentLength64 = $bytes.Length
+  $res.OutputStream.Write($bytes, 0, $bytes.Length)
+}
+
+# HttpListener is already in System on Windows PowerShell 5.1.
+# Do NOT Add-Type System.Net.HttpListener — that assembly name does not exist.
+$listener = $null
+$prefix = $null
+foreach ($port in $preferredPorts) {
+  $tryPrefix = "http://127.0.0.1:$port/"
+  $try = [System.Net.HttpListener]::new()
+  $try.Prefixes.Add($tryPrefix)
+  try {
+    $try.Start()
+    $listener = $try
+    $prefix = $tryPrefix
+    break
+  } catch {
+    $try.Close()
+  }
+}
+
+if (-not $listener) {
+  # Visible only when launched via Debug cmd; hidden VBS users see nothing —
+  # still write a log next to the pack for support.
+  $msg = "Pulse Perch could not start — ports 5174-5184 busy. Close other Perch copies and try again."
+  try {
+    Set-Content -LiteralPath (Join-Path $root "perch-serve-error.txt") -Value $msg
+  } catch { }
+  if ([Environment]::UserInteractive -and $Host.Name -eq "ConsoleHost") {
+    Write-Host $msg
+    pause
+  }
+  exit 1
+}
+
+try {
+  Set-Content -LiteralPath (Join-Path $root "perch-serve-url.txt") -Value $prefix
+} catch { }
+
+Start-Process $prefix
+
+while ($listener.IsListening -and -not $script:ShouldStop) {
+  try {
+    $ctx = $listener.GetContext()
+  } catch {
+    break
+  }
   $req = $ctx.Request
   $res = $ctx.Response
   try {
+    $path = $req.Url.AbsolutePath.TrimEnd("/")
+    if ([string]::IsNullOrWhiteSpace($path)) { $path = "/" }
+
+    if ($path -eq "/__perch/local") {
+      Write-JsonResponse $res 200 '{"local":true,"product":"pulse-perch"}'
+      continue
+    }
+
+    if ($path -eq "/__perch/quit" -and ($req.HttpMethod -eq "POST" -or $req.HttpMethod -eq "GET")) {
+      Write-JsonResponse $res 200 '{"ok":true,"stopping":true}'
+      $script:ShouldStop = $true
+      try { $listener.Stop() } catch { }
+      continue
+    }
+
     $rel = [Uri]::UnescapeDataString($req.Url.AbsolutePath.TrimStart("/"))
     if ([string]::IsNullOrWhiteSpace($rel)) { $rel = "index.html" }
     $candidate = Join-Path $root ($rel -replace "/", [IO.Path]::DirectorySeparatorChar)
@@ -62,8 +113,13 @@ while ($listener.IsListening) {
       $res.OutputStream.Write($bytes, 0, $bytes.Length)
     }
   } catch {
-    $res.StatusCode = 500
+    try { $res.StatusCode = 500 } catch { }
   } finally {
-    $res.OutputStream.Close()
+    try { $res.OutputStream.Close() } catch { }
   }
 }
+
+try { $listener.Close() } catch { }
+try {
+  Remove-Item -LiteralPath (Join-Path $root "perch-serve-url.txt") -Force -ErrorAction SilentlyContinue
+} catch { }

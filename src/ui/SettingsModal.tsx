@@ -24,6 +24,7 @@ import { t } from "../i18n/en";
 import type { BagTab } from "./BagPanel";
 import { AddEvmForm } from "./AddEvmForm";
 import { InstallPwa } from "./InstallPwa";
+import { LocalDeskQuit } from "./LocalDeskQuit";
 import {
   loadLightMetrics,
   loadMetricsOptIn,
@@ -241,6 +242,7 @@ export function SettingsModal(p: Props) {
         </details>
 
         <InstallPwa />
+        <LocalDeskQuit />
 
         <h4 className="settings-section">Networks</h4>
         <AddEvmForm
@@ -285,7 +287,7 @@ export function SettingsModal(p: Props) {
 
         <h4 className="settings-section">Bag data</h4>
         <p className="muted fee">
-          Stays on this PC. Download to move machines; clear to wipe this browser.
+          Stays on this PC. Upload: Perch snapshot, single pulse-portfolio export, or multi-wallet watch export.
         </p>
         <div className="settings-actions">
           <button
