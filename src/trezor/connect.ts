@@ -477,6 +477,10 @@ export function listTrezorAccountsFromGesture(
 
 /**
  * Call from a click. `accountIndex` = BIP44 index (0 = Suite "Ethereum #1").
+ *
+ * Important: do **not** await suitePopupGap / enqueueHw before ethereumGetAddress.
+ * Connect opens Suite via window.open('about:blank') — Chrome only allows that
+ * while user-activation is still alive (lost after awaits / timers).
  */
 export function connectTrezorFromGesture(accountIndex = 0): Promise<{
   address0: string;
@@ -486,18 +490,26 @@ export function connectTrezorFromGesture(accountIndex = 0): Promise<{
 }> {
   const derivationIndex = Math.max(0, Math.floor(accountIndex));
   const derivationPath = ethAddressPath(derivationIndex);
-  return shareFlight(`addr:${derivationPath}`, async () => {
-    await ensureTrezorInit();
+  const flightKey = `addr:${derivationPath}`;
+  const existing = addressFlights.get(flightKey);
+  if (existing) {
+    return existing as Promise<{
+      address0: string;
+      derivationIndex: number;
+      derivationPath: string;
+      deviceId: string;
+    }>;
+  }
 
-    const res = await TrezorConnect.ethereumGetAddress({
-      path: derivationPath,
-      showOnTrezor: false,
-    });
+  const parseAddr = (res: {
+    success: boolean;
+    payload?: { address?: string } | unknown;
+  }) => {
     if (!res.success) {
       throw new Error(humanTrezorError(extractErr(res)));
     }
     const payload = res.payload as { address?: string };
-    const address0 = payload.address;
+    const address0 = payload?.address;
     if (!address0) throw new Error("Trezor returned no address.");
     return {
       address0,
@@ -505,7 +517,39 @@ export function connectTrezorFromGesture(accountIndex = 0): Promise<{
       derivationPath,
       deviceId: "trezor-default",
     };
-  });
+  };
+
+  // Already warm: start getAddress in this turn so the Suite window can open.
+  if (initDone) {
+    const p = Promise.resolve(
+      TrezorConnect.ethereumGetAddress({
+        path: derivationPath,
+        showOnTrezor: false,
+      }) as Promise<{ success: boolean; payload?: { address?: string } }>,
+    )
+      .then(parseAddr)
+      .finally(() => {
+        if (addressFlights.get(flightKey) === p) addressFlights.delete(flightKey);
+      });
+    addressFlights.set(flightKey, p);
+    return p;
+  }
+
+  // Rare: init still pending — may lose gesture; UI should wait for warm first.
+  const p = ensureTrezorInit()
+    .then(
+      () =>
+        TrezorConnect.ethereumGetAddress({
+          path: derivationPath,
+          showOnTrezor: false,
+        }) as Promise<{ success: boolean; payload?: { address?: string } }>,
+    )
+    .then(parseAddr)
+    .finally(() => {
+      if (addressFlights.get(flightKey) === p) addressFlights.delete(flightKey);
+    });
+  addressFlights.set(flightKey, p);
+  return p;
 }
 
 function extractErr(res: unknown): string {

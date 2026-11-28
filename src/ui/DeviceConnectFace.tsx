@@ -80,6 +80,8 @@ type Props = {
   /** Face error — drives popup-blocked help. */
   connectErr?: string | null;
   onConnect?: () => void;
+  /** Connect init finished — button should wait for this. */
+  warm?: boolean;
 };
 
 export function DeviceConnectFace({
@@ -96,6 +98,7 @@ export function DeviceConnectFace({
   acquireBusy = false,
   connectErr = null,
   onConnect,
+  warm = true,
 }: Props) {
   const steps = connectSteps({
     suiteChannel,
@@ -241,9 +244,10 @@ export function DeviceConnectFace({
       {onConnect ? (
         <ConnectPopupHelp
           err={connectErr}
-          showTip={!hasSession && !connecting}
+          showCta={!hasSession}
           connecting={connecting}
-          onRetryConnect={onConnect}
+          warm={warm}
+          onConnect={onConnect}
         />
       ) : null}
 

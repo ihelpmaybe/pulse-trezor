@@ -24,16 +24,14 @@ export const en = {
   suiteAllowTitle: "Allow in Trezor Suite",
   suiteAllowHint:
     "Stuck? Stop waiting, bring Suite forward, Start connection again.",
-  popupTip:
-    "Chrome may say “Pop-ups blocked” and list about:blank. That empty window is Trezor's allow prompt — not your wallet. Choose Always allow for this address, then Connect.",
-  popupBlockedTitle: "Chrome blocked Trezor's window",
+  popupBlockedTitle: "Chrome blocked Suite’s window",
   popupBlockedBody:
-    "Your Perch tab is fine. Connect needs a second small window (Chrome often labels it about:blank) so Suite can Allow Pulse Perch.",
+    "Your Perch tab is fine. Connect Trezor Suite needs a second small window (Chrome often labels it about:blank) so you can Allow Pulse Perch.",
   popupBlockedStep1:
     "In Chrome's pop-up notice, pick Always allow for this 127.0.0.1 address.",
   popupBlockedStep2: "Click Done.",
-  popupBlockedStep3: "Then click Open Trezor window below (must be your click).",
-  openTrezorWindow: "Open Trezor window",
+  popupBlockedStep3: "Then click Connect Trezor Suite below (must be your click).",
+  openTrezorWindow: "Connect Trezor Suite",
   nftOperators: "NFT operators",
   pairInApps: "Pair in Apps",
   fullPulsex: "Full PulseX (ipfs)",
@@ -42,7 +40,13 @@ export const en = {
   nfts: "NFTs",
   activity: "Activity",
   stakes: "Stakes",
-  startConnection: "Start connection",
+  startConnection: "Connect Trezor Suite",
+  preparingSuiteLink: "Preparing Suite link…",
+  connectTrezorSuite: "Connect Trezor Suite",
+  connectTrezorSuiteBody:
+    "Unlock Trezor Suite on this PC, then click below. That click opens Suite’s allow window (Chrome may call it about:blank — that is normal).",
+  connectTrezorSuiteHint:
+    "If Chrome says pop-ups blocked, choose Always allow for this address, then click Connect Trezor Suite again.",
   waitingOnSuite: "Waiting on Suite…",
   stopWaiting: "Stop waiting",
   stopWaitingTitle:

@@ -1,24 +1,25 @@
 /**
- * Chrome blocks Trezor Connect's window.open('about:blank') when it is not
- * tied to a clear click — explain that and offer a user-gesture retry.
+ * Make Trezor Suite Connect a deliberate click — Chrome blocks about:blank
+ * unless window.open runs under user-activation.
  */
 import { t } from "../i18n/en";
 import { isPopupBlockedError } from "../trezor/errors";
 
 type Props = {
-  /** Current face error — when popup-blocked, show the strong callout. */
   err?: string | null;
-  /** Soft tip before first Connect (no session yet). */
-  showTip?: boolean;
+  /** Show the Connect Trezor Suite CTA before a session exists. */
+  showCta?: boolean;
   connecting?: boolean;
-  onRetryConnect: () => void;
+  warm?: boolean;
+  onConnect: () => void;
 };
 
 export function ConnectPopupHelp({
   err,
-  showTip = false,
+  showCta = false,
   connecting = false,
-  onRetryConnect,
+  warm = true,
+  onConnect,
 }: Props) {
   const blocked = isPopupBlockedError(err);
 
@@ -35,20 +36,38 @@ export function ConnectPopupHelp({
         <button
           type="button"
           className="btn"
-          disabled={connecting}
-          onClick={onRetryConnect}
+          disabled={connecting || !warm}
+          onClick={onConnect}
         >
-          {connecting ? t("waitingOnSuite") : t("openTrezorWindow")}
+          {connecting
+            ? t("waitingOnSuite")
+            : !warm
+              ? t("preparingSuiteLink")
+              : t("connectTrezorSuite")}
         </button>
       </div>
     );
   }
 
-  if (!showTip) return null;
+  if (!showCta) return null;
 
   return (
-    <p className="muted fee connect-popup-tip" role="note">
-      {t("popupTip")}
-    </p>
+    <div className="suite-allow-callout connect-popup-help" role="region">
+      <p className="suite-allow-callout-title">{t("connectTrezorSuite")}</p>
+      <p className="suite-allow-callout-body">{t("connectTrezorSuiteBody")}</p>
+      <button
+        type="button"
+        className="btn"
+        disabled={connecting || !warm}
+        onClick={onConnect}
+      >
+        {connecting
+          ? t("waitingOnSuite")
+          : !warm
+            ? t("preparingSuiteLink")
+            : t("connectTrezorSuite")}
+      </button>
+      <p className="muted fee suite-allow-callout-hint">{t("connectTrezorSuiteHint")}</p>
+    </div>
   );
 }

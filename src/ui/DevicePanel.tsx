@@ -75,6 +75,8 @@ type Props = {
   setErr?: (v: string | null) => void;
   /** Live connect/face error (popup-blocked help). */
   connectErr?: string | null;
+  /** Trezor Connect init ready. */
+  warm?: boolean;
   accountRange: string;
   setAccountRange: (s: string) => void;
   connecting: boolean;
@@ -120,6 +122,7 @@ export function DevicePanel({
   setAsset,
   setErr,
   connectErr = null,
+  warm = true,
   accountRange,
   setAccountRange,
   connecting,
@@ -448,25 +451,7 @@ export function DevicePanel({
             Run local to Connect
           </a>
         ) : null}
-        {!session && !isShowcase() ? (
-          <button
-            type="button"
-            className="btn"
-            disabled={connecting}
-            title={
-              suiteChannel === "desktop"
-                ? "Suite is up — Allow Pulse Perch, then confirm on the device"
-                : "Plug in + unlock in Suite, then start (Suite Web works if Desktop is closed)"
-            }
-            onClick={onConnect}
-          >
-            {connecting && !listing
-              ? t("waitingOnSuite")
-              : advanced
-                ? `${t("startConnection")} …/${accountIndex}`
-                : t("startConnection")}
-          </button>
-        ) : null}
+        {/* Primary Connect CTA lives in DeviceConnectFace (Connect Trezor Suite). */}
         {isShowcase() ? (
           <a
             className="btn ghost"
@@ -501,7 +486,8 @@ export function DevicePanel({
         onAcquireDevice={onAcquireDevice}
         acquireBusy={busy && !connecting}
         connectErr={connectErr}
-        onConnect={onConnect}
+        onConnect={isShowcase() ? undefined : onConnect}
+        warm={warm}
       />
       {deviceHints?.passphraseProtection ? (
         <p className="muted fee" role="status">
