@@ -14,6 +14,9 @@ export const en = {
   importWatch: "Import watch JSON",
   noCollect:
     "We don’t collect your data. Keys stay on your Trezor — bag, send, approve, and Apps without MetaMask.",
+  donateLabel: "Donate (PLS / PulseChain)",
+  donateCopy: "Copy",
+  donateCopied: "Copied",
   pulseChain: "PulseChain",
   firstRunTitle: "First time here",
   firstRunConnect: "Connect — Start connection, Allow in Suite",
@@ -24,11 +27,11 @@ export const en = {
   suiteAllowTitle: "Allow in Trezor Suite",
   suiteAllowHint:
     "Stuck? Stop waiting, bring Suite forward, Start connection again.",
-  popupBlockedTitle: "Chrome blocked the Suite helper window",
-  popupBlockedStep1:
-    "On Chrome’s box, pick Always allow pop-ups from this 127.0.0.1 address.",
-  popupBlockedStep2: "Click Done on Chrome’s box.",
-  popupBlockedStep3: "Click Connect Trezor Suite below again.",
+  popupBlockedTitle: "Chrome blocked a Suite window",
+  popupBlockedBody:
+    "That’s Chrome, not a virus warning. Pick Always allow for this address, tap Done, then Connect again.",
+  popupBlockedHint:
+    "Keep this Perch tab open. Your seed stays on the Trezor.",
   openTrezorWindow: "Connect Trezor Suite",
   nftOperators: "NFT operators",
   pairInApps: "Pair in Apps",
@@ -39,22 +42,17 @@ export const en = {
   activity: "Activity",
   stakes: "Stakes",
   startConnection: "Connect Trezor Suite",
-  preparingSuiteLink: "Preparing Suite link…",
+  preparingSuiteLink: "Preparing…",
   connectTrezorSuite: "Connect Trezor Suite",
-  chromePopupExplain:
-    "Chrome may show its own box: “Pop-ups blocked” and “about:blank”. That is Chrome’s wording — not a Perch warning and not a virus scan.",
-  chromePopupFactWallet:
-    "This wallet tab you are reading is not the pop-up. Keep it open.",
-  chromePopupFactBlank:
-    "“about:blank” means an empty helper window. Trezor fills it so Suite can ask you to Allow Pulse Perch.",
-  chromePopupFactAllow:
-    "Choose Always allow for this 127.0.0.1 address — that only lets Perch open Suite’s allow window on your PC.",
-  chromePopupFactSafe:
-    "Your seed never goes in the browser. Allow does not move funds.",
-  chromePopupBeforeClick:
-    "Unlock Trezor Suite first, then click Connect Trezor Suite. If Chrome’s box appears, use Always allow — then click the button again.",
+  connectTrezorSuiteBody:
+    "Open Trezor Suite on your PC if you have it. If you don’t, Connect will open Suite in the browser for you.",
   connectTrezorSuiteHint:
-    "After Always allow, click Connect Trezor Suite again (your click opens Suite’s window).",
+    "Plug in your Trezor, unlock Suite, then hit the button. Chrome may ask to allow a window once — Always allow is fine.",
+  allowPopups: "Allow pop-ups",
+  allowPopupsTitle:
+    "Open a test Suite window so Chrome can Always allow pop-ups for Perch",
+  allowPopupsBlocked:
+    "Chrome blocked it — choose Always allow for this address, then try again.",
   waitingOnSuite: "Waiting on Suite…",
   stopWaiting: "Stop waiting",
   stopWaitingTitle:

@@ -231,6 +231,19 @@ body {
   align-items: center;
   gap: 0.25rem;
 }
+
+.allow-popups-btn {
+  min-width: auto;
+  padding: 0.3rem 0.5rem;
+}
+
+.allow-popups-label {
+  min-width: 0;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
 .other-software-modal {
   max-width: min(44rem, 96vw);
   max-height: min(85vh, 38rem);
@@ -2613,6 +2626,44 @@ html[data-a11y-focus] :focus-visible {
   line-height: 1.35;
   color: var(--muted);
   opacity: 0.9;
+}
+
+.core-footer-donate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.55rem;
+  max-width: 100%;
+}
+
+.core-footer-donate-label {
+  color: var(--muted);
+}
+
+.core-footer-donate-addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  color: var(--text, var(--ink, #e8e8e8));
+  word-break: break-all;
+}
+
+.core-footer-donate-copy {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  cursor: pointer;
+}
+
+.core-footer-donate-copy:hover,
+.core-footer-donate-copy:focus-visible {
+  color: var(--lime-dim, var(--accent, #9fe870));
+  border-color: color-mix(in srgb, var(--lime-dim, #9fe870) 45%, var(--border));
 }
 
 .receive-qr {
