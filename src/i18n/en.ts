@@ -24,13 +24,11 @@ export const en = {
   suiteAllowTitle: "Allow in Trezor Suite",
   suiteAllowHint:
     "Stuck? Stop waiting, bring Suite forward, Start connection again.",
-  popupBlockedTitle: "Chrome blocked Suite’s window",
-  popupBlockedBody:
-    "Your Perch tab is fine. Connect Trezor Suite needs a second small window (Chrome often labels it about:blank) so you can Allow Pulse Perch.",
+  popupBlockedTitle: "Chrome blocked the Suite helper window",
   popupBlockedStep1:
-    "In Chrome's pop-up notice, pick Always allow for this 127.0.0.1 address.",
-  popupBlockedStep2: "Click Done.",
-  popupBlockedStep3: "Then click Connect Trezor Suite below (must be your click).",
+    "On Chrome’s box, pick Always allow pop-ups from this 127.0.0.1 address.",
+  popupBlockedStep2: "Click Done on Chrome’s box.",
+  popupBlockedStep3: "Click Connect Trezor Suite below again.",
   openTrezorWindow: "Connect Trezor Suite",
   nftOperators: "NFT operators",
   pairInApps: "Pair in Apps",
@@ -43,10 +41,20 @@ export const en = {
   startConnection: "Connect Trezor Suite",
   preparingSuiteLink: "Preparing Suite link…",
   connectTrezorSuite: "Connect Trezor Suite",
-  connectTrezorSuiteBody:
-    "Unlock Trezor Suite on this PC, then click below. That click opens Suite’s allow window (Chrome may call it about:blank — that is normal).",
+  chromePopupExplain:
+    "Chrome may show its own box: “Pop-ups blocked” and “about:blank”. That is Chrome’s wording — not a Perch warning and not a virus scan.",
+  chromePopupFactWallet:
+    "This wallet tab you are reading is not the pop-up. Keep it open.",
+  chromePopupFactBlank:
+    "“about:blank” means an empty helper window. Trezor fills it so Suite can ask you to Allow Pulse Perch.",
+  chromePopupFactAllow:
+    "Choose Always allow for this 127.0.0.1 address — that only lets Perch open Suite’s allow window on your PC.",
+  chromePopupFactSafe:
+    "Your seed never goes in the browser. Allow does not move funds.",
+  chromePopupBeforeClick:
+    "Unlock Trezor Suite first, then click Connect Trezor Suite. If Chrome’s box appears, use Always allow — then click the button again.",
   connectTrezorSuiteHint:
-    "If Chrome says pop-ups blocked, choose Always allow for this address, then click Connect Trezor Suite again.",
+    "After Always allow, click Connect Trezor Suite again (your click opens Suite’s window).",
   waitingOnSuite: "Waiting on Suite…",
   stopWaiting: "Stop waiting",
   stopWaitingTitle:

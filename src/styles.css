@@ -1133,17 +1133,26 @@ button.linkish {
 }
 
 .connect-popup-help .btn {
-  margin-top: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.connect-popup-help-blocked {
+  border-color: #a84a40;
+}
+
+.connect-popup-facts {
+  margin: 0.45rem 0 0;
+  padding-left: 1.15rem;
+  line-height: 1.45;
+}
+
+.connect-popup-facts li {
+  margin: 0.2rem 0;
 }
 
 .connect-popup-steps {
-  margin: 0.4rem 0 0;
+  margin: 0.45rem 0 0;
   padding-left: 1.15rem;
-  line-height: 1.4;
-}
-
-.connect-popup-tip {
-  margin: 0.15rem 0 0;
   line-height: 1.4;
 }
 

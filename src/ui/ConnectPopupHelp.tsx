@@ -1,13 +1,12 @@
 /**
- * Make Trezor Suite Connect a deliberate click — Chrome blocks about:blank
- * unless window.open runs under user-activation.
+ * Chrome's own "Pop-ups blocked / about:blank" dialog cannot be customized.
+ * This face is the context users need so that dialog isn't terrifying.
  */
 import { t } from "../i18n/en";
 import { isPopupBlockedError } from "../trezor/errors";
 
 type Props = {
   err?: string | null;
-  /** Show the Connect Trezor Suite CTA before a session exists. */
   showCta?: boolean;
   connecting?: boolean;
   warm?: boolean;
@@ -23,38 +22,38 @@ export function ConnectPopupHelp({
 }: Props) {
   const blocked = isPopupBlockedError(err);
 
-  if (blocked) {
-    return (
-      <div className="suite-allow-callout connect-popup-help" role="alert">
-        <p className="suite-allow-callout-title">{t("popupBlockedTitle")}</p>
-        <p className="suite-allow-callout-body">{t("popupBlockedBody")}</p>
+  if (!showCta && !blocked) return null;
+
+  return (
+    <div
+      className={
+        blocked
+          ? "suite-allow-callout connect-popup-help connect-popup-help-blocked"
+          : "suite-allow-callout connect-popup-help"
+      }
+      role={blocked ? "alert" : "region"}
+    >
+      <p className="suite-allow-callout-title">
+        {blocked ? t("popupBlockedTitle") : t("connectTrezorSuite")}
+      </p>
+
+      <p className="suite-allow-callout-body">{t("chromePopupExplain")}</p>
+
+      <ul className="connect-popup-facts muted fee">
+        <li>{t("chromePopupFactWallet")}</li>
+        <li>{t("chromePopupFactBlank")}</li>
+        <li>{t("chromePopupFactAllow")}</li>
+        <li>{t("chromePopupFactSafe")}</li>
+      </ul>
+
+      {blocked ? (
         <ol className="connect-popup-steps muted fee">
           <li>{t("popupBlockedStep1")}</li>
           <li>{t("popupBlockedStep2")}</li>
           <li>{t("popupBlockedStep3")}</li>
         </ol>
-        <button
-          type="button"
-          className="btn"
-          disabled={connecting || !warm}
-          onClick={onConnect}
-        >
-          {connecting
-            ? t("waitingOnSuite")
-            : !warm
-              ? t("preparingSuiteLink")
-              : t("connectTrezorSuite")}
-        </button>
-      </div>
-    );
-  }
+      ) : null}
 
-  if (!showCta) return null;
-
-  return (
-    <div className="suite-allow-callout connect-popup-help" role="region">
-      <p className="suite-allow-callout-title">{t("connectTrezorSuite")}</p>
-      <p className="suite-allow-callout-body">{t("connectTrezorSuiteBody")}</p>
       <button
         type="button"
         className="btn"
@@ -67,7 +66,10 @@ export function ConnectPopupHelp({
             ? t("preparingSuiteLink")
             : t("connectTrezorSuite")}
       </button>
-      <p className="muted fee suite-allow-callout-hint">{t("connectTrezorSuiteHint")}</p>
+
+      <p className="muted fee suite-allow-callout-hint">
+        {blocked ? t("connectTrezorSuiteHint") : t("chromePopupBeforeClick")}
+      </p>
     </div>
   );
 }
