@@ -5,16 +5,21 @@
 
 $ErrorActionPreference = "Stop"
 $root = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
+# Do not keep the pack folder as cwd — that locks the folder for delete on Windows.
+try { Set-Location -LiteralPath $env:TEMP } catch { }
 $preferredPorts = 5174..5184
 $script:ShouldStop = $false
 $script:LastBeat = [datetime]::UtcNow
+$script:StartedAt = [datetime]::UtcNow
 $script:SeenClient = $false
 $script:PendingBye = $false
 $script:ByeAt = $null
 # After tab close beacon: wait this long for a refresh/new tab to ping again.
-$byeGraceSec = 4
+$byeGraceSec = 3
 # If the desk stops heartbeating (crash / force-kill tab), exit so the folder unlocks.
-$idleQuitSec = 75
+$idleQuitSec = 45
+# If the browser never loads (or closes before JS), still exit — don't lock forever.
+$orphanQuitSec = 90
 
 function Get-ContentType([string]$path) {
   switch -Regex ($path) {
@@ -49,11 +54,14 @@ function Touch-Beat {
 }
 
 function Test-ShouldIdleQuit {
-  if (-not $script:SeenClient) { return $false }
-  $idle = ([datetime]::UtcNow - $script:LastBeat).TotalSeconds
+  $now = [datetime]::UtcNow
+  if (-not $script:SeenClient) {
+    return (($now - $script:StartedAt).TotalSeconds -ge $orphanQuitSec)
+  }
+  $idle = ($now - $script:LastBeat).TotalSeconds
   if ($idle -ge $idleQuitSec) { return $true }
   if ($script:PendingBye -and $script:ByeAt) {
-    $sinceBye = ([datetime]::UtcNow - $script:ByeAt).TotalSeconds
+    $sinceBye = ($now - $script:ByeAt).TotalSeconds
     if ($sinceBye -ge $byeGraceSec -and $idle -ge ($byeGraceSec - 0.5)) {
       return $true
     }
@@ -184,3 +192,4 @@ try { $listener.Close() } catch { }
 try {
   Remove-Item -LiteralPath (Join-Path $root "perch-serve-url.txt") -Force -ErrorAction SilentlyContinue
 } catch { }
+try { Set-Location -LiteralPath $env:TEMP } catch { }

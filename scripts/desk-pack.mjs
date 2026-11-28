@@ -43,6 +43,9 @@ writeFileSync(
     "",
     "When done: close the browser tab (Perch stops in a few seconds),",
     "or click Quit (X) in the desk top-right.",
+    "",
+    "Folder says in use? Double-click Stop-Pulse-Perch.cmd, then delete.",
+    "",
     "Then: unlock Trezor Suite → Connect → confirm address on device.",
     "No seed in the browser. Checksum (.sha256) is optional on GitHub Releases.",
     "",
@@ -52,10 +55,12 @@ writeFileSync(
 );
 const launcherVbs = join(root, "scripts", "Open-Pulse-Perch.vbs");
 const launcherDebug = join(root, "scripts", "Open-Pulse-Perch-Debug.cmd");
+const launcherStop = join(root, "scripts", "Stop-Pulse-Perch.cmd");
 if (existsSync(launcherCmd)) copyFileSync(launcherCmd, join(dist, "Open-Pulse-Perch.cmd"));
 if (existsSync(launcherVbs)) copyFileSync(launcherVbs, join(dist, "Open-Pulse-Perch.vbs"));
 if (existsSync(launcherDebug))
   copyFileSync(launcherDebug, join(dist, "Open-Pulse-Perch-Debug.cmd"));
+if (existsSync(launcherStop)) copyFileSync(launcherStop, join(dist, "Stop-Pulse-Perch.cmd"));
 if (existsSync(launcherPs)) copyFileSync(launcherPs, join(dist, "serve-desk.ps1"));
 
 const isWin = process.platform === "win32";
