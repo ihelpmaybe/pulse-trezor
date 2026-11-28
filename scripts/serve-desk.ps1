@@ -1,12 +1,20 @@
 ﻿# Pulse Perch — local static server for the portable web pack (normie zip).
 # Serves this folder on localhost and opens the browser.
 # Suite still required for Trezor. No Node.
-# Designed to run hidden (Open-Pulse-Perch.vbs). Quit from the desk UI.
+# Hidden via Open-Pulse-Perch.vbs. Stops on Quit, tab close (bye+grace), or idle.
 
 $ErrorActionPreference = "Stop"
 $root = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $preferredPorts = 5174..5184
 $script:ShouldStop = $false
+$script:LastBeat = [datetime]::UtcNow
+$script:SeenClient = $false
+$script:PendingBye = $false
+$script:ByeAt = $null
+# After tab close beacon: wait this long for a refresh/new tab to ping again.
+$byeGraceSec = 4
+# If the desk stops heartbeating (crash / force-kill tab), exit so the folder unlocks.
+$idleQuitSec = 75
 
 function Get-ContentType([string]$path) {
   switch -Regex ($path) {
@@ -33,6 +41,26 @@ function Write-JsonResponse($res, [int]$code, [string]$json) {
   $res.OutputStream.Write($bytes, 0, $bytes.Length)
 }
 
+function Touch-Beat {
+  $script:LastBeat = [datetime]::UtcNow
+  $script:SeenClient = $true
+  $script:PendingBye = $false
+  $script:ByeAt = $null
+}
+
+function Test-ShouldIdleQuit {
+  if (-not $script:SeenClient) { return $false }
+  $idle = ([datetime]::UtcNow - $script:LastBeat).TotalSeconds
+  if ($idle -ge $idleQuitSec) { return $true }
+  if ($script:PendingBye -and $script:ByeAt) {
+    $sinceBye = ([datetime]::UtcNow - $script:ByeAt).TotalSeconds
+    if ($sinceBye -ge $byeGraceSec -and $idle -ge ($byeGraceSec - 0.5)) {
+      return $true
+    }
+  }
+  return $false
+}
+
 # HttpListener is already in System on Windows PowerShell 5.1.
 # Do NOT Add-Type System.Net.HttpListener — that assembly name does not exist.
 $listener = $null
@@ -52,8 +80,6 @@ foreach ($port in $preferredPorts) {
 }
 
 if (-not $listener) {
-  # Visible only when launched via Debug cmd; hidden VBS users see nothing —
-  # still write a log next to the pack for support.
   $msg = "Pulse Perch could not start — ports 5174-5184 busy. Close other Perch copies and try again."
   try {
     Set-Content -LiteralPath (Join-Path $root "perch-serve-error.txt") -Value $msg
@@ -72,8 +98,23 @@ try {
 Start-Process $prefix
 
 while ($listener.IsListening -and -not $script:ShouldStop) {
+  $ar = $null
   try {
-    $ctx = $listener.GetContext()
+    $ar = $listener.BeginGetContext($null, $null)
+  } catch {
+    break
+  }
+  while (-not $ar.IsCompleted) {
+    if (Test-ShouldIdleQuit) {
+      $script:ShouldStop = $true
+      try { $listener.Stop() } catch { }
+      break
+    }
+    Start-Sleep -Milliseconds 200
+  }
+  if ($script:ShouldStop) { break }
+  try {
+    $ctx = $listener.EndGetContext($ar)
   } catch {
     break
   }
@@ -84,7 +125,22 @@ while ($listener.IsListening -and -not $script:ShouldStop) {
     if ([string]::IsNullOrWhiteSpace($path)) { $path = "/" }
 
     if ($path -eq "/__perch/local") {
-      Write-JsonResponse $res 200 '{"local":true,"product":"pulse-perch"}'
+      Touch-Beat
+      Write-JsonResponse $res 200 '{"local":true,"product":"pulse-perch","autoStop":true}'
+      continue
+    }
+
+    if ($path -eq "/__perch/ping" -and ($req.HttpMethod -eq "POST" -or $req.HttpMethod -eq "GET")) {
+      Touch-Beat
+      Write-JsonResponse $res 200 '{"ok":true}'
+      continue
+    }
+
+    if ($path -eq "/__perch/bye" -and ($req.HttpMethod -eq "POST" -or $req.HttpMethod -eq "GET")) {
+      # Tab closing / navigating away — grace so a refresh can re-ping.
+      $script:PendingBye = $true
+      $script:ByeAt = [datetime]::UtcNow
+      Write-JsonResponse $res 200 '{"ok":true,"bye":true}'
       continue
     }
 
@@ -93,6 +149,11 @@ while ($listener.IsListening -and -not $script:ShouldStop) {
       $script:ShouldStop = $true
       try { $listener.Stop() } catch { }
       continue
+    }
+
+    # Any real desk asset means a client is alive (first paint before JS heartbeats).
+    if ($path -eq "/" -or $path -eq "/index.html") {
+      Touch-Beat
     }
 
     $rel = [Uri]::UnescapeDataString($req.Url.AbsolutePath.TrimStart("/"))

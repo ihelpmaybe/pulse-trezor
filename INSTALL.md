@@ -15,7 +15,7 @@ Privacy: [PRIVACY.md](./PRIVACY.md) · Security: [SECURITY.md](./SECURITY.md). N
 2. Check the `.sha256` file if you want (recommended).
 3. Unzip → double-click **`Open-Pulse-Perch.cmd`** (no black window).
 4. Browser opens the desk. Unlock Suite → **Connect** → confirm on device.
-5. When done: **Quit** (✕ top-right) or Settings → Quit Pulse Perch.
+5. When done: **close the browser tab** (Perch stops in a few seconds so the folder unlocks), or **Quit** (✕ top-right).
 
 ---
 

@@ -49,6 +49,7 @@ import {
 } from "./ui/DeviceConnectFace";
 import { TopStrip } from "./ui/TopStrip";
 import { DeskTools } from "./ui/DeskTools";
+import { LocalDeskLifecycle } from "./ui/LocalDeskLifecycle";
 import { SettingsModal } from "./ui/SettingsModal";
 import {
   type A11yPrefs,
@@ -779,6 +780,7 @@ export function PulseTrezor({
       className={["pulse-trezor", className].filter(Boolean).join(" ")}
       data-privacy-hide={privacyHide ? "1" : undefined}
     >
+      <LocalDeskLifecycle />
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {a11yLive}
       </div>

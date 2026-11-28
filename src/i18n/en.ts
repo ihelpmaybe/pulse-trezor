@@ -137,7 +137,7 @@ export const en = {
     "Installed as an app on this device. Suite still needs a network when you sign.",
   localDeskSection: "This PC (zip pack)",
   localDeskBlurb:
-    "Running from the Windows zip. No console window — Quit here when you are done.",
+    "Running from the Windows zip. No console window. Closing this tab stops Perch in a few seconds (so the folder unlocks). Or Quit here now.",
   quitPulsePerch: "Quit Pulse Perch",
   quitPulsePerchHint: "Stop the local desk on this PC",
   quittingPulsePerch: "Quitting…",
