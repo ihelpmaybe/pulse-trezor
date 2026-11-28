@@ -4,6 +4,7 @@
  */
 import type { DeviceHints, SuiteChannel } from "../trezor/connect";
 import { t } from "../i18n/en";
+import { ConnectPopupHelp } from "./ConnectPopupHelp";
 
 /** Official Suite / firmware help — open in browser; Suite Desktop owns the update. */
 export const TREZOR_FIRMWARE_HELP =
@@ -76,6 +77,9 @@ type Props = {
   /** Official CONNECT_UNACQUIRED → getFeatures acquire. */
   onAcquireDevice?: () => void;
   acquireBusy?: boolean;
+  /** Face error — drives popup-blocked help. */
+  connectErr?: string | null;
+  onConnect?: () => void;
 };
 
 export function DeviceConnectFace({
@@ -90,6 +94,8 @@ export function DeviceConnectFace({
   showChecklist,
   onAcquireDevice,
   acquireBusy = false,
+  connectErr = null,
+  onConnect,
 }: Props) {
   const steps = connectSteps({
     suiteChannel,
@@ -231,6 +237,15 @@ export function DeviceConnectFace({
           </p>
         </div>
       </div>
+
+      {onConnect ? (
+        <ConnectPopupHelp
+          err={connectErr}
+          showTip={!hasSession && !connecting}
+          connecting={connecting}
+          onRetryConnect={onConnect}
+        />
+      ) : null}
 
       {connecting && suiteCue ? (
         <div className="suite-allow-callout" role="status">

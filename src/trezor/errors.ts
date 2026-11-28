@@ -24,6 +24,21 @@ export function messageFromTrezorPayload(
   return humanTrezorError(raw);
 }
 
+/** True when Connect's window.open('about:blank') was blocked by the browser. */
+export function isPopupBlockedError(raw: string | null | undefined): boolean {
+  if (!raw) return false;
+  const s = raw.toLowerCase();
+  return (
+    s.includes("popup-blocked") ||
+    s.includes("about:blank") ||
+    (s.includes("popup") &&
+      (s.includes("block") || s.includes("blocked") || s.includes("allow"))) ||
+    (s.includes("trezor") &&
+      s.includes("allow window") &&
+      s.includes("blocked"))
+  );
+}
+
 export function humanTrezorError(raw: string): string {
   const s = raw.toLowerCase();
 
@@ -66,8 +81,12 @@ export function humanTrezorError(raw: string): string {
     // Suite Desktop WS can still be linked — cancelled Allow/prompt, not Suite down.
     return "Connect cancelled (Suite prompt closed). Suite can stay linked — click Connect again.";
   }
-  if (s.includes("popup") && (s.includes("block") || s.includes("blocked"))) {
-    return "Allow popups for this site (Suite Web), then click Connect Trezor again.";
+  if (
+    s.includes("popup-blocked") ||
+    s.includes("handshake_error") ||
+    (s.includes("popup") && (s.includes("block") || s.includes("blocked")))
+  ) {
+    return "Chrome blocked Trezor's allow window (it may list about:blank). That is not your wallet tab — allow pop-ups for this address, then use Open Trezor window.";
   }
   if (
     s.includes("local network") ||

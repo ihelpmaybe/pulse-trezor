@@ -73,6 +73,8 @@ type Props = {
   setChainId: (id: DeskChainId) => void;
   setAsset: (v: "PLS" | string) => void;
   setErr?: (v: string | null) => void;
+  /** Live connect/face error (popup-blocked help). */
+  connectErr?: string | null;
   accountRange: string;
   setAccountRange: (s: string) => void;
   connecting: boolean;
@@ -117,6 +119,7 @@ export function DevicePanel({
   setChainId,
   setAsset,
   setErr,
+  connectErr = null,
   accountRange,
   setAccountRange,
   connecting,
@@ -497,6 +500,8 @@ export function DevicePanel({
         showChecklist={!session || connecting}
         onAcquireDevice={onAcquireDevice}
         acquireBusy={busy && !connecting}
+        connectErr={connectErr}
+        onConnect={onConnect}
       />
       {deviceHints?.passphraseProtection ? (
         <p className="muted fee" role="status">

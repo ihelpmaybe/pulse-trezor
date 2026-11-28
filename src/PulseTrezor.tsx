@@ -822,6 +822,7 @@ export function PulseTrezor({
           setChainId={setChainId}
           setAsset={setAsset}
           setErr={setErr}
+          connectErr={faceErr}
           accountRange={accountRange}
           setAccountRange={setAccountRange}
           connecting={connecting}
